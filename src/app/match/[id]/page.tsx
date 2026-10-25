@@ -1,3 +1,5 @@
+import { LocalTime } from "@/components/local-time";
+import { PlayerPhoto } from "@/components/player-photo";
 import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
@@ -24,9 +26,9 @@ import {
 } from "@/components/match/match-panels";
 import { TabBar } from "@/components/tab-bar";
 import { EmptyState, SectionHeading, SkeletonBlock } from "@/components/ui";
-import { leagueLogo, playerImage, teamCrest } from "@/lib/assets";
+import { leagueLogo, teamCrest } from "@/lib/assets";
 import { getLeague, getMatch } from "@/lib/fotmob";
-import { formatKickoff, hexAlpha, isLive } from "@/lib/format";
+import { hexAlpha, isLive } from "@/lib/format";
 import type { MatchTopPlayer, TeamFormEntry } from "@/lib/types";
 
 type Params = Promise<{ id: string }>;
@@ -100,8 +102,8 @@ async function MatchContent({
   const finished = general.finished ?? status.finished ?? false;
   const facts = match.content.matchFacts;
   const colors = general.teamColors;
-  const homeColor = colors?.lightMode?.home ?? "#ff4a38";
-  const awayColor = colors?.lightMode?.away ?? "#fb7185";
+  const homeColor = colors?.lightMode?.home ?? "#39ff6b";
+  const awayColor = colors?.lightMode?.away ?? "#a78bfa";
   const venue = facts?.infoBox?.Stadium;
   const tableSource =
     match.content.table?.parentLeagueId ?? general.parentLeagueId ?? general.leagueId;
@@ -162,7 +164,7 @@ async function MatchContent({
               >
                 {general.leagueName ?? "Match"}
               </Link>
-              <span className="mt-0.5 block text-[9px] font-semibold uppercase tracking-[0.14em] text-dim">
+              <span className="mt-0.5 block text-[10px] font-semibold uppercase tracking-[0.14em] text-dim">
                 {general.matchRound ? `Round ${general.matchRound}` : "Match centre"}
               </span>
             </div>
@@ -201,22 +203,22 @@ async function MatchContent({
               </p>
             ) : (
               <p className="score-display font-display text-[34px] font-black leading-none text-ink num sm:text-[48px]">
-                {status.utcTime ? formatKickoff(status.utcTime) : "vs"}
+                {status.utcTime ? <LocalTime value={status.utcTime} /> : "vs"}
               </p>
             )}
             <div className="mt-3 flex flex-col items-center gap-1">
               {live ? (
-                <span className="inline-flex items-center gap-1.5 rounded-full border border-live/25 bg-live/10 px-2.5 py-1 text-[9px] font-bold uppercase tracking-[0.12em] text-live">
+                <span className="inline-flex items-center gap-1.5 rounded-full border border-live/25 bg-live/10 px-2.5 py-1 text-[10px] font-bold uppercase tracking-[0.12em] text-live">
                   <span className="live-dot h-1.5 w-1.5 rounded-full bg-live" />
                   {status.liveTime?.short ?? "Live"}
                 </span>
               ) : (
-                <span className="text-[9px] font-bold uppercase tracking-[0.16em] text-muted">
+                <span className="text-[10px] font-bold uppercase tracking-[0.16em] text-muted">
                   {status.reason?.long ?? (finished ? "Full time" : "Kick-off")}
                 </span>
               )}
               {status.utcTime && (
-                <span className="text-[9px] text-dim">
+                <span className="text-[10px] text-dim">
                   {new Intl.DateTimeFormat("en-GB", {
                     weekday: "short",
                     day: "numeric",
@@ -229,7 +231,7 @@ async function MatchContent({
           <TeamHero team={away} side="away" accent={awayColor} />
         </div>
 
-        <div className="relative mt-5 flex flex-wrap items-center justify-center gap-x-3 gap-y-1 border-t border-line/50 pt-3.5 text-[9px] text-dim">
+        <div className="relative mt-5 flex flex-wrap items-center justify-center gap-x-3 gap-y-1 border-t border-line/50 pt-3.5 text-[10px] text-dim">
           {facts?.infoBox?.Referee?.text && (
             <span>Referee · {facts.infoBox.Referee.text}</span>
           )}
@@ -322,7 +324,7 @@ async function MatchContent({
                     <p className="font-display text-xl font-extrabold text-ink num">
                       {match.content.weather.temperature}°
                     </p>
-                    <p className="text-[9px] text-dim">
+                    <p className="text-[10px] text-dim">
                       Wind {match.content.weather.windSpeed ?? 0} km/h
                     </p>
                   </div>
@@ -413,7 +415,7 @@ function TeamHero({
         />
       </span>
       <div className="min-w-0">
-        <p className="flex items-center justify-center gap-1 text-[8px] font-bold uppercase tracking-[0.16em] text-dim sm:justify-start">
+        <p className="flex items-center justify-center gap-1 text-[10px] font-bold uppercase tracking-[0.16em] text-dim sm:justify-start">
           <span
             className="h-1.5 w-1.5 rounded-full"
             style={{ backgroundColor: accent }}
@@ -485,8 +487,8 @@ function TopPlayers({
               className="flex items-center gap-2 py-2 transition-colors hover:text-ink"
             >
               <span className="h-6 w-6 shrink-0 overflow-hidden rounded-full bg-white/[0.05] ring-1 ring-inset ring-white/10">
-                <Image
-                  src={playerImage(player.playerId)}
+                <PlayerPhoto
+                  playerId={player.playerId}
                   alt=""
                   width={24}
                   height={24}
@@ -497,7 +499,7 @@ function TopPlayers({
                 {player.name.fullName ??
                   `${player.name.firstName ?? ""} ${player.name.lastName ?? ""}`}
               </span>
-              <span className="text-[9px] text-dim">{group.name}</span>
+              <span className="text-[10px] text-dim">{group.name}</span>
               <span className="rounded bg-accent/12 px-1.5 py-0.5 text-[10px] font-bold text-accent num">
                 {player.playerRatingRounded ?? player.playerRating?.toFixed(1)}
               </span>

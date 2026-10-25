@@ -8,14 +8,14 @@ const ACCENT_KEY = "touchline-accent";
 const THEME_EVENT = "touchline-theme-change";
 
 type Theme = "dark" | "light";
-type Accent = "ember" | "pitch" | "gold" | "ocean";
+type Accent = "neon" | "gold" | "ocean" | "violet";
 
 const ACCENTS: { id: Accent; label: string; light: string; dark: string }[] = [
-  { id: "ember", label: "Ember", light: "#f02a18", dark: "#ff4a38" },
-  { id: "pitch", label: "Pitch", light: "#2f7d32", dark: "#9be15d" },
-  { id: "gold", label: "Gold", light: "#a16207", dark: "#f0c24b" },
-  { id: "ocean", label: "Ocean", light: "#0e7490", dark: "#5cc8ff" },
-];
+  { id: "neon", label: "Neon", light: "#1ee85c", dark: "#39ff6b" },
+  { id: "gold", label: "Gold", light: "#f2b81c", dark: "#f5c542" },
+  { id: "ocean", label: "Ocean", light: "#38bdf8", dark: "#4cc9ff" },
+  { id: "violet", label: "Violet", light: "#a78bfa", dark: "#b79cff" },
+]
 
 const ACCENT_IDS = new Set<Accent>(ACCENTS.map((accent) => accent.id));
 
@@ -25,22 +25,22 @@ function subscribe(callback: () => void) {
 }
 
 function getThemeSnapshot(): Theme {
-  if (typeof document === "undefined") return "light";
-  return document.documentElement.dataset.theme === "dark" ? "dark" : "light";
+  if (typeof document === "undefined") return "dark";
+  return document.documentElement.dataset.theme === "light" ? "light" : "dark";
 }
 
 function getAccentSnapshot(): Accent {
-  if (typeof document === "undefined") return "ember";
+  if (typeof document === "undefined") return "neon";
   const value = document.documentElement.dataset.accent as Accent | undefined;
-  return value && ACCENT_IDS.has(value) ? value : "ember";
+  return value && ACCENT_IDS.has(value) ? value : "neon";
 }
 
 function getServerSnapshot(): Theme {
-  return "light";
+  return "dark";
 }
 
 function getServerAccent(): Accent {
-  return "ember";
+  return "neon";
 }
 
 export function ThemeToggle({ className = "" }: { className?: string }) {
@@ -108,7 +108,7 @@ export function ThemeToggle({ className = "" }: { className?: string }) {
         >
           <div className="flex items-center justify-between px-0.5">
             <p className="text-[10px] font-bold uppercase tracking-[0.16em] text-dim">Appearance</p>
-            <span className="text-[9px] font-semibold text-dim">Saved locally</span>
+            <span className="text-[10px] font-semibold text-dim">Saved locally</span>
           </div>
 
           <div className="mt-2 grid grid-cols-2 gap-1.5">

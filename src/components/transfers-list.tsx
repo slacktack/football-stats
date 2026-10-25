@@ -26,7 +26,7 @@ function TransferRow({ transfer }: { transfer: Transfer }) {
       </div>
       <div className="shrink-0 text-right">
         <div className="text-[11px] font-bold text-ink">{formatFee(transfer.fee, transfer.amountEuroEstimated)}</div>
-        <div className="text-[9px] text-dim">
+        <div className="text-[10px] text-dim">
           {transfer.transferDate ? formatMonthDay(transfer.transferDate) : transfer.transferType?.text ?? ""}
         </div>
       </div>

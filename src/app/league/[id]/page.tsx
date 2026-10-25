@@ -1,3 +1,4 @@
+import { PlayerPhoto } from "@/components/player-photo";
 import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
@@ -17,7 +18,7 @@ import {
   SkeletonBlock,
   SkeletonRows,
 } from "@/components/ui";
-import { leagueLogo, playerImage } from "@/lib/assets";
+import { leagueLogo } from "@/lib/assets";
 import { getLeague } from "@/lib/fotmob";
 import { countryName, hexAlpha } from "@/lib/format";
 import { computeForm } from "@/lib/stats";
@@ -89,7 +90,7 @@ async function LeagueContent({
   const season = typeof sp.season === "string" ? sp.season : undefined;
   const league = await getLeague(id, season);
 
-  const color = league.details.leagueColor ?? "#ff4a38";
+  const color = league.details.leagueColor ?? "#39ff6b";
   const table = league.table?.[0];
   const fixtures = league.fixtures?.allMatches ?? [];
   const form = computeForm(fixtures);
@@ -177,7 +178,7 @@ async function LeagueContent({
           </div>
           <div className="flex shrink-0 items-center gap-3 sm:flex-col sm:items-end">
             <div className="hidden text-right sm:block">
-              <p className="text-[9px] font-bold uppercase tracking-[0.18em] text-dim">Season</p>
+              <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-dim">Season</p>
               <p className="font-display text-xl font-extrabold text-ink num">
                 {league.details.selectedSeason ?? league.details.latestSeason ?? "—"}
               </p>
@@ -303,8 +304,8 @@ async function LeagueContent({
                   className="group relative mt-3 flex items-center gap-3"
                 >
                   <span className="flex h-16 w-16 shrink-0 items-center justify-center overflow-hidden rounded-2xl bg-white/[0.05] ring-1 ring-inset ring-white/[0.07]">
-                    <Image
-                      src={playerImage(topScorer.id)}
+                    <PlayerPhoto
+                      playerId={topScorer.id}
                       alt={topScorer.name}
                       width={64}
                       height={64}

@@ -1,10 +1,9 @@
+import { LocalTime } from "@/components/local-time";
 import Link from "next/link";
 import {
   compactNumber,
   ordinal,
-  formatKickoff,
   formatMarketValue,
-  formatMonthDay,
   formatShortDate,
 } from "@/lib/format";
 import type {
@@ -29,7 +28,7 @@ export function PlayerStatStrip({ player }: { player: PlayerResponse }) {
         const isRating = stat.localizedTitleId === "rating";
         return (
           <div key={stat.title} className="px-1.5 py-3 text-center">
-            <p className="flex min-h-[20px] items-center justify-center text-[8px] font-semibold uppercase leading-tight tracking-[0.06em] text-dim">
+            <p className="flex min-h-[20px] items-center justify-center text-[10px] font-semibold uppercase leading-tight tracking-[0.06em] text-dim">
               {stat.title}
             </p>
             <p
@@ -52,7 +51,7 @@ export function TopStatCards({ section }: { section?: PlayerStatsSection }) {
     <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 xl:grid-cols-6">
       {section.items.map((item) => (
         <div key={item.localizedTitleId ?? item.title} className="card p-3">
-          <p className="text-[9px] font-semibold uppercase tracking-[0.08em] text-dim">
+          <p className="text-[10px] font-semibold uppercase tracking-[0.08em] text-dim">
             {item.title}
           </p>
           <p className="mt-1 font-display text-2xl font-extrabold tracking-tight text-ink num">
@@ -64,7 +63,7 @@ export function TopStatCards({ section }: { section?: PlayerStatsSection }) {
               style={{ width: `${Math.min(100, Math.max(0, item.percentileRank ?? 0))}%` }}
             />
           </div>
-          <p className="mt-1 text-[9px] text-dim">
+          <p className="mt-1 text-[10px] text-dim">
             {ordinal(Math.round(item.percentileRank ?? 0))} percentile
           </p>
         </div>
@@ -142,7 +141,7 @@ export function ShotMapCard({ shots }: { shots?: PlayerShot[] }) {
             {shots.length} shots · {goals} goals · {onTarget} on target · {xg.toFixed(2)} xG
           </p>
         </div>
-        <div className="flex items-center gap-3 text-[9px] text-dim">
+        <div className="flex items-center gap-3 text-[10px] text-dim">
           <span className="flex items-center gap-1">
             <span className="h-2 w-2 rounded-full bg-accent" /> Goal
           </span>
@@ -237,7 +236,7 @@ export function ShotMapCard({ shots }: { shots?: PlayerShot[] }) {
 function ShotMetric({ label, value }: { label: string; value: string }) {
   return (
     <div>
-      <p className="text-[9px] text-dim">{label}</p>
+      <p className="text-[10px] text-dim">{label}</p>
       <p className="text-sm font-bold text-ink num">{value}</p>
     </div>
   );
@@ -286,7 +285,7 @@ export function DeepStats({
                     <span className="shrink-0 text-xs font-bold text-ink num">
                       {value}
                       {metric === "per90" && (
-                        <span className="ml-0.5 text-[9px] font-medium text-dim">/90</span>
+                        <span className="ml-0.5 text-[10px] font-medium text-dim">/90</span>
                       )}
                     </span>
                   </div>
@@ -297,7 +296,7 @@ export function DeepStats({
                         style={{ width: `${Math.min(100, Math.max(0, percentile))}%` }}
                       />
                     </div>
-                    <span className="w-8 shrink-0 text-right text-[9px] text-dim num">
+                    <span className="w-8 shrink-0 text-right text-[10px] text-dim num">
                       {ordinal(Math.round(percentile))}
                     </span>
                   </div>
@@ -353,7 +352,7 @@ function PlayerMatchRow({ match }: { match: PlayerRecentMatch }) {
       <FormPill result={result} size={20} />
       <div className="min-w-0">
         <div className="flex items-center gap-1.5">
-          <span className="text-[9px] font-semibold uppercase tracking-wider text-dim">
+          <span className="text-[10px] font-semibold uppercase tracking-wider text-dim">
             {match.isHomeTeam ? "vs" : "@"}
           </span>
           <Crest id={match.opponentTeamId} name={match.opponentTeamName} size={17} />
@@ -361,8 +360,8 @@ function PlayerMatchRow({ match }: { match: PlayerRecentMatch }) {
             {match.opponentTeamName}
           </span>
         </div>
-        <p className="mt-0.5 truncate text-[9px] text-dim">
-          {formatShortDate(match.matchDate.utcTime)} · {match.leagueName ?? "Match"}
+        <p className="mt-0.5 truncate text-[10px] text-dim">
+          <LocalTime value={match.matchDate.utcTime} kind="short" /> · {match.leagueName ?? "Match"}
           {match.onBench ? " · bench" : !match.playedInMatch ? " · unused" : ""}
         </p>
       </div>
@@ -370,10 +369,10 @@ function PlayerMatchRow({ match }: { match: PlayerRecentMatch }) {
         <p className="font-display text-sm font-extrabold text-ink num">
           {match.homeScore ?? 0}–{match.awayScore ?? 0}
         </p>
-        <p className="text-[9px] text-dim num">{match.minutesPlayed ?? 0}&apos;</p>
+        <p className="text-[10px] text-dim num">{match.minutesPlayed ?? 0}&apos;</p>
       </div>
       <div className="hidden w-24 items-center justify-end gap-2 sm:flex">
-        <span className="text-[9px] font-semibold text-dim num">
+        <span className="text-[10px] font-semibold text-dim num">
           {match.goals ? `${match.goals}G` : ""} {match.assists ? `${match.assists}A` : ""}
         </span>
         <RatingChip rating={match.ratingProps?.rating} />
@@ -423,7 +422,7 @@ export function PlayerNextMatchCard({ match }: { match?: PlayerNextMatch }) {
     <Link href={`/match/${match.matchId}`} className="card card-hover block p-4">
       <div className="flex items-center justify-between">
         <p className="eyebrow">Next match</p>
-        <span className="text-[9px] font-semibold uppercase tracking-wider text-dim">
+        <span className="text-[10px] font-semibold uppercase tracking-wider text-dim">
           {match.leagueName}
         </span>
       </div>
@@ -434,9 +433,9 @@ export function PlayerNextMatchCard({ match }: { match?: PlayerNextMatch }) {
         </div>
         <div className="text-center">
           <p className="font-display text-sm font-extrabold text-ink">
-            {formatKickoff(match.status.utcTime)}
+            <LocalTime value={match.status.utcTime} />
           </p>
-          <p className="text-[9px] text-dim">{formatMonthDay(match.matchDate)}</p>
+          <p className="text-[10px] text-dim"><LocalTime value={match.matchDate} kind="monthDay" /></p>
         </div>
         <div className="flex flex-1 flex-col items-center gap-1 text-center">
           <Crest id={match.awayId} name={match.awayName} size={30} />
@@ -476,7 +475,7 @@ export function PlayerTrophies({ player }: { player: PlayerResponse }) {
               <p className="truncate text-[11px] font-semibold text-muted">
                 {tournament.leagueName}
               </p>
-              <p className="truncate text-[9px] text-dim">{team.teamName}</p>
+              <p className="truncate text-[10px] text-dim">{team.teamName}</p>
             </div>
             <span className="text-xs font-bold text-ink num">
               {tournament.seasonsWon?.length ?? 0}
@@ -535,7 +534,7 @@ function CareerRow({ entry }: { entry: PlayerCareerEntry }) {
         >
           {entry.team}
         </Link>
-        <p className="mt-0.5 text-[9px] text-dim">
+        <p className="mt-0.5 text-[10px] text-dim">
           {formatYear(entry.startDate)} – {entry.active ? "Present" : formatYear(entry.endDate)}
           {entry.transferType?.text ? ` · ${entry.transferType.text}` : ""}
         </p>
@@ -552,8 +551,8 @@ function CareerRow({ entry }: { entry: PlayerCareerEntry }) {
 function CareerStat({ label, value }: { label: string; value?: string }) {
   return (
     <div>
-      <p className="text-[9px] font-semibold text-muted num">{value ?? "—"}</p>
-      <p className="text-[8px] uppercase tracking-wider text-dim">{label}</p>
+      <p className="text-[10px] font-semibold text-muted num">{value ?? "—"}</p>
+      <p className="text-[10px] uppercase tracking-wider text-dim">{label}</p>
     </div>
   );
 }
@@ -590,7 +589,7 @@ export function MarketValueChart({ player }: { player: PlayerResponse }) {
             {formatMarketValue(latest.value)}
           </p>
         </div>
-        <div className="text-right text-[9px] text-dim">
+        <div className="text-right text-[10px] text-dim">
           <p>Peak {formatMarketValue(peak.value)}</p>
           <p>{formatShortDate(latest.date)}</p>
         </div>
@@ -614,7 +613,7 @@ export function MarketValueChart({ player }: { player: PlayerResponse }) {
         />
         <circle cx={points[points.length - 1].x} cy={points[points.length - 1].y} r="1.6" fill="var(--color-accent)" />
       </svg>
-      <div className="flex items-center justify-between text-[9px] text-dim">
+      <div className="flex items-center justify-between text-[10px] text-dim">
         <span>{new Date(sampled[0].date).getFullYear()}</span>
         <span>Low {formatMarketValue(min)}</span>
         <span>{new Date(latest.date).getFullYear()}</span>

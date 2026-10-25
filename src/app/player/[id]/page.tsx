@@ -1,5 +1,5 @@
+import { PlayerPhoto } from "@/components/player-photo";
 import type { Metadata } from "next";
-import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
@@ -25,7 +25,6 @@ import {
 } from "@/components/player/player-panels";
 import { TabBar } from "@/components/tab-bar";
 import { Crest, Pill, SectionHeading, SkeletonBlock, SkeletonRows } from "@/components/ui";
-import { playerImage } from "@/lib/assets";
 import { getPlayer } from "@/lib/fotmob";
 import { formatShortDate } from "@/lib/format";
 import type { PlayerInfoItem, PlayerResponse } from "@/lib/types";
@@ -112,7 +111,7 @@ async function PlayerContent({
   const otherPositions = player.positionDescription?.nonPrimaryPositions ?? [];
   const team = player.primaryTeam;
   const basePath = `/player/${id}`;
-  const accent = team?.teamColors?.darkMode ?? "#ff4a38";
+  const accent = team?.teamColors?.darkMode ?? "#39ff6b";
   const allMatches = player.initialMatchesPage?.matches ?? player.recentMatches ?? [];
   const deepGroups = player.firstSeasonStats?.statsSection?.items ?? [];
 
@@ -181,7 +180,7 @@ async function PlayerContent({
               {countryCode && (
                 <span className="flex items-center gap-1">
                   <GlobeIcon size={12} />
-                  <span className="rounded bg-white/[0.06] px-1 py-0.5 text-[8px] font-bold tracking-wider text-muted">
+                  <span className="rounded bg-white/[0.06] px-1 py-0.5 text-[10px] font-bold tracking-wider text-muted">
                     {countryCode}
                   </span>
                   {countryName}
@@ -198,8 +197,8 @@ async function PlayerContent({
               aria-hidden="true"
             />
             <span className="relative block h-[92px] w-[76px] overflow-hidden rounded-2xl border border-white/10 bg-white/[0.04] shadow-[0_18px_40px_-20px_rgba(0,0,0,0.9)] sm:h-[150px] sm:w-[124px] md:h-[176px] md:w-[146px]">
-              <Image
-                src={playerImage(player.id)}
+              <PlayerPhoto
+                playerId={player.id}
                 alt={player.name}
                 width={192}
                 height={192}
@@ -211,7 +210,7 @@ async function PlayerContent({
         </div>
         <div className="relative mt-4 flex flex-wrap items-end justify-between gap-3 border-t border-line/50 pt-3">
           <div>
-            <p className="text-[9px] uppercase tracking-[0.14em] text-dim">Market value</p>
+            <p className="text-[10px] uppercase tracking-[0.14em] text-dim">Market value</p>
             <p className="font-display text-xl font-extrabold tracking-tight text-ink">
               {marketValue !== "—" ? marketValue : "—"}
             </p>

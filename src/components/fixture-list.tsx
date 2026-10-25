@@ -1,7 +1,8 @@
+import { LocalTime } from "@/components/local-time";
 import Image from "next/image";
 import Link from "next/link";
 import { leagueLogo } from "@/lib/assets";
-import { formatKickoff, formatMonthDay, statusLabel, statusTone } from "@/lib/format";
+import { statusLabel, statusTone } from "@/lib/format";
 import { scoreFromStatus } from "@/lib/stats";
 import type { Fixture, TeamFixture } from "@/lib/types";
 import { Crest, LiveDot } from "./ui";
@@ -31,7 +32,7 @@ export function FixtureRow({
     >
       <div className="row-span-2 flex flex-col items-start gap-0.5">
         <span className="text-[10px] font-medium uppercase tracking-wide text-dim">
-          {formatMonthDay(fixture.status.utcTime)}
+          <LocalTime value={fixture.status.utcTime} kind="monthDay" />
         </span>
         {tone === "live" ? (
           <span className="flex items-center gap-1 text-[11px] font-bold uppercase text-live">
@@ -44,11 +45,11 @@ export function FixtureRow({
               tone === "scheduled" ? "text-muted" : "text-dim"
             }`}
           >
-            {tone === "scheduled" ? formatKickoff(fixture.status.utcTime) : statusLabel(fixture.status)}
+            {tone === "scheduled" ? <LocalTime value={fixture.status.utcTime} /> : statusLabel(fixture.status)}
           </span>
         )}
         {showTournament && fixture.tournament?.name && (
-          <span className="hidden max-w-[64px] truncate text-[9px] text-dim lg:block">
+          <span className="hidden max-w-[64px] truncate text-[10px] text-dim lg:block">
             {fixture.tournament.name}
           </span>
         )}

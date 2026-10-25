@@ -59,21 +59,21 @@ export const metadata: Metadata = {
 
 export const viewport: Viewport = {
   themeColor: [
-    { media: "(prefers-color-scheme: dark)", color: "#100e0c" },
-    { media: "(prefers-color-scheme: light)", color: "#e7e2d7" },
+    { media: "(prefers-color-scheme: dark)", color: "#090b0a" },
+    { media: "(prefers-color-scheme: light)", color: "#e9ecea" },
   ],
   width: "device-width",
   initialScale: 1,
   viewportFit: "cover",
-  colorScheme: "light dark",
+  colorScheme: "dark light",
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html
       lang="en"
-      data-theme="light"
-      data-accent="ember"
+      data-theme="dark"
+      data-accent="neon"
       suppressHydrationWarning
       className={`${geistSans.variable} ${geistMono.variable} ${archivo.variable} h-full antialiased`}
     >
@@ -81,7 +81,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
         <script
           dangerouslySetInnerHTML={{
             __html:
-              "(function(){try{var t=localStorage.getItem('touchline-theme')==='dark'?'dark':'light';var a=localStorage.getItem('touchline-accent');var ok={ember:1,pitch:1,gold:1,ocean:1};if(!a||!ok[a])a='ember';document.documentElement.dataset.theme=t;document.documentElement.dataset.accent=a;document.documentElement.style.colorScheme=t;}catch(e){}})();",
+              "(function(){try{var t=localStorage.getItem('touchline-theme')==='light'?'light':'dark';var a=localStorage.getItem('touchline-accent');var ok={neon:1,gold:1,ocean:1,violet:1};if(!a||!ok[a])a='neon';document.documentElement.dataset.theme=t;document.documentElement.dataset.accent=a;document.documentElement.style.colorScheme=t;}catch(e){}})();",
           }}
         />
       </head>

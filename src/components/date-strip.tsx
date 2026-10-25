@@ -29,9 +29,13 @@ export function DateStrip({
 }) {
   const router = useRouter();
   const activeRef = useRef<HTMLAnchorElement>(null);
+  const trackRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    activeRef.current?.scrollIntoView({ inline: "center", block: "nearest", behavior: "auto" });
+    const track = trackRef.current;
+    const active = activeRef.current;
+    if (!track || !active) return;
+    track.scrollLeft = active.offsetLeft - (track.clientWidth - active.clientWidth) / 2;
   }, [selected]);
 
   const suffix = filter && filter !== "all" ? `&filter=${filter}` : "";
@@ -40,13 +44,13 @@ export function DateStrip({
     <div className="flex items-center gap-1.5 sm:gap-2">
       <Link
         href={`/?date=${prevParam}${suffix}`}
-        className="flex h-[58px] w-8 shrink-0 items-center justify-center rounded-xl border border-line/70 bg-card text-dim transition-colors hover:border-accent/30 hover:text-ink sm:w-9"
+        className="hidden h-[58px] w-9 shrink-0 items-center justify-center rounded-xl border border-line/70 bg-card text-dim transition-colors hover:border-accent/30 hover:text-ink sm:flex"
         aria-label="Previous day"
       >
         <ChevronLeftIcon size={17} />
       </Link>
 
-      <div className="no-scrollbar flex flex-1 gap-1.5 overflow-x-auto py-0.5">
+      <div ref={trackRef} className="no-scrollbar relative flex flex-1 gap-1.5 overflow-x-auto py-0.5">
         {days.map((day) => {
           const active = day.param === selected;
           return (
@@ -62,7 +66,7 @@ export function DateStrip({
               }`}
             >
               <span
-                className={`text-[8px] font-bold uppercase tracking-[0.12em] ${
+                className={`text-[10px] font-bold uppercase tracking-[0.12em] ${
                   active ? "text-on-accent/55" : "text-dim"
                 }`}
               >
@@ -70,7 +74,7 @@ export function DateStrip({
               </span>
               <span className="font-display text-[19px] font-extrabold leading-tight num">{day.day}</span>
               <span
-                className={`text-[8px] font-semibold uppercase tracking-[0.12em] ${
+                className={`text-[10px] font-semibold uppercase tracking-[0.12em] ${
                   active ? "text-on-accent/55" : "text-dim"
                 }`}
               >
@@ -86,13 +90,13 @@ export function DateStrip({
 
       <Link
         href={`/?date=${nextParam}${suffix}`}
-        className="flex h-[58px] w-8 shrink-0 items-center justify-center rounded-xl border border-line/70 bg-card text-dim transition-colors hover:border-accent/30 hover:text-ink sm:w-9"
+        className="hidden h-[58px] w-9 shrink-0 items-center justify-center rounded-xl border border-line/70 bg-card text-dim transition-colors hover:border-accent/30 hover:text-ink sm:flex"
         aria-label="Next day"
       >
         <ChevronRightIcon size={17} />
       </Link>
 
-      <label className="relative hidden h-[58px] w-[58px] shrink-0 cursor-pointer items-center justify-center rounded-xl border border-line/70 bg-card text-muted transition-colors hover:border-accent/30 hover:text-ink sm:flex">
+      <label className="relative flex h-[58px] w-[52px] shrink-0 cursor-pointer items-center justify-center rounded-xl border border-line/70 bg-card text-muted transition-colors hover:border-accent/30 hover:text-ink sm:w-[58px]">
         <CalendarIcon size={17} />
         <input
           type="date"

@@ -1,7 +1,7 @@
+import { LocalTime } from "@/components/local-time";
+import { PlayerPhoto } from "@/components/player-photo";
 import Image from "next/image";
 import Link from "next/link";
-import { playerImage } from "@/lib/assets";
-import { formatKickoff, formatShortDate } from "@/lib/format";
 import type {
   H2HMatch,
   LineupTeam,
@@ -68,7 +68,7 @@ export function Timeline({
             return (
               <li
                 key={`${event.reactKey ?? index}`}
-                className="flex items-center justify-center gap-2 bg-white/[0.018] px-4 py-1.5 text-[9px] font-bold uppercase tracking-[0.16em] text-dim"
+                className="flex items-center justify-center gap-2 bg-white/[0.018] px-4 py-1.5 text-[10px] font-bold uppercase tracking-[0.16em] text-dim"
               >
                 {event.halfStrShort ?? (event.time >= 90 ? "FT" : "HT")}
               </li>
@@ -78,7 +78,7 @@ export function Timeline({
             return (
               <li
                 key={`${event.reactKey ?? index}`}
-                className="flex items-center justify-center gap-1.5 px-4 py-1 text-[9px] font-semibold text-dim"
+                className="flex items-center justify-center gap-1.5 px-4 py-1 text-[10px] font-semibold text-dim"
               >
                 + {event.minutesAddedInput ?? 1} min
               </li>
@@ -159,7 +159,7 @@ function EventText({
           {event.player?.name ?? event.nameStr}
           {event.ownGoal ? " (OG)" : ""}
         </p>
-        <p className="mt-0.5 flex flex-wrap items-center gap-1 text-[9px] text-dim">
+        <p className="mt-0.5 flex flex-wrap items-center gap-1 text-[10px] text-dim">
           <Crest id={team.id} name={team.name} size={12} />
           {team.name}
           {event.assistStr ? ` · ${event.assistStr}` : ""}
@@ -175,7 +175,7 @@ function EventText({
           <ArrowRightIcon size={10} className="-rotate-90" />
           {on?.name ?? "Player in"}
         </p>
-        <p className="flex items-center gap-1 text-[9px] text-dim">
+        <p className="flex items-center gap-1 text-[10px] text-dim">
           <ArrowRightIcon size={10} className="rotate-90 text-red-400" />
           {off?.name ?? "Player out"}
         </p>
@@ -187,7 +187,7 @@ function EventText({
       <p className="text-[11px] font-semibold text-ink">
         {event.player?.name ?? event.nameStr ?? event.type}
       </p>
-      <p className="mt-0.5 flex items-center gap-1 text-[9px] text-dim">
+      <p className="mt-0.5 flex items-center gap-1 text-[10px] text-dim">
         <Crest id={team.id} name={team.name} size={12} />
         {team.name}
         {event.card ? ` · ${event.card} card` : ""}
@@ -215,12 +215,12 @@ export function MomentumChart({
           <p className="eyebrow">Momentum</p>
           <p className="mt-0.5 text-[10px] text-dim">Pressure by minute</p>
         </div>
-        <div className="flex items-center gap-3 text-[9px] text-dim">
+        <div className="flex items-center gap-3 text-[10px] text-dim">
           <span className="flex items-center gap-1">
             <span className="h-1.5 w-3 rounded-full bg-accent" /> {homeName}
           </span>
           <span className="flex items-center gap-1">
-            <span className="h-1.5 w-3 rounded-full bg-rose-400" /> {awayName}
+            <span className="h-1.5 w-3 rounded-full bg-violet" /> {awayName}
           </span>
         </div>
       </div>
@@ -233,7 +233,7 @@ export function MomentumChart({
             <span
               key={point.minute}
               className={`absolute bottom-1/2 w-[2px] rounded-full ${
-                positive ? "bg-accent/80" : "bg-rose-400/70"
+                positive ? "bg-accent/80" : "bg-violet/70"
               }`}
               style={{
                 left: `${(point.minute / 90) * 100}%`,
@@ -244,7 +244,7 @@ export function MomentumChart({
             />
           );
         })}
-        <div className="absolute inset-x-2 bottom-1 flex justify-between text-[8px] text-dim">
+        <div className="absolute inset-x-2 bottom-1 flex justify-between text-[10px] text-dim">
           <span>0&apos;</span>
           <span>45&apos;</span>
           <span>90&apos;</span>
@@ -280,12 +280,12 @@ export function MatchShotMap({
             {shots.length} shots · {goals} goals · {xg.toFixed(2)} xG
           </p>
         </div>
-        <div className="flex items-center gap-3 text-[9px] text-dim">
+        <div className="flex items-center gap-3 text-[10px] text-dim">
           <span className="flex items-center gap-1">
             <span className="h-2 w-2 rounded-full bg-accent" /> {homeName}
           </span>
           <span className="flex items-center gap-1">
-            <span className="h-2 w-2 rounded-full bg-rose-400" /> {awayName}
+            <span className="h-2 w-2 rounded-full bg-violet" /> {awayName}
           </span>
         </div>
       </div>
@@ -311,7 +311,7 @@ export function MatchShotMap({
                 cx={Math.min(104, Math.max(1, cx))}
                 cy={Math.min(67, Math.max(1, shot.y))}
                 r={isGoal ? 2.3 : 1.5}
-                fill={isHome ? "#ff4a38" : "#fb7185"}
+                fill={isHome ? "#39ff6b" : "#a78bfa"}
                 fillOpacity={isGoal ? 1 : shot.isOnTarget ? 0.85 : 0.35}
                 stroke={isGoal ? "#07130c" : "none"}
                 strokeWidth="0.4"
@@ -402,7 +402,7 @@ function StatRow({
       </div>
       <div className="mt-1.5 flex h-1.5 overflow-hidden rounded-full bg-white/[0.05]">
         <span className="h-full bg-accent/85" style={{ width: `${homeWidth}%` }} />
-        <span className="h-full flex-1 bg-rose-400/70" />
+        <span className="h-full flex-1 bg-violet/70" />
       </div>
     </div>
   );
@@ -429,8 +429,8 @@ export function Lineups({
     );
   }
 
-  const homeColor = colors?.lightMode?.home ?? "#ff4a38";
-  const awayColor = colors?.lightMode?.away ?? "#fb7185";
+  const homeColor = colors?.lightMode?.home ?? "#39ff6b";
+  const awayColor = colors?.lightMode?.away ?? "#a78bfa";
   const homeFont = colors?.fontLightMode?.home ?? "#07130c";
   const awayFont = colors?.fontLightMode?.away ?? "#07130c";
 
@@ -446,7 +446,7 @@ export function Lineups({
               <Crest id={side.team.id} name={side.name} size={26} />
               <div className="min-w-0">
                 <p className="truncate text-xs font-bold text-ink">{side.name}</p>
-                <p className="text-[9px] text-dim">
+                <p className="text-[10px] text-dim">
                   {side.team.formation} · avg {side.team.averageStarterAge?.toFixed(1) ?? "—"} yrs
                 </p>
               </div>
@@ -454,7 +454,7 @@ export function Lineups({
             </div>
           ))}
         </div>
-        <div className="pitch-surface relative aspect-[68/105] w-full overflow-hidden sm:aspect-[105/68]">
+        <div className="pitch-surface relative aspect-[68/118] w-full overflow-hidden sm:aspect-[105/68]">
           <div className="absolute inset-0 hidden opacity-70 sm:block">
             <svg viewBox="0 0 105 68" className="h-full w-full" aria-hidden="true">
               <g stroke="rgba(255,255,255,0.17)" strokeWidth="0.35" fill="none">
@@ -469,15 +469,15 @@ export function Lineups({
             </svg>
           </div>
           <div className="absolute inset-0 opacity-70 sm:hidden">
-            <svg viewBox="0 0 68 105" className="h-full w-full" aria-hidden="true">
+            <svg viewBox="0 0 68 118" preserveAspectRatio="none" className="h-full w-full" aria-hidden="true">
               <g stroke="rgba(255,255,255,0.17)" strokeWidth="0.35" fill="none">
-                <rect x="1" y="1" width="66" height="103" rx="1" />
-                <line x1="1" y1="52.5" x2="67" y2="52.5" />
-                <circle cx="34" cy="52.5" r="9.15" />
+                <rect x="1" y="1" width="66" height="116" rx="1" />
+                <line x1="1" y1="59" x2="67" y2="59" />
+                <circle cx="34" cy="59" r="9.15" />
                 <rect x="13.84" y="1" width="40.32" height="16" />
                 <rect x="24.84" y="1" width="18.32" height="7" />
-                <rect x="13.84" y="88" width="40.32" height="16" />
-                <rect x="24.84" y="97" width="18.32" height="7" />
+                <rect x="13.84" y="101" width="40.32" height="16" />
+                <rect x="24.84" y="110" width="18.32" height="7" />
               </g>
             </svg>
           </div>
@@ -485,21 +485,23 @@ export function Lineups({
             { team: home, side: "home" as const, color: homeColor, font: homeFont },
             { team: away, side: "away" as const, color: awayColor, font: awayFont },
           ].flatMap(({ team, side, color, font }) =>
-            (team.starters ?? []).map((player, index) => {
+            (team.starters ?? []).map((player) => {
               const layout = player.horizontalLayout;
-              const x = layout ? (side === "home" ? layout.x : 1 - layout.x) : 0.5;
-              const y = layout?.y ?? 0.5;
+              const along = 0.03 + (layout?.x ?? 0.5) * 0.46;
+              const across = layout?.y ?? 0.5;
+              const home = side === "home";
+              const pos = {
+                "--dl": `${(home ? along : 1 - along) * 100}%`,
+                "--dt": `${(home ? across : 1 - across) * 100}%`,
+                "--ml": `${(home ? across : 1 - across) * 100}%`,
+                "--mt": `${(home ? 1 - along : along) * 100}%`,
+              } as React.CSSProperties;
               return (
                 <Link
                   key={`${side}-${player.id}`}
                   href={`/player/${player.id}`}
-                  className={`lineup-marker group absolute z-10 flex -translate-x-1/2 -translate-y-1/2 flex-col items-center gap-1 ${index % 2 === 1 ? "lineup-marker-alt" : ""}`}
-                  style={
-                    {
-                      "--lx": `${x * 100}%`,
-                      "--ly": `${y * 100}%`,
-                    } as React.CSSProperties
-                  }
+                  className="lineup-marker group absolute z-10 flex -translate-x-1/2 -translate-y-1/2 flex-col items-center gap-1"
+                  style={pos}
                   title={`${player.name}${player.performance?.rating ? ` · ${player.performance.rating}` : ""}`}
                 >
                   <span className="relative inline-flex">
@@ -507,8 +509,8 @@ export function Lineups({
                       className="relative flex h-7 w-7 items-center justify-center overflow-hidden rounded-full bg-card-2 shadow-[0_8px_18px_-8px_rgba(0,0,0,0.95)] transition-transform duration-200 group-hover:scale-110 sm:h-10 sm:w-10"
                       style={{ boxShadow: `0 0 0 2px ${color}, 0 8px 18px -8px rgba(0,0,0,0.95)` }}
                     >
-                      <Image
-                        src={playerImage(player.id)}
+                      <PlayerPhoto
+                        playerId={player.id}
                         alt=""
                         width={40}
                         height={40}
@@ -516,17 +518,22 @@ export function Lineups({
                       />
                     </span>
                     <span
-                      className="absolute -bottom-1 -right-1 flex h-3.5 w-3.5 items-center justify-center rounded-full text-[7px] font-black shadow-sm sm:h-4 sm:w-4 sm:text-[8px]"
+                      className="absolute -bottom-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full text-[9px] font-black shadow-sm sm:h-[18px] sm:w-[18px] sm:text-[10px]"
                       style={{ backgroundColor: color, color: font }}
                     >
                       {player.shirtNumber ?? player.positionId}
                     </span>
+                    {player.performance?.rating ? (
+                      <span className="absolute -left-2 -top-1.5 rounded bg-black/80 px-1 text-[9px] font-bold leading-[14px] text-white sm:hidden">
+                        {player.performance.rating.toFixed(1)}
+                      </span>
+                    ) : null}
                   </span>
-                  <span className="max-w-[64px] truncate rounded bg-black/60 px-1 py-0.5 text-[8px] font-semibold text-white backdrop-blur-sm sm:max-w-[84px]">
+                  <span className="max-w-[64px] truncate rounded bg-black/60 px-1 py-0.5 text-[10px] font-semibold text-white backdrop-blur-sm sm:max-w-[84px]">
                     {player.name.split(" ").slice(-1)[0]}
                   </span>
                   {player.performance?.rating ? (
-                    <span className="lineup-rating hidden rounded bg-black/70 px-1 text-[7px] font-bold text-accent sm:block">
+                    <span className="lineup-rating hidden rounded bg-black/70 px-1 text-[10px] font-bold leading-4 text-white sm:block">
                       {player.performance.rating.toFixed(1)}
                     </span>
                   ) : null}
@@ -561,21 +568,21 @@ function Bench({ team, name }: { team?: LineupTeam; name: string }) {
             className="flex items-center gap-2.5 px-3 py-2 transition-colors hover:bg-white/[0.025]"
           >
             <span className="relative h-7 w-7 shrink-0 overflow-hidden rounded-full bg-white/[0.05] ring-1 ring-inset ring-white/10">
-              <Image
-                src={playerImage(player.id)}
+              <PlayerPhoto
+                playerId={player.id}
                 alt=""
                 width={28}
                 height={28}
                 className="h-full w-full object-cover object-top"
               />
-              <span className="absolute bottom-0 right-0 flex h-3 min-w-3 items-center justify-center rounded-tl bg-black/75 px-0.5 text-[7px] font-bold text-white">
+              <span className="absolute bottom-0 right-0 flex h-3 min-w-3 items-center justify-center rounded-tl bg-black/75 px-0.5 text-[9px] font-bold text-white">
                 {player.shirtNumber ?? "—"}
               </span>
             </span>
             <span className="min-w-0 flex-1 truncate text-[11px] font-semibold text-muted">
               {player.name}
             </span>
-            <span className="text-[9px] text-dim">{player.positionId ?? ""}</span>
+            <span className="text-[10px] text-dim">{player.positionId ?? ""}</span>
             <RatingChip rating={player.performance?.rating} />
           </Link>
         ))}
@@ -613,8 +620,8 @@ export function H2HList({
         ].map((item) => (
           <div key={`${item.label}-${item.team}`} className="px-2 py-3">
             <p className="font-display text-2xl font-extrabold text-ink num">{item.value}</p>
-            <p className="truncate text-[9px] uppercase tracking-wider text-dim">{item.team}</p>
-            <p className="text-[9px] text-dim">{item.label}</p>
+            <p className="truncate text-[10px] uppercase tracking-wider text-dim">{item.team}</p>
+            <p className="text-[10px] text-dim">{item.label}</p>
           </div>
         ))}
       </div>
@@ -626,8 +633,8 @@ export function H2HList({
               href={`/match/${match.matchUrl?.split("#").pop() ?? ""}`}
               className="group flex items-center gap-3 px-3 py-2.5 transition-colors hover:bg-white/[0.025]"
             >
-              <span className="w-14 shrink-0 text-[9px] text-dim">
-                {match.time?.utcTime ? formatShortDate(match.time.utcTime) : "—"}
+              <span className="w-14 shrink-0 text-[10px] text-dim">
+                {match.time?.utcTime ? <LocalTime value={match.time.utcTime} kind="short" /> : "—"}
               </span>
               <div className="flex flex-1 items-center justify-end gap-1.5">
                 <span className="truncate text-[11px] font-semibold text-muted group-hover:text-ink">
@@ -644,7 +651,7 @@ export function H2HList({
                   {match.away.name}
                 </span>
               </div>
-              <span className="hidden w-24 shrink-0 truncate text-right text-[9px] text-dim sm:block">
+              <span className="hidden w-24 shrink-0 truncate text-right text-[10px] text-dim sm:block">
                 {match.league?.name}
               </span>
             </Link>
@@ -725,7 +732,7 @@ export function MatchInfoCard({
   if (date) {
     rows.push({
       label: "Date",
-      value: `${formatShortDate(date)} · ${formatKickoff(date)}`,
+      value: <LocalTime value={date} kind="dayTime" />,
     });
   }
   if (stadium?.name) {
@@ -758,7 +765,7 @@ export function MatchInfoCard({
           </div>
         ))}
       </div>
-      <p className="mt-2 text-[9px] text-dim">
+      <p className="mt-2 text-[10px] text-dim">
         {homeTeam.name} vs {awayTeam.name}
       </p>
     </div>

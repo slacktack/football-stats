@@ -1,10 +1,9 @@
+import { LocalTime } from "@/components/local-time";
+import { PlayerPhoto } from "@/components/player-photo";
 import Image from "next/image";
 import Link from "next/link";
-import { playerImage } from "@/lib/assets";
 import {
-  formatKickoff,
   formatMarketValue,
-  formatShortDate,
 } from "@/lib/format";
 import { scoreFromStatus } from "@/lib/stats";
 import type {
@@ -46,7 +45,7 @@ export function NextMatchCard({
       <div className="pointer-events-none absolute -right-8 -top-10 h-32 w-32 rounded-full bg-accent/8 blur-2xl" />
       <div className="flex items-center justify-between gap-3">
         <p className="eyebrow">Next match</p>
-        <span className="rounded-md bg-white/[0.05] px-2 py-0.5 text-[9px] font-bold uppercase tracking-wider text-dim">
+        <span className="rounded-md bg-white/[0.05] px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-dim">
           {fixture.tournament?.name ?? "Fixture"}
         </span>
       </div>
@@ -59,10 +58,10 @@ export function NextMatchCard({
         </div>
         <div className="shrink-0 text-center">
           <p className="font-display text-lg font-extrabold text-ink">
-            {fixture.status.started ? fixture.status.scoreStr ?? "vs" : formatKickoff(fixture.status.utcTime)}
+            {fixture.status.started ? fixture.status.scoreStr ?? "vs" : <LocalTime value={fixture.status.utcTime} />}
           </p>
-          <p className="mt-0.5 text-[9px] font-semibold uppercase tracking-wider text-dim">
-            {formatShortDate(fixture.status.utcTime)}
+          <p className="mt-0.5 text-[10px] font-semibold uppercase tracking-wider text-dim">
+            <LocalTime value={fixture.status.utcTime} kind="short" />
           </p>
         </div>
         <div className="flex min-w-0 flex-1 flex-col items-center gap-1.5 text-center">
@@ -132,7 +131,7 @@ export function TeamFormCard({
                 <p className="truncate text-[10px] font-semibold text-ink">
                   {opponent?.shortName ?? opponent?.name ?? "Match"}
                 </p>
-                <p className="mt-0.5 truncate text-[9px] text-dim">
+                <p className="mt-0.5 truncate text-[10px] text-dim">
                   <span className="num">{item.score ?? "—"}</span>
                   {item.tournamentName ? ` · ${item.tournamentName}` : ""}
                 </p>
@@ -171,7 +170,7 @@ export function MatchResultCard({
     <Link href={`/match/${fixture.id}`} className="card card-hover flex h-full flex-col p-4">
       <div className="flex items-center justify-between">
         <p className="eyebrow">{label}</p>
-        <span className="text-[9px] font-semibold uppercase tracking-wider text-dim">
+        <span className="text-[10px] font-semibold uppercase tracking-wider text-dim">
           {fixture.tournament?.name ?? ""}
         </span>
       </div>
@@ -187,7 +186,7 @@ export function MatchResultCard({
           </span>
         </div>
         <span className="shrink-0 font-display text-lg font-extrabold text-ink num">
-          {score ? `${score[0]} – ${score[1]}` : formatKickoff(fixture.status.utcTime)}
+          {score ? `${score[0]} – ${score[1]}` : <LocalTime value={fixture.status.utcTime} />}
         </span>
         <div className="flex flex-1 items-center justify-end gap-2 text-right">
           <span
@@ -200,8 +199,8 @@ export function MatchResultCard({
           <Crest id={fixture.away.id} name={fixture.away.name} size={32} />
         </div>
       </div>
-      <p className="mt-auto text-center text-[9px] font-semibold uppercase tracking-wider text-dim">
-        {formatShortDate(fixture.status.utcTime)}
+      <p className="mt-auto text-center text-[10px] font-semibold uppercase tracking-wider text-dim">
+        <LocalTime value={fixture.status.utcTime} kind="short" />
       </p>
     </Link>
   );
@@ -216,15 +215,15 @@ export function SquadPlayer({ member }: { member: SquadMember }) {
       className="group flex items-center gap-3 rounded-xl border border-line/70 bg-card/60 p-2.5 transition-colors hover:border-accent/25 hover:bg-white/[0.03]"
     >
       <span className="relative flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-full bg-white/[0.05] ring-1 ring-inset ring-white/10">
-        <Image
-          src={playerImage(member.id)}
+        <PlayerPhoto
+          playerId={member.id}
           alt=""
           width={40}
           height={40}
           className="h-full w-full object-cover object-top"
         />
         {member.shirtNumber !== undefined && (
-          <span className="absolute bottom-0 right-0 flex h-4 min-w-4 items-center justify-center rounded-full bg-base/90 px-1 text-[8px] font-bold text-muted ring-1 ring-white/10">
+          <span className="absolute bottom-0 right-0 flex h-4 min-w-4 items-center justify-center rounded-full bg-base/90 px-1 text-[10px] font-bold text-muted ring-1 ring-white/10">
             {member.shirtNumber}
           </span>
         )}
@@ -232,9 +231,9 @@ export function SquadPlayer({ member }: { member: SquadMember }) {
       <div className="min-w-0 flex-1">
         <p className="truncate text-[11px] font-bold text-ink group-hover:text-accent">
           {member.name}
-          {member.isCaptain && <span className="ml-1 text-[9px] font-bold text-accent">C</span>}
+          {member.isCaptain && <span className="ml-1 text-[10px] font-bold text-accent">C</span>}
         </p>
-        <p className="truncate text-[9px] text-dim">
+        <p className="truncate text-[10px] text-dim">
           {position}
           {member.age ? ` · ${member.age}y` : ""}
           {member.injury ? " · injured" : ""}
@@ -242,7 +241,7 @@ export function SquadPlayer({ member }: { member: SquadMember }) {
       </div>
       <div className="flex shrink-0 flex-col items-end gap-1">
         {member.rating ? <RatingChip rating={member.rating} /> : null}
-        <span className="text-[9px] font-semibold text-dim num">
+        <span className="text-[10px] font-semibold text-dim num">
           {formatMarketValue(member.transferValue)}
         </span>
       </div>
@@ -340,7 +339,7 @@ export function TeamStatGrid({
                 {group.header}
               </p>
               {entry?.rank ? (
-                <span className="rounded bg-white/[0.05] px-1.5 py-0.5 text-[9px] font-bold text-dim num">
+                <span className="rounded bg-white/[0.05] px-1.5 py-0.5 text-[10px] font-bold text-dim num">
                   #{entry.rank}
                 </span>
               ) : null}
@@ -382,7 +381,7 @@ export function TrophyGrid({
               <span className="font-display text-xl font-extrabold text-ink num">{trophy.won}</span>
             </div>
             <p className="mt-2 text-[11px] font-bold text-ink">{trophy.name}</p>
-            <p className="mt-1 text-[9px] text-dim">
+            <p className="mt-1 text-[10px] text-dim">
               {trophy.runnerup ? `${trophy.runnerup} runner-up · ` : ""}
               {seasons.length ? seasons.join(", ") : "—"}
             </p>

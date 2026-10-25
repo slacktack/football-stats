@@ -1,6 +1,5 @@
-import Image from "next/image";
+import { PlayerPhoto } from "@/components/player-photo";
 import Link from "next/link";
-import { playerImage } from "@/lib/assets";
 import type { StatEntry, StatLeaderGroup } from "@/lib/types";
 import { Crest } from "./ui";
 
@@ -36,8 +35,8 @@ function StatRow({
         <Crest id={entry.teamId} name={entry.name} size={26} />
       ) : (
         <span className="flex h-[26px] w-[26px] shrink-0 items-center justify-center overflow-hidden rounded-full bg-white/[0.045] ring-1 ring-inset ring-white/[0.06]">
-          <Image
-            src={playerImage(entry.id)}
+          <PlayerPhoto
+            playerId={entry.id}
             alt=""
             width={26}
             height={26}

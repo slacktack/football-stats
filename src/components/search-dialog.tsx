@@ -279,7 +279,7 @@ export function SearchDialog() {
                               {result.meta}
                             </span>
                           )}
-                          <span className="hidden rounded-md bg-white/[0.05] px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wider text-dim sm:inline">
+                          <span className="hidden rounded-md bg-white/[0.05] px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-wider text-dim sm:inline">
                             {TYPE_LABEL[result.type]}
                           </span>
                           <ChevronRightIcon size={14} className="text-dim" />

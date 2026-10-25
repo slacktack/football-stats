@@ -19,7 +19,7 @@ export function Crest({
 }) {
   return (
     <span
-      className={`inline-flex shrink-0 items-center justify-center rounded-full bg-white/[0.045] ring-1 ring-inset ring-white/[0.06] ${className}`}
+      className={`crest-chip inline-flex shrink-0 items-center justify-center rounded-full ${className}`}
       style={{ width: size, height: size }}
     >
       <Image

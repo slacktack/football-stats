@@ -32,7 +32,7 @@ export function MobileNav() {
             <Link
               key={item.label}
               href={item.href}
-              className={`relative flex flex-1 flex-col items-center gap-1 rounded-xl py-2 text-[9px] font-bold uppercase tracking-[0.1em] transition-colors ${
+              className={`relative flex flex-1 flex-col items-center gap-1 rounded-xl py-2 text-[10px] font-bold uppercase tracking-[0.1em] transition-colors ${
                 active ? "bg-accent/10 text-accent" : "text-dim hover:text-ink"
               }`}
             >

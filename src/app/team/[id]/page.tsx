@@ -112,7 +112,7 @@ async function TeamContent({
   if (!team?.details) notFound();
 
   const details = team.details;
-  const color = details.teamColor ?? "#ff4a38";
+  const color = details.teamColor ?? "#39ff6b";
   const basePath = `/team/${id}`;
   const tableCandidates = team.overview?.table ?? team.table ?? [];
   const primaryTable =
@@ -220,7 +220,7 @@ async function TeamContent({
                   {team.overview.teamForm.slice(0, 5).map((item, index) => (
                     <span
                       key={`${item.date?.utcTime ?? index}`}
-                      className={`flex h-5 w-5 items-center justify-center rounded-md text-[9px] font-extrabold ${
+                      className={`flex h-5 w-5 items-center justify-center rounded-md text-[10px] font-extrabold ${
                         item.result === 1
                           ? "bg-emerald-400/15 text-emerald-300"
                           : item.result === -1

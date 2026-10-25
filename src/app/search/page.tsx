@@ -1,3 +1,4 @@
+import { LocalTime } from "@/components/local-time";
 import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
@@ -5,7 +6,7 @@ import { Suspense } from "react";
 import { ChevronRightIcon, SearchIcon, SparkIcon } from "@/components/icons";
 import { EmptyState, SkeletonRows } from "@/components/ui";
 import { leagueLogo, playerImage, teamCrest } from "@/lib/assets";
-import { formatKickoff, formatShortDate, isLive } from "@/lib/format";
+import { isLive } from "@/lib/format";
 import { searchSuggest } from "@/lib/fotmob";
 import type { SearchGroup, SearchSuggestion } from "@/lib/types";
 
@@ -120,7 +121,7 @@ async function SearchContent({ searchParams }: { searchParams: SearchParams }) {
             <div className="flex items-start gap-3 rounded-xl border border-accent/15 bg-accent/[0.045] p-4">
               <SparkIcon size={16} className="mt-0.5 shrink-0 text-accent" />
               <p className="text-[11px] leading-relaxed text-muted">
-                Tip: press <kbd className="rounded border border-line bg-white/[0.06] px-1 py-0.5 text-[9px] text-ink">⌘ K</kbd>{" "}
+                Tip: press <kbd className="rounded border border-line bg-white/[0.06] px-1 py-0.5 text-[10px] text-ink">⌘ K</kbd>{" "}
                 anywhere to search without leaving the page.
               </p>
             </div>
@@ -145,7 +146,7 @@ async function SearchContent({ searchParams }: { searchParams: SearchParams }) {
                   <h2 className="font-display text-sm font-bold text-ink">
                     {group.title.value}
                   </h2>
-                  <span className="rounded-full bg-white/[0.05] px-1.5 py-0.5 text-[9px] font-bold text-dim num">
+                  <span className="rounded-full bg-white/[0.05] px-1.5 py-0.5 text-[10px] font-bold text-dim num">
                     {group.suggestions.length}
                   </span>
                 </div>
@@ -252,15 +253,15 @@ function MatchResult({ suggestion }: { suggestion: SearchSuggestion }) {
       href={`/match/${suggestion.id}`}
       className="flex items-center gap-3 px-3.5 py-3 transition-colors hover:bg-white/[0.025]"
     >
-      <div className="w-[70px] shrink-0 text-[9px] leading-tight text-dim">
+      <div className="w-[70px] shrink-0 text-[10px] leading-tight text-dim">
         {live ? (
           <span className="font-bold text-live">LIVE</span>
         ) : started ? (
           <span className="font-semibold text-muted">Full time</span>
         ) : suggestion.matchDate ? (
           <>
-            <span className="block text-muted">{formatShortDate(suggestion.matchDate)}</span>
-            <span className="block">{formatKickoff(suggestion.matchDate)}</span>
+            <span className="block text-muted"><LocalTime value={suggestion.matchDate} kind="short" /></span>
+            <span className="block"><LocalTime value={suggestion.matchDate} /></span>
           </>
         ) : (
           "Fixture"
@@ -304,7 +305,7 @@ function MatchResult({ suggestion }: { suggestion: SearchSuggestion }) {
         </div>
       </div>
       {finished && (
-        <span className="rounded bg-white/[0.05] px-1.5 py-0.5 text-[8px] font-bold text-dim">
+        <span className="rounded bg-white/[0.05] px-1.5 py-0.5 text-[10px] font-bold text-dim">
           FT
         </span>
       )}

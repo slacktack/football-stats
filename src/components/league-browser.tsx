@@ -184,7 +184,7 @@ export function LeagueBrowser({
                       className="flex w-full items-center gap-2.5 px-3.5 py-2.5 text-left transition-colors hover:bg-white/[0.025]"
                       aria-expanded={expanded}
                     >
-                      <span className="flex h-7 min-w-7 items-center justify-center rounded-md bg-white/[0.05] px-1 text-[9px] font-bold tracking-wider text-muted">
+                      <span className="flex h-7 min-w-7 items-center justify-center rounded-md bg-white/[0.05] px-1 text-[10px] font-bold tracking-wider text-muted">
                         {country.ccode}
                       </span>
                       <span className="flex-1 truncate text-xs font-bold text-ink">
@@ -253,7 +253,7 @@ function LeagueLink({
         {subtitle && <span className="block truncate text-[10px] text-dim">{subtitle}</span>}
       </span>
       {!compact && (
-        <span className="text-[9px] font-bold uppercase tracking-wider text-dim">{league.ccode}</span>
+        <span className="text-[10px] font-bold uppercase tracking-wider text-dim">{league.ccode}</span>
       )}
     </Link>
   );
