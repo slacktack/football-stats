@@ -1,26 +1,251 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
-
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
   --font-sans: var(--font-geist-sans);
+  --font-display: var(--font-archivo), var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+@theme {
+  --color-base: #06090e;
+  --color-raise: #0a1017;
+  --color-card: #0c131d;
+  --color-card-2: #111a26;
+  --color-line: #1a2532;
+  --color-ink: #f3f7fc;
+  --color-muted: #93a0b3;
+  --color-dim: #647286;
+  --color-accent: #c8f751;
+  --color-accent-strong: #b7eb2f;
+  --color-mint: #5eead4;
+  --color-sky: #67c7ff;
+  --color-live: #ff4d5e;
+  --color-violet: #a78bfa;
+}
+
+:root {
+  color-scheme: dark;
+  --header-height: 64px;
+}
+
+* {
+  border-color: var(--color-line);
+}
+
+html {
+  scroll-behavior: smooth;
+  -webkit-tap-highlight-color: transparent;
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background-color: var(--color-base);
+  color: var(--color-ink);
+  font-family: var(--font-sans), ui-sans-serif, system-ui, sans-serif;
+  background-image:
+    radial-gradient(1100px 620px at 12% -12%, rgba(200, 247, 81, 0.075), transparent 55%),
+    radial-gradient(900px 520px at 92% -8%, rgba(103, 199, 255, 0.055), transparent 58%),
+    radial-gradient(800px 500px at 50% 110%, rgba(94, 234, 212, 0.035), transparent 60%);
+  background-repeat: no-repeat;
+  background-attachment: fixed;
+  font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+  text-rendering: optimizeLegibility;
+}
+
+::selection {
+  background: rgba(200, 247, 81, 0.28);
+  color: #fff;
+}
+
+a,
+button {
+  -webkit-touch-callout: none;
+}
+
+:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+@layer components {
+  .shell {
+    width: 100%;
+    max-width: 1264px;
+    margin-inline: auto;
+    padding-inline: 1rem;
+  }
+
+  @media (min-width: 768px) {
+    .shell {
+      padding-inline: 1.5rem;
+    }
+  }
+
+  .card {
+    border-radius: 1.15rem;
+    border: 1px solid color-mix(in oklab, var(--color-line) 88%, transparent);
+    background:
+      linear-gradient(180deg, rgba(255, 255, 255, 0.025), rgba(255, 255, 255, 0) 44%),
+      color-mix(in oklab, var(--color-card) 92%, transparent);
+    box-shadow: 0 1px 0 rgba(255, 255, 255, 0.03) inset, 0 18px 40px -28px rgba(0, 0, 0, 0.9);
+  }
+
+  .card-hover {
+    transition:
+      border-color 180ms ease,
+      transform 180ms ease,
+      background-color 180ms ease;
+  }
+
+  .card-hover:hover {
+    border-color: color-mix(in oklab, var(--color-accent) 26%, var(--color-line));
+    transform: translateY(-1px);
+  }
+
+  .surface {
+    background: color-mix(in oklab, var(--color-card-2) 68%, transparent);
+    border: 1px solid color-mix(in oklab, var(--color-line) 75%, transparent);
+    border-radius: 0.85rem;
+  }
+
+  .eyebrow {
+    font-size: 0.6875rem;
+    font-weight: 700;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--color-dim);
+  }
+
+  .num {
+    font-variant-numeric: tabular-nums;
+    font-feature-settings: "tnum";
+  }
+
+  .no-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+
+  .thin-scrollbar {
+    scrollbar-width: thin;
+    scrollbar-color: #263444 transparent;
+  }
+
+  .pitch-surface {
+    background:
+      radial-gradient(120% 80% at 50% 0%, rgba(255, 255, 255, 0.05), transparent 55%),
+      linear-gradient(180deg, #0c2a1c 0%, #0a2318 48%, #081c14 100%);
+  }
+
+  .glow-accent {
+    box-shadow: 0 0 0 1px rgba(200, 247, 81, 0.22), 0 12px 40px -18px rgba(200, 247, 81, 0.45);
+  }
+
+  .glass {
+    background: color-mix(in oklab, var(--color-base) 78%, transparent);
+    backdrop-filter: blur(14px) saturate(140%);
+    -webkit-backdrop-filter: blur(14px) saturate(140%);
+  }
+}
+
+@keyframes live-pulse {
+  0%,
+  100% {
+    opacity: 1;
+    box-shadow: 0 0 0 0 rgba(255, 77, 94, 0.45);
+  }
+  50% {
+    opacity: 0.65;
+    box-shadow: 0 0 0 4px rgba(255, 77, 94, 0);
+  }
+}
+
+.live-dot {
+  animation: live-pulse 1.8s ease-in-out infinite;
+}
+
+@keyframes shimmer {
+  100% {
+    transform: translateX(100%);
+  }
+}
+
+.skeleton {
+  position: relative;
+  overflow: hidden;
+  background: color-mix(in oklab, var(--color-card-2) 80%, transparent);
+}
+
+.skeleton::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  transform: translateX(-100%);
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.05), transparent);
+  animation: shimmer 1.6s infinite;
+}
+
+@keyframes rise-in {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.rise-in {
+  animation: rise-in 420ms cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+@keyframes overlay-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.overlay-in {
+  animation: overlay-in 160ms ease-out both;
+}
+
+@keyframes dialog-in {
+  from {
+    opacity: 0;
+    transform: translateY(12px) scale(0.985);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.dialog-in {
+  animation: dialog-in 220ms cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+input[type="date"]::-webkit-calendar-picker-indicator {
+  opacity: 0.5;
+  filter: invert(1);
+  cursor: pointer;
 }
