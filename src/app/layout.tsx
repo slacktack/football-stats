@@ -59,8 +59,8 @@ export const metadata: Metadata = {
 
 export const viewport: Viewport = {
   themeColor: [
-    { media: "(prefers-color-scheme: dark)", color: "#06090e" },
-    { media: "(prefers-color-scheme: light)", color: "#f5f6ef" },
+    { media: "(prefers-color-scheme: dark)", color: "#100e0c" },
+    { media: "(prefers-color-scheme: light)", color: "#e7e2d7" },
   ],
   width: "device-width",
   initialScale: 1,
@@ -73,6 +73,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
     <html
       lang="en"
       data-theme="light"
+      data-accent="ember"
       suppressHydrationWarning
       className={`${geistSans.variable} ${geistMono.variable} ${archivo.variable} h-full antialiased`}
     >
@@ -80,7 +81,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
         <script
           dangerouslySetInnerHTML={{
             __html:
-              "(function(){try{var k='touchline-theme',s=localStorage.getItem(k);var t=s==='dark'?'dark':'light';document.documentElement.dataset.theme=t;document.documentElement.style.colorScheme=t;}catch(e){}})();",
+              "(function(){try{var t=localStorage.getItem('touchline-theme')==='dark'?'dark':'light';var a=localStorage.getItem('touchline-accent');var ok={ember:1,pitch:1,gold:1,ocean:1};if(!a||!ok[a])a='ember';document.documentElement.dataset.theme=t;document.documentElement.dataset.accent=a;document.documentElement.style.colorScheme=t;}catch(e){}})();",
           }}
         />
       </head>

@@ -112,7 +112,7 @@ async function TeamContent({
   if (!team?.details) notFound();
 
   const details = team.details;
-  const color = details.teamColor ?? "#c8f751";
+  const color = details.teamColor ?? "#ff4a38";
   const basePath = `/team/${id}`;
   const tableCandidates = team.overview?.table ?? team.table ?? [];
   const primaryTable =

@@ -176,7 +176,7 @@ export function ShotMapCard({ shots }: { shots?: PlayerShot[] }) {
             <circle cx="52.5" cy="34" r="0.8" fill="rgba(255,255,255,0.35)" />
             {shots.map((shot) => {
               const isGoal = shot.eventType === "Goal";
-              const fill = isGoal ? "#c8f751" : shot.isOnTarget ? "#38bdf8" : "rgba(255,255,255,0.32)";
+              const fill = isGoal ? "var(--color-accent)" : shot.isOnTarget ? "#38bdf8" : "rgba(255,255,255,0.32)";
               return (
                 <g key={shot.id}>
                   <circle
@@ -598,21 +598,21 @@ export function MarketValueChart({ player }: { player: PlayerResponse }) {
       <svg viewBox="0 0 100 40" preserveAspectRatio="none" className="mt-3 h-24 w-full">
         <defs>
           <linearGradient id="value-area" x1="0" x2="0" y1="0" y2="1">
-            <stop offset="0%" stopColor="#c8f751" stopOpacity="0.28" />
-            <stop offset="100%" stopColor="#c8f751" stopOpacity="0" />
+            <stop offset="0%" stopColor="var(--color-accent)" stopOpacity="0.28" />
+            <stop offset="100%" stopColor="var(--color-accent)" stopOpacity="0" />
           </linearGradient>
         </defs>
         <path d={area} fill="url(#value-area)" />
         <polyline
           points={line}
           fill="none"
-          stroke="#c8f751"
+          stroke="var(--color-accent)"
           strokeWidth="1"
           vectorEffect="non-scaling-stroke"
           strokeLinejoin="round"
           strokeLinecap="round"
         />
-        <circle cx={points[points.length - 1].x} cy={points[points.length - 1].y} r="1.6" fill="#c8f751" />
+        <circle cx={points[points.length - 1].x} cy={points[points.length - 1].y} r="1.6" fill="var(--color-accent)" />
       </svg>
       <div className="flex items-center justify-between text-[9px] text-dim">
         <span>{new Date(sampled[0].date).getFullYear()}</span>

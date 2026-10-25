@@ -3,16 +3,16 @@ import Link from "next/link";
 export function BrandMark({ className = "h-8 w-8" }: { className?: string }) {
   return (
     <svg viewBox="0 0 64 64" className={className} aria-hidden="true">
-      <rect width="64" height="64" rx="16" fill="#D42A1E" />
+      <rect width="64" height="64" rx="16" fill="var(--color-accent)" />
       <path
         d="M18 17v30h30"
         fill="none"
-        stroke="#FFF4E8"
+        stroke="var(--color-on-accent)"
         strokeWidth="7"
         strokeLinecap="round"
         strokeLinejoin="round"
       />
-      <circle cx="43" cy="41" r="7.5" fill="#FFF4E8" />
+      <circle cx="43" cy="41" r="7.5" fill="var(--color-on-accent)" />
     </svg>
   );
 }

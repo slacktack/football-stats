@@ -48,6 +48,49 @@
   --color-hover: rgba(35, 24, 14, 0.05);
 }
 
+
+:root[data-accent="pitch"] {
+  --color-accent: #9be15d;
+  --color-accent-strong: #b4ef7a;
+  --color-accent-ink: #2f7d32;
+  --color-on-accent: #0c1907;
+}
+
+[data-theme="light"][data-accent="pitch"] {
+  --color-accent: #2f7d32;
+  --color-accent-strong: #256628;
+  --color-accent-ink: #2f7d32;
+  --color-on-accent: #fff7ed;
+}
+
+:root[data-accent="gold"] {
+  --color-accent: #f0c24b;
+  --color-accent-strong: #ffd76b;
+  --color-accent-ink: #a16207;
+  --color-on-accent: #1a1305;
+}
+
+[data-theme="light"][data-accent="gold"] {
+  --color-accent: #a16207;
+  --color-accent-strong: #854d0e;
+  --color-accent-ink: #a16207;
+  --color-on-accent: #fff7ed;
+}
+
+:root[data-accent="ocean"] {
+  --color-accent: #5cc8ff;
+  --color-accent-strong: #8adcff;
+  --color-accent-ink: #0e7490;
+  --color-on-accent: #04141c;
+}
+
+[data-theme="light"][data-accent="ocean"] {
+  --color-accent: #0e7490;
+  --color-accent-strong: #155e75;
+  --color-accent-ink: #0e7490;
+  --color-on-accent: #f0fbff;
+}
+
 :root {
   color-scheme: dark;
   --header-height: 64px;
@@ -69,7 +112,7 @@ body {
   color: var(--color-ink);
   font-family: var(--font-sans), ui-sans-serif, system-ui, sans-serif;
   background-image:
-    radial-gradient(1100px 620px at 12% -12%, rgba(255, 74, 56, 0.09), transparent 55%),
+    radial-gradient(1100px 620px at 12% -12%, color-mix(in srgb, var(--color-accent) 9%, transparent), transparent 55%),
     radial-gradient(900px 520px at 92% -8%, rgba(236, 194, 90, 0.045), transparent 58%),
     radial-gradient(800px 500px at 50% 110%, rgba(99, 207, 165, 0.028), transparent 60%);
   background-repeat: no-repeat;
@@ -81,13 +124,13 @@ body {
 
 [data-theme="light"] body {
   background-image:
-    radial-gradient(1100px 620px at 8% -12%, rgba(240, 42, 24, 0.11), transparent 55%),
+    radial-gradient(1100px 620px at 8% -12%, color-mix(in srgb, var(--color-accent) 11%, transparent), transparent 55%),
     radial-gradient(900px 520px at 94% -6%, rgba(160, 106, 20, 0.07), transparent 58%),
     radial-gradient(800px 500px at 50% 108%, rgba(31, 122, 92, 0.045), transparent 62%);
 }
 
 [data-theme="light"] ::selection {
-  background: rgba(240, 42, 24, 0.2);
+  background: color-mix(in srgb, var(--color-accent) 20%, transparent);
   color: #17130f;
 }
 
@@ -104,7 +147,7 @@ body {
 }
 
 ::selection {
-  background: rgba(255, 74, 56, 0.3);
+  background: color-mix(in srgb, var(--color-accent) 30%, transparent);
   color: #fff;
 }
 
@@ -167,7 +210,7 @@ button {
 
   .hero-panel {
     background:
-      radial-gradient(720px 340px at 82% -14%, rgba(255, 74, 56, 0.14), transparent 64%),
+      radial-gradient(720px 340px at 82% -14%, color-mix(in srgb, var(--color-accent) 14%, transparent), transparent 64%),
       radial-gradient(600px 280px at -8% 108%, rgba(236, 194, 90, 0.06), transparent 62%),
       linear-gradient(135deg, color-mix(in oklab, var(--color-card) 96%, transparent), var(--color-card));
     box-shadow:
@@ -177,7 +220,7 @@ button {
 
   [data-theme="light"] .hero-panel {
     background:
-      radial-gradient(720px 360px at 84% -16%, rgba(240, 42, 24, 0.14), transparent 64%),
+      radial-gradient(720px 360px at 84% -16%, color-mix(in srgb, var(--color-accent) 14%, transparent), transparent 64%),
       radial-gradient(560px 280px at -6% 110%, rgba(160, 106, 20, 0.07), transparent 62%),
       linear-gradient(135deg, #ffffff, #fbfcf6);
     box-shadow:
@@ -198,13 +241,13 @@ button {
       background-color 160ms ease,
       transform 160ms ease,
       box-shadow 160ms ease;
-    box-shadow: 0 12px 28px -14px rgba(255, 74, 56, 0.42);
+    box-shadow: 0 12px 28px -14px color-mix(in srgb, var(--color-accent) 42%, transparent);
   }
 
   .btn-primary:hover {
     background: var(--color-accent-strong);
     transform: translateY(-1px);
-    box-shadow: 0 16px 34px -14px rgba(255, 74, 56, 0.38);
+    box-shadow: 0 16px 34px -14px color-mix(in srgb, var(--color-accent) 38%, transparent);
   }
 
   .btn-primary:active {
@@ -284,7 +327,7 @@ button {
   }
 
   .glow-accent {
-    box-shadow: 0 0 0 1px rgba(255, 74, 56, 0.3), 0 12px 40px -18px rgba(255, 74, 56, 0.4);
+    box-shadow: 0 0 0 1px color-mix(in srgb, var(--color-accent) 30%, transparent), 0 12px 40px -18px color-mix(in srgb, var(--color-accent) 40%, transparent);
   }
 
   .glass {

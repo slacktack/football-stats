@@ -311,7 +311,7 @@ export function MatchShotMap({
                 cx={Math.min(104, Math.max(1, cx))}
                 cy={Math.min(67, Math.max(1, shot.y))}
                 r={isGoal ? 2.3 : 1.5}
-                fill={isHome ? "#c8f751" : "#fb7185"}
+                fill={isHome ? "#ff4a38" : "#fb7185"}
                 fillOpacity={isGoal ? 1 : shot.isOnTarget ? 0.85 : 0.35}
                 stroke={isGoal ? "#07130c" : "none"}
                 strokeWidth="0.4"
@@ -429,7 +429,7 @@ export function Lineups({
     );
   }
 
-  const homeColor = colors?.lightMode?.home ?? "#c8f751";
+  const homeColor = colors?.lightMode?.home ?? "#ff4a38";
   const awayColor = colors?.lightMode?.away ?? "#fb7185";
   const homeFont = colors?.fontLightMode?.home ?? "#07130c";
   const awayFont = colors?.fontLightMode?.away ?? "#07130c";

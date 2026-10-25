@@ -224,7 +224,7 @@ async function HomeContent({ searchParams }: { searchParams: SearchParams }) {
       </div>
 
       <div className="mt-6 grid items-start gap-6 lg:grid-cols-[minmax(0,1fr)_312px]">
-        <div>
+        <div className="min-w-0">
           <div className="mb-4 flex items-center gap-2">
             <div className="no-scrollbar flex min-w-0 flex-1 items-center gap-0.5 overflow-x-auto rounded-xl border border-line/80 bg-card p-1 shadow-[0_10px_30px_-24px_rgba(0,0,0,0.7)]">
               {FILTERS.map((item) => {

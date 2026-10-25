@@ -57,7 +57,7 @@ export function DateStrip({
               aria-current={active ? "date" : undefined}
               className={`group relative flex h-[58px] min-w-[58px] flex-1 flex-col items-center justify-center rounded-xl border px-2 transition-all duration-200 ${
                 active
-                  ? "border-accent bg-accent text-on-accent shadow-[0_14px_30px_-16px_rgba(200,247,81,0.75)]"
+                  ? "border-accent bg-accent text-on-accent shadow-lg shadow-accent/25"
                   : "border-line/60 bg-card text-muted hover:-translate-y-0.5 hover:border-accent/25 hover:text-ink"
               }`}
             >

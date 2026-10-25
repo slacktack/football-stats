@@ -100,7 +100,7 @@ async function MatchContent({
   const finished = general.finished ?? status.finished ?? false;
   const facts = match.content.matchFacts;
   const colors = general.teamColors;
-  const homeColor = colors?.lightMode?.home ?? "#c8f751";
+  const homeColor = colors?.lightMode?.home ?? "#ff4a38";
   const awayColor = colors?.lightMode?.away ?? "#fb7185";
   const venue = facts?.infoBox?.Stadium;
   const tableSource =
@@ -196,9 +196,7 @@ async function MatchContent({
             {started || finished ? (
               <p className="score-display flex items-baseline justify-center font-display text-[46px] font-black leading-[0.8] text-ink num sm:text-[76px]">
                 <span>{String(status.scoreStr?.split(" - ")[0] ?? home.score ?? "0").trim()}</span>
-                <span className="mx-1.5 -translate-y-[0.06em] font-sans text-[0.46em] font-black text-dim sm:mx-2">
-                  –
-                </span>
+                <span className="mx-1.5 h-[2px] w-4 self-center rounded-full bg-dim/80 sm:mx-2.5 sm:h-[3px] sm:w-6" />
                 <span>{String(status.scoreStr?.split(" - ")[1] ?? away.score ?? "0").trim()}</span>
               </p>
             ) : (

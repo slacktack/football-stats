@@ -89,7 +89,7 @@ async function LeagueContent({
   const season = typeof sp.season === "string" ? sp.season : undefined;
   const league = await getLeague(id, season);
 
-  const color = league.details.leagueColor ?? "#c8f751";
+  const color = league.details.leagueColor ?? "#ff4a38";
   const table = league.table?.[0];
   const fixtures = league.fixtures?.allMatches ?? [];
   const form = computeForm(fixtures);

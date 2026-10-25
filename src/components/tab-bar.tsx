@@ -70,7 +70,7 @@ export function TabBar({
             >
               {tab.label}
               {isActive && (
-                <span className="absolute -bottom-[2px] left-0 h-[2px] w-full rounded-full bg-accent shadow-[0_0_12px_rgba(255,74,56,0.45)]" />
+                <span className="absolute -bottom-[2px] left-0 h-[2px] w-full rounded-full bg-accent shadow-[0_0_12px_var(--color-accent)]" />
               )}
             </Link>
           );

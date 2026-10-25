@@ -112,7 +112,7 @@ async function PlayerContent({
   const otherPositions = player.positionDescription?.nonPrimaryPositions ?? [];
   const team = player.primaryTeam;
   const basePath = `/player/${id}`;
-  const accent = team?.teamColors?.darkMode ?? "#c8f751";
+  const accent = team?.teamColors?.darkMode ?? "#ff4a38";
   const allMatches = player.initialMatchesPage?.matches ?? player.recentMatches ?? [];
   const deepGroups = player.firstSeasonStats?.statsSection?.items ?? [];
 
@@ -121,7 +121,7 @@ async function PlayerContent({
       <section
         className="card relative overflow-hidden rounded-[28px] p-4 sm:p-6"
         style={{
-          backgroundImage: `radial-gradient(680px 260px at 100% -30%, ${hex(accent, 0.2)}, transparent 70%), radial-gradient(420px 220px at 0% 0%, rgba(200,247,81,0.05), transparent 70%)`,
+          backgroundImage: `radial-gradient(680px 260px at 100% -30%, ${hex(accent, 0.2)}, transparent 70%), radial-gradient(420px 220px at 0% 0%, rgba(255,74,56,0.05), transparent 70%)`,
         }}
       >
         <span
@@ -428,7 +428,7 @@ function infoText(value: PlayerInfoItem["value"] | undefined): string {
 
 function hex(value: string, alpha: number) {
   const normalized = value.replace("#", "");
-  if (normalized.length !== 6) return `rgba(200,247,81,${alpha})`;
+  if (normalized.length !== 6) return `rgba(255,74,56,${alpha})`;
   const r = parseInt(normalized.slice(0, 2), 16);
   const g = parseInt(normalized.slice(2, 4), 16);
   const b = parseInt(normalized.slice(4, 6), 16);
