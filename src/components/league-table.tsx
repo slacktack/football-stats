@@ -30,7 +30,7 @@ export function LeagueTable({
   return (
     <div className={`card overflow-hidden ${className}`}>
       <div className="overflow-x-auto thin-scrollbar">
-        <table className="w-full min-w-[340px] border-collapse text-left">
+        <table className="w-full border-collapse text-left">
           <thead>
             <tr className="border-b border-line/70 text-[10px] font-semibold uppercase tracking-wider text-dim">
               <th className="w-9 py-2.5 pl-3 pr-1 text-center font-semibold">#</th>
@@ -45,7 +45,7 @@ export function LeagueTable({
             </tr>
           </thead>
           <tbody>
-            {rows.map((row, index) => {
+            {rows.map((row) => {
               const isHighlighted = highlightSet.has(String(row.id));
               return (
                 <tr

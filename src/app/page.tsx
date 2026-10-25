@@ -5,10 +5,11 @@ import { DateStrip } from "@/components/date-strip";
 import { ActivityIcon, ChevronRightIcon, TrophyIcon } from "@/components/icons";
 import { LiveRefresher } from "@/components/live-refresher";
 import { LeagueMatchGroup } from "@/components/match-row";
-import { EmptyState, LiveDot, SkeletonBlock, SkeletonRows } from "@/components/ui";
+import { LiveTicker } from "@/components/live-ticker";
+import { Crest, EmptyState, LiveDot, SkeletonBlock, SkeletonRows } from "@/components/ui";
 import { leagueLogo } from "@/lib/assets";
 import { getAllLeagues, getMatchesByDate, hasLiveMatches } from "@/lib/fotmob";
-import { isLive } from "@/lib/format";
+import { isLive, scorePair } from "@/lib/format";
 import {
   addDays,
   buildDateStrip,
@@ -84,13 +85,30 @@ async function HomeContent({ searchParams }: { searchParams: SearchParams }) {
       .filter((match) => !match.status.started && !match.status.cancelled).length,
   };
 
-  const suffix = filter === "all" ? "" : `&filter=${filter}`;
   const popular = allLeagues.popular.slice(0, 10);
   const dateHeading = dateParam === today ? "Today" : formatLongDate(date);
   const dateStrip = buildDateStrip(date);
+  const featuredLeague = data.leagues.find((league) =>
+    league.matches.some((match) => isLive(match.status)),
+  );
+  const featured = featuredLeague?.matches.find((match) => isLive(match.status));
+  const liveTicker = data.leagues
+    .flatMap((league) =>
+      league.matches
+        .filter((match) => isLive(match.status))
+        .map((match) => ({
+          id: match.id,
+          home: match.home,
+          away: match.away,
+          status: match.status,
+          leagueName: league.name,
+        })),
+    )
+    .slice(0, 12);
 
   return (
     <div className="shell py-5 md:py-7">
+      <LiveTicker matches={liveTicker} />
       <section className="hero-panel relative overflow-hidden rounded-[26px] border border-line/80 px-4 pb-4 pt-6 sm:px-7 sm:pb-5 sm:pt-8">
         <span
           className="pointer-events-none absolute -right-6 -top-16 select-none font-display text-[220px] font-black leading-none tracking-[-0.09em] text-ink/[0.028] sm:-right-2 sm:text-[280px]"
@@ -146,6 +164,53 @@ async function HomeContent({ searchParams }: { searchParams: SearchParams }) {
           <HeroStat label="Goals" value={totalGoals} />
           <HeroStat label="Leagues" value={data.leagues.length} />
         </div>
+
+        {featured && featuredLeague && (
+          <Link
+            href={`/match/${featured.id}`}
+            className="live-spotlight group relative mt-4 flex items-center gap-2.5 rounded-2xl px-2.5 py-2.5 sm:gap-4 sm:px-3.5"
+          >
+            <span className="flex shrink-0 items-center gap-1.5 rounded-lg bg-live px-2 py-1.5 text-[9px] font-black uppercase tracking-[0.08em] text-white">
+              <span className="live-dot h-1.5 w-1.5 rounded-full bg-white" />
+              {featured.status.liveTime?.short ?? "Live"}
+            </span>
+            <span className="hidden shrink-0 items-center gap-1.5 text-[10px] font-bold uppercase tracking-[0.12em] text-muted lg:flex">
+              <Image
+                src={leagueLogo(featuredLeague.id)}
+                alt=""
+                width={20}
+                height={20}
+                className="h-5 w-5 object-contain"
+              />
+              <span className="max-w-[160px] truncate">{featuredLeague.name}</span>
+            </span>
+            <span className="flex min-w-0 flex-1 items-center justify-center gap-1.5 sm:gap-3">
+              <span className="flex min-w-0 items-center justify-end gap-1.5">
+                <span className="truncate text-[11px] font-semibold text-ink sm:text-xs">
+                  {featured.home.shortName ?? featured.home.name}
+                </span>
+                <Crest id={featured.home.id} name={featured.home.name} size={20} />
+              </span>
+              <span className="shrink-0 rounded-lg border border-line/80 bg-card px-2 py-1 font-display text-[13px] font-black leading-none text-ink num sm:text-sm">
+                {scorePair(featured)[0]}–{scorePair(featured)[1]}
+              </span>
+              <span className="flex min-w-0 items-center justify-start gap-1.5">
+                <Crest id={featured.away.id} name={featured.away.name} size={20} />
+                <span className="truncate text-[11px] font-semibold text-ink sm:text-xs">
+                  {featured.away.shortName ?? featured.away.name}
+                </span>
+              </span>
+            </span>
+            <span className="ml-auto hidden shrink-0 items-center gap-1 text-[10px] font-bold text-muted transition-colors group-hover:text-ink sm:flex">
+              Match centre
+              <ChevronRightIcon
+                size={12}
+                className="transition-transform group-hover:translate-x-0.5"
+              />
+            </span>
+            <ChevronRightIcon size={14} className="shrink-0 text-dim sm:hidden" />
+          </Link>
+        )}
       </section>
 
       <div className="mt-4">

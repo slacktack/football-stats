@@ -1,7 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { leagueLogo } from "@/lib/assets";
-import { formatKickoff, formatMonthDay, isLive, statusLabel, statusTone } from "@/lib/format";
+import { formatKickoff, formatMonthDay, statusLabel, statusTone } from "@/lib/format";
 import { scoreFromStatus } from "@/lib/stats";
 import type { Fixture, TeamFixture } from "@/lib/types";
 import { Crest, LiveDot } from "./ui";
@@ -15,7 +15,6 @@ export function FixtureRow({
   showTournament?: boolean;
   highlightTeamId?: number | string;
 }) {
-  const live = isLive(fixture.status);
   const finished = Boolean(fixture.status.finished);
   const tone = statusTone(fixture.status);
   const score = scoreFromStatus(fixture.status);

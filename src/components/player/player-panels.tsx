@@ -1,6 +1,4 @@
-import Image from "next/image";
 import Link from "next/link";
-import { leagueLogo, playerImage, teamCrest } from "@/lib/assets";
 import {
   compactNumber,
   ordinal,
@@ -17,9 +15,8 @@ import type {
   PlayerResponse,
   PlayerShot,
   PlayerStatsSection,
-  PlayerTrophyTeam,
 } from "@/lib/types";
-import { ChartIcon, ChevronRightIcon, TrophyIcon } from "../icons";
+import { ChartIcon, TrophyIcon } from "../icons";
 import { Crest, FormPill, RatingChip, SectionHeading } from "../ui";
 
 export function PlayerStatStrip({ player }: { player: PlayerResponse }) {

@@ -119,11 +119,16 @@ async function PlayerContent({
   return (
     <div className="shell py-6 md:py-8">
       <section
-        className="card relative overflow-hidden p-4 sm:p-5 md:p-6"
+        className="card relative overflow-hidden rounded-[28px] p-4 sm:p-6"
         style={{
           backgroundImage: `radial-gradient(680px 260px at 100% -30%, ${hex(accent, 0.2)}, transparent 70%), radial-gradient(420px 220px at 0% 0%, rgba(200,247,81,0.05), transparent 70%)`,
         }}
       >
+        <span
+          className="pointer-events-none absolute inset-y-5 left-0 w-[3px] rounded-r-full"
+          style={{ backgroundColor: hex(accent, 0.85) }}
+          aria-hidden="true"
+        />
         <div className="relative flex items-start gap-4">
           <div className="min-w-0 flex-1">
             <div className="flex flex-wrap items-center gap-2">
@@ -156,7 +161,7 @@ async function PlayerContent({
                 </>
               )}
             </div>
-            <h1 className="mt-1.5 font-display text-[30px] font-extrabold leading-none tracking-tight text-ink sm:text-4xl">
+            <h1 className="mt-2 font-display text-[34px] font-black leading-[0.92] tracking-[-0.04em] text-ink sm:text-[48px]">
               {player.name}
             </h1>
             <div className="mt-2.5 flex flex-wrap items-center gap-1.5">

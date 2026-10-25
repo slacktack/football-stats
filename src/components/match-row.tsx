@@ -94,8 +94,8 @@ export function MatchRow({
 
       <TeamLine team={match.home} redCards={match.status.numberOfHomeRedCards ?? 0} winner={homeWinner} live={live} />
       <span
-        className={`text-right text-[15px] leading-none num ${
-          showScore ? (homeWinner ? "font-extrabold text-ink" : "font-semibold text-muted") : "text-transparent"
+        className={`score-chip flex h-6 min-w-7 items-center justify-center rounded-md px-1.5 text-right text-[13px] leading-none num ${
+          showScore ? (homeWinner ? "font-extrabold text-ink" : "font-semibold text-muted") : "invisible"
         }`}
       >
         {showScore ? homeScore : "0"}
@@ -103,8 +103,8 @@ export function MatchRow({
 
       <TeamLine team={match.away} redCards={match.status.numberOfAwayRedCards ?? 0} winner={awayWinner} live={live} />
       <span
-        className={`text-right text-[15px] leading-none num ${
-          showScore ? (awayWinner ? "font-extrabold text-ink" : "font-semibold text-muted") : "text-transparent"
+        className={`score-chip flex h-6 min-w-7 items-center justify-center rounded-md px-1.5 text-right text-[13px] leading-none num ${
+          showScore ? (awayWinner ? "font-extrabold text-ink" : "font-semibold text-muted") : "invisible"
         }`}
       >
         {showScore ? awayScore : "0"}

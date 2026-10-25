@@ -22,13 +22,13 @@ export function TopNav() {
           <Link
             key={item.href}
             href={item.href}
-            className={`group relative rounded-lg px-3 py-2 text-[13px] font-semibold transition-colors ${
+            className={`group relative px-3 py-2 text-[10px] font-bold uppercase tracking-[0.14em] transition-colors ${
               active ? "text-ink" : "text-muted hover:text-ink"
             }`}
           >
             {item.label}
             <span
-              className={`absolute inset-x-3 -bottom-[13px] h-[2px] origin-left rounded-full bg-accent transition-transform duration-300 ${
+              className={`absolute inset-x-3 -bottom-[15px] h-[2px] origin-left rounded-full bg-accent transition-transform duration-300 ${
                 active ? "scale-x-100" : "scale-x-0 group-hover:scale-x-50"
               }`}
             />

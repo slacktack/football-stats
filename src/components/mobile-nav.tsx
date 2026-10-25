@@ -16,10 +16,10 @@ export function MobileNav() {
 
   return (
     <nav
-      className="glass fixed inset-x-0 bottom-0 z-50 border-t border-line pb-[env(safe-area-inset-bottom)] md:hidden"
+      className="fixed inset-x-0 bottom-0 z-50 px-3 pb-[calc(env(safe-area-inset-bottom)+0.75rem)] md:hidden"
       aria-label="Mobile navigation"
     >
-      <div className="grid grid-cols-4">
+      <div className="glass mx-auto flex max-w-md items-center gap-1 rounded-2xl border border-line/80 p-1.5 shadow-[0_22px_60px_-24px_rgba(0,0,0,0.75)] backdrop-blur-xl">
         {ITEMS.map((item) => {
           const Icon = item.icon;
           const active =
@@ -32,17 +32,14 @@ export function MobileNav() {
             <Link
               key={item.label}
               href={item.href}
-              className={`relative flex flex-col items-center gap-1 py-2.5 text-[10px] font-semibold transition-colors ${
-                active ? "text-accent" : "text-dim"
+              className={`relative flex flex-1 flex-col items-center gap-1 rounded-xl py-2 text-[9px] font-bold uppercase tracking-[0.1em] transition-colors ${
+                active ? "bg-accent/10 text-accent" : "text-dim hover:text-ink"
               }`}
             >
-              {active && (
-                <span className="absolute top-0 h-[2px] w-8 rounded-b-full bg-accent" />
-              )}
               <span className="relative">
-                <Icon size={21} />
+                <Icon size={19} />
                 {item.live && (
-                  <span className="live-dot absolute -right-0.5 -top-0.5 h-1.5 w-1.5 rounded-full bg-live" />
+                  <span className="live-dot absolute -right-1 -top-0.5 h-1.5 w-1.5 rounded-full bg-live ring-2 ring-base" />
                 )}
               </span>
               {item.label}

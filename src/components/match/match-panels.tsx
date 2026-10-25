@@ -1,15 +1,13 @@
 import Image from "next/image";
 import Link from "next/link";
-import { teamCrest } from "@/lib/assets";
+import { playerImage } from "@/lib/assets";
 import { formatKickoff, formatShortDate } from "@/lib/format";
 import type {
   H2HMatch,
-  LineupPlayer,
   LineupTeam,
   MatchEventShot,
   MatchFacts,
   MatchLineup,
-  MatchStatGroup,
   MatchStatValue,
   MatchStats,
   MatchTeamColors,
@@ -23,19 +21,37 @@ export function Timeline({
   facts,
   homeTeam,
   awayTeam,
+  live = false,
+  minute,
 }: {
   facts?: MatchFacts;
   homeTeam: { id: number | string; name: string };
   awayTeam: { id: number | string; name: string };
+  live?: boolean;
+  minute?: string;
 }) {
   const events = facts?.events?.events ?? [];
   const visible = events.filter((event) =>
     ["Goal", "Card", "Substitution", "Half", "AddedTime", "PenaltyMissed"].includes(event.type),
   );
-  if (!visible.length) {
+  const meaningful = visible.filter((event) => event.type !== "Half" && event.type !== "AddedTime");
+  if (!meaningful.length) {
     return (
-      <div className="card px-4 py-8 text-center text-sm text-dim">
-        No match events yet.
+      <div className="card flex flex-col items-center gap-2 px-4 py-10 text-center">
+        {live ? (
+          <>
+            <span className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-[0.16em] text-live">
+              <span className="live-dot h-1.5 w-1.5 rounded-full bg-live" />
+              Live {minute ?? ""}
+            </span>
+            <p className="text-sm font-semibold text-ink">Waiting for the first big moment</p>
+            <p className="max-w-xs text-xs text-dim">
+              No goals, cards or substitutions yet. This page refreshes automatically.
+            </p>
+          </>
+        ) : (
+          <p className="text-sm text-dim">No match events recorded.</p>
+        )}
       </div>
     );
   }
@@ -241,7 +257,6 @@ export function MomentumChart({
 export function MatchShotMap({
   shots,
   homeId,
-  awayId,
   homeName,
   awayName,
 }: {
@@ -296,7 +311,7 @@ export function MatchShotMap({
                 cx={Math.min(104, Math.max(1, cx))}
                 cy={Math.min(67, Math.max(1, shot.y))}
                 r={isGoal ? 2.3 : 1.5}
-                fill={isHome ? "#c8f751" : "#fb7185"}
+                fill={isHome ? "#ff4a38" : "#f5efe4"}
                 fillOpacity={isGoal ? 1 : shot.isOnTarget ? 0.85 : 0.35}
                 stroke={isGoal ? "#07130c" : "none"}
                 strokeWidth="0.4"
@@ -439,8 +454,8 @@ export function Lineups({
             </div>
           ))}
         </div>
-        <div className="pitch-surface relative aspect-[105/68] w-full overflow-hidden">
-          <div className="absolute inset-0 opacity-70">
+        <div className="pitch-surface relative aspect-[68/105] w-full overflow-hidden sm:aspect-[105/68]">
+          <div className="absolute inset-0 hidden opacity-70 sm:block">
             <svg viewBox="0 0 105 68" className="h-full w-full" aria-hidden="true">
               <g stroke="rgba(255,255,255,0.17)" strokeWidth="0.35" fill="none">
                 <rect x="1" y="1" width="103" height="66" rx="1" />
@@ -453,11 +468,24 @@ export function Lineups({
               </g>
             </svg>
           </div>
+          <div className="absolute inset-0 opacity-70 sm:hidden">
+            <svg viewBox="0 0 68 105" className="h-full w-full" aria-hidden="true">
+              <g stroke="rgba(255,255,255,0.17)" strokeWidth="0.35" fill="none">
+                <rect x="1" y="1" width="66" height="103" rx="1" />
+                <line x1="1" y1="52.5" x2="67" y2="52.5" />
+                <circle cx="34" cy="52.5" r="9.15" />
+                <rect x="13.84" y="1" width="40.32" height="16" />
+                <rect x="24.84" y="1" width="18.32" height="7" />
+                <rect x="13.84" y="88" width="40.32" height="16" />
+                <rect x="24.84" y="97" width="18.32" height="7" />
+              </g>
+            </svg>
+          </div>
           {[
             { team: home, side: "home" as const, color: homeColor, font: homeFont },
             { team: away, side: "away" as const, color: awayColor, font: awayFont },
           ].flatMap(({ team, side, color, font }) =>
-            (team.starters ?? []).map((player) => {
+            (team.starters ?? []).map((player, index) => {
               const layout = player.horizontalLayout;
               const x = layout ? (side === "home" ? layout.x : 1 - layout.x) : 0.5;
               const y = layout?.y ?? 0.5;
@@ -465,21 +493,40 @@ export function Lineups({
                 <Link
                   key={`${side}-${player.id}`}
                   href={`/player/${player.id}`}
-                  className="group absolute z-10 flex -translate-x-1/2 -translate-y-1/2 flex-col items-center gap-1"
-                  style={{ left: `${x * 100}%`, top: `${y * 100}%` }}
+                  className={`lineup-marker group absolute z-10 flex -translate-x-1/2 -translate-y-1/2 flex-col items-center gap-1 ${index % 2 === 1 ? "lineup-marker-alt" : ""}`}
+                  style={
+                    {
+                      "--lx": `${x * 100}%`,
+                      "--ly": `${y * 100}%`,
+                    } as React.CSSProperties
+                  }
                   title={`${player.name}${player.performance?.rating ? ` · ${player.performance.rating}` : ""}`}
                 >
-                  <span
-                    className="flex h-6 w-6 items-center justify-center rounded-full border border-white/20 text-[9px] font-extrabold shadow-[0_6px_14px_-6px_rgba(0,0,0,0.9)] transition-transform group-hover:scale-110 sm:h-8 sm:w-8 sm:text-[10px]"
-                    style={{ backgroundColor: color, color: font }}
-                  >
-                    {player.shirtNumber ?? player.positionId}
+                  <span className="relative inline-flex">
+                    <span
+                      className="relative flex h-7 w-7 items-center justify-center overflow-hidden rounded-full bg-card-2 shadow-[0_8px_18px_-8px_rgba(0,0,0,0.95)] transition-transform duration-200 group-hover:scale-110 sm:h-10 sm:w-10"
+                      style={{ boxShadow: `0 0 0 2px ${color}, 0 8px 18px -8px rgba(0,0,0,0.95)` }}
+                    >
+                      <Image
+                        src={playerImage(player.id)}
+                        alt=""
+                        width={40}
+                        height={40}
+                        className="h-full w-full object-cover object-top"
+                      />
+                    </span>
+                    <span
+                      className="absolute -bottom-1 -right-1 flex h-3.5 w-3.5 items-center justify-center rounded-full text-[7px] font-black shadow-sm sm:h-4 sm:w-4 sm:text-[8px]"
+                      style={{ backgroundColor: color, color: font }}
+                    >
+                      {player.shirtNumber ?? player.positionId}
+                    </span>
                   </span>
-                  <span className="hidden max-w-[76px] truncate rounded bg-black/55 px-1 py-0.5 text-[8px] font-semibold text-white backdrop-blur-sm sm:block">
+                  <span className="max-w-[64px] truncate rounded bg-black/60 px-1 py-0.5 text-[8px] font-semibold text-white backdrop-blur-sm sm:max-w-[84px]">
                     {player.name.split(" ").slice(-1)[0]}
                   </span>
                   {player.performance?.rating ? (
-                    <span className="hidden rounded bg-black/70 px-1 text-[7px] font-bold text-[#c8f751] sm:block">
+                    <span className="lineup-rating hidden rounded bg-black/70 px-1 text-[7px] font-bold text-accent sm:block">
                       {player.performance.rating.toFixed(1)}
                     </span>
                   ) : null}
@@ -513,8 +560,17 @@ function Bench({ team, name }: { team?: LineupTeam; name: string }) {
             href={`/player/${player.id}`}
             className="flex items-center gap-2.5 px-3 py-2 transition-colors hover:bg-white/[0.025]"
           >
-            <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-white/[0.05] text-[9px] font-bold text-muted">
-              {player.shirtNumber ?? "—"}
+            <span className="relative h-7 w-7 shrink-0 overflow-hidden rounded-full bg-white/[0.05] ring-1 ring-inset ring-white/10">
+              <Image
+                src={playerImage(player.id)}
+                alt=""
+                width={28}
+                height={28}
+                className="h-full w-full object-cover object-top"
+              />
+              <span className="absolute bottom-0 right-0 flex h-3 min-w-3 items-center justify-center rounded-tl bg-black/75 px-0.5 text-[7px] font-bold text-white">
+                {player.shirtNumber ?? "—"}
+              </span>
             </span>
             <span className="min-w-0 flex-1 truncate text-[11px] font-semibold text-muted">
               {player.name}
@@ -622,7 +678,7 @@ export function PlayerOfTheMatch({
 }: {
   player?: NonNullable<MatchFacts["playerOfTheMatch"]>;
 }) {
-  if (!player) return null;
+  if (!player?.id) return null;
   const name =
     player.name?.fullName ??
     `${player.name?.firstName ?? ""} ${player.name?.lastName ?? ""}`.trim();

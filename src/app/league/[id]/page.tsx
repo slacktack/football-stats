@@ -21,7 +21,7 @@ import { leagueLogo, playerImage } from "@/lib/assets";
 import { getLeague } from "@/lib/fotmob";
 import { countryName, hexAlpha } from "@/lib/format";
 import { computeForm } from "@/lib/stats";
-import type { LeagueResponse, LeagueTableWrapper } from "@/lib/types";
+import type { LeagueTableWrapper } from "@/lib/types";
 
 type Params = Promise<{ id: string }>;
 type SearchParams = Promise<Record<string, string | string[] | undefined>>;
@@ -119,9 +119,9 @@ async function LeagueContent({
   return (
     <div className="shell py-6 md:py-8">
       <section
-        className="card relative overflow-hidden p-4 sm:p-5 md:p-6"
+        className="card relative overflow-hidden rounded-[28px] p-4 sm:p-6"
         style={{
-          backgroundImage: `radial-gradient(760px 260px at -5% -40%, ${hexAlpha(color, 0.22)}, transparent 68%), radial-gradient(500px 200px at 105% -30%, ${hexAlpha("#67c7ff", 0.07)}, transparent 70%)`,
+          backgroundImage: `radial-gradient(760px 300px at -5% -30%, ${hexAlpha(color, 0.26)}, transparent 66%), radial-gradient(500px 220px at 105% -20%, ${hexAlpha("#67c7ff", 0.08)}, transparent 70%)`,
         }}
       >
         <Image
@@ -129,53 +129,67 @@ async function LeagueContent({
           alt=""
           width={220}
           height={220}
-          className="logo-watermark pointer-events-none absolute -right-10 -top-12 h-52 w-52 rotate-6 object-contain opacity-[0.06]"
+          className="logo-watermark pointer-events-none absolute -right-10 -top-12 h-56 w-56 rotate-6 object-contain opacity-[0.055]"
           aria-hidden="true"
         />
-        <div className="relative flex flex-col gap-4 sm:flex-row sm:items-center">
-          <span className="flex h-16 w-16 shrink-0 items-center justify-center rounded-2xl border border-white/10 bg-white/[0.05] shadow-[0_16px_40px_-20px_rgba(0,0,0,0.9)]">
+        <span
+          className="pointer-events-none absolute inset-y-5 left-0 w-[3px] rounded-r-full"
+          style={{ backgroundColor: hexAlpha(color, 0.85) }}
+          aria-hidden="true"
+        />
+        <div className="relative flex flex-col gap-5 sm:flex-row sm:items-center">
+          <span className="flex h-16 w-16 shrink-0 items-center justify-center rounded-[20px] border border-white/10 bg-white/[0.05] p-2 shadow-[0_18px_44px_-22px_rgba(0,0,0,0.9)] sm:h-[76px] sm:w-[76px] sm:rounded-[22px]">
             <Image
               src={leagueLogo(league.details.id)}
               alt={league.details.name}
-              width={48}
-              height={48}
+              width={56}
+              height={56}
               priority
-              className="h-12 w-12 object-contain"
+              className="h-12 w-12 object-contain sm:h-14 sm:w-14"
             />
           </span>
           <div className="min-w-0 flex-1">
             <div className="flex flex-wrap items-center gap-2">
-              <span className="text-[10px] font-bold uppercase tracking-[0.16em] text-muted">
+              <span className="text-[10px] font-bold uppercase tracking-[0.18em] text-muted">
                 {countryName(league.details.country)}
               </span>
               <span className="h-1 w-1 rounded-full bg-white/20" />
-              <span className="text-[10px] font-bold uppercase tracking-[0.16em] text-dim">
+              <span className="text-[10px] font-bold uppercase tracking-[0.18em] text-dim">
                 {league.details.selectedSeason ?? league.details.latestSeason}
               </span>
               {league.details.gender === "female" && <Pill tone="info">Women&apos;s</Pill>}
             </div>
-            <h1 className="mt-1.5 font-display text-[30px] font-extrabold leading-none tracking-tight text-ink sm:text-4xl">
+            <h1 className="mt-2 font-display text-[30px] font-black leading-[0.92] tracking-[-0.01em] text-ink sm:text-[48px]">
               {league.details.name}
             </h1>
-            <div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-1.5 text-[11px] text-muted">
+            <div className="mt-4 flex flex-wrap items-center gap-2">
               {table?.data?.table?.all?.length ? (
-                <span>{table.data.table.all.length} teams</span>
+                <span className="hero-stat">
+                  <b>{table.data.table.all.length}</b> teams
+                </span>
               ) : null}
               {fixtures.length > 0 && (
-                <span>
-                  {fixtures.length} {fixtures.length === 1 ? "fixture" : "fixtures"}
+                <span className="hero-stat">
+                  <b>{fixtures.length}</b> {fixtures.length === 1 ? "fixture" : "fixtures"}
                 </span>
               )}
-              {league.details.selectedSeason && <span>Season {league.details.selectedSeason}</span>}
             </div>
           </div>
-          <Link
-            href={`${basePath}?tab=table`}
-            className="hidden shrink-0 items-center gap-1.5 rounded-xl bg-accent px-4 py-2.5 text-xs font-bold text-on-accent transition-opacity hover:opacity-90 sm:flex"
-          >
-            View table
-            <ChevronRightIcon size={14} />
-          </Link>
+          <div className="flex shrink-0 items-center gap-3 sm:flex-col sm:items-end">
+            <div className="hidden text-right sm:block">
+              <p className="text-[9px] font-bold uppercase tracking-[0.18em] text-dim">Season</p>
+              <p className="font-display text-xl font-extrabold text-ink num">
+                {league.details.selectedSeason ?? league.details.latestSeason ?? "—"}
+              </p>
+            </div>
+            <Link
+              href={`${basePath}?tab=table`}
+              className="btn-primary ml-auto items-center gap-1.5 px-4 py-2.5 text-xs sm:ml-0"
+            >
+              View table
+              <ChevronRightIcon size={14} />
+            </Link>
+          </div>
         </div>
       </section>
 

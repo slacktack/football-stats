@@ -23,11 +23,11 @@ import {
   Timeline,
 } from "@/components/match/match-panels";
 import { TabBar } from "@/components/tab-bar";
-import { Crest, EmptyState, SectionHeading, SkeletonBlock } from "@/components/ui";
-import { leagueLogo, teamCrest } from "@/lib/assets";
+import { EmptyState, SectionHeading, SkeletonBlock } from "@/components/ui";
+import { leagueLogo, playerImage, teamCrest } from "@/lib/assets";
 import { getLeague, getMatch } from "@/lib/fotmob";
 import { formatKickoff, hexAlpha, isLive } from "@/lib/format";
-import type { MatchFacts, MatchTopPlayer, TeamFormEntry } from "@/lib/types";
+import type { MatchTopPlayer, TeamFormEntry } from "@/lib/types";
 
 type Params = Promise<{ id: string }>;
 type SearchParams = Promise<Record<string, string | string[] | undefined>>;
@@ -130,43 +130,46 @@ async function MatchContent({
       </nav>
 
       <section
-        className="card relative overflow-hidden p-4 sm:p-5"
+        className="match-hero card relative overflow-hidden rounded-[28px] p-4 sm:p-6"
         style={{
-          backgroundImage: `radial-gradient(620px 230px at 0% -30%, ${hexAlpha(
+          backgroundImage: `radial-gradient(620px 320px at -4% 0%, ${hexAlpha(
             homeColor,
-            0.16,
-          )}, transparent 65%), radial-gradient(560px 220px at 100% -30%, ${hexAlpha(
+            0.24,
+          )}, transparent 64%), radial-gradient(580px 300px at 104% 4%, ${hexAlpha(
             awayColor,
-            0.14,
-          )}, transparent 65%)`,
+            0.22,
+          )}, transparent 64%), linear-gradient(108deg, ${hexAlpha(
+            homeColor,
+            0.055,
+          )} 0%, transparent 40%, transparent 60%, ${hexAlpha(awayColor, 0.055)} 100%)`,
         }}
       >
-        <div className="relative flex flex-wrap items-center justify-between gap-2">
-          <div className="flex min-w-0 items-center gap-2">
-            <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg border border-white/10 bg-white/[0.05]">
+        <div className="relative flex items-center justify-between gap-2">
+          <div className="flex min-w-0 items-center gap-2.5">
+            <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border border-line/70 bg-card-2/80">
               <Image
                 src={leagueLogo(general.leagueId)}
                 alt=""
-                width={18}
-                height={18}
-                className="h-[18px] w-[18px] object-contain"
+                width={22}
+                height={22}
+                className="h-[22px] w-[22px] object-contain"
               />
             </span>
-            <Link
-              href={`/league/${general.leagueId}`}
-              className="truncate text-[11px] font-bold text-muted transition-colors hover:text-ink"
-            >
-              {general.leagueName ?? "Match"}
-            </Link>
-            {general.matchRound && (
-              <span className="hidden text-[10px] text-dim sm:inline">
-                · Round {general.matchRound}
+            <div className="min-w-0">
+              <Link
+                href={`/league/${general.leagueId}`}
+                className="block truncate text-[12px] font-bold text-ink transition-colors hover:text-accent"
+              >
+                {general.leagueName ?? "Match"}
+              </Link>
+              <span className="mt-0.5 block text-[9px] font-semibold uppercase tracking-[0.14em] text-dim">
+                {general.matchRound ? `Round ${general.matchRound}` : "Match centre"}
               </span>
-            )}
+            </div>
           </div>
-          <div className="flex items-center gap-2">
+          <div className="flex shrink-0 items-center gap-2">
             {venue?.name && (
-              <span className="hidden items-center gap-1 text-[10px] text-dim sm:flex">
+              <span className="hidden items-center gap-1 rounded-full border border-line/70 bg-card-2/60 px-2.5 py-1.5 text-[10px] font-medium text-dim sm:flex">
                 <MapPinIcon size={11} />
                 {venue.name}
               </span>
@@ -174,44 +177,63 @@ async function MatchContent({
             {live ? (
               <LiveRefresher active />
             ) : (
-              <span className="rounded-full border border-line bg-white/[0.035] px-2.5 py-1 text-[10px] font-bold uppercase tracking-[0.1em] text-muted">
+              <span
+                className={`rounded-full px-2.5 py-1.5 text-[10px] font-bold uppercase tracking-[0.1em] ${
+                  finished
+                    ? "border border-accent/25 bg-accent/10 text-accent"
+                    : "border border-line bg-white/[0.035] text-muted"
+                }`}
+              >
                 {status.reason?.short ?? (finished ? "FT" : "Preview")}
               </span>
             )}
           </div>
         </div>
 
-        <div className="relative mt-5 grid grid-cols-[1fr_auto_1fr] items-center gap-2 sm:gap-6">
-          <TeamHero team={home} side="home" />
-          <div className="min-w-[104px] text-center sm:min-w-[150px]">
+        <div className="relative mt-5 grid grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] items-center gap-1 sm:mt-7 sm:gap-6">
+          <TeamHero team={home} side="home" accent={homeColor} />
+          <div className="relative z-10 flex min-w-[92px] flex-col items-center text-center sm:min-w-[176px]">
             {started || finished ? (
-              <p className="font-display text-4xl font-extrabold leading-none text-ink num sm:text-5xl">
-                {status.scoreStr?.replace(/\s/g, "") ?? `${home.score ?? 0}-${away.score ?? 0}`}
+              <p className="score-display flex items-baseline justify-center font-display text-[46px] font-black leading-[0.8] text-ink num sm:text-[76px]">
+                <span>{String(status.scoreStr?.split(" - ")[0] ?? home.score ?? "0").trim()}</span>
+                <span className="mx-1.5 -translate-y-[0.06em] font-sans text-[0.46em] font-black text-dim sm:mx-2">
+                  –
+                </span>
+                <span>{String(status.scoreStr?.split(" - ")[1] ?? away.score ?? "0").trim()}</span>
               </p>
             ) : (
-              <p className="font-display text-3xl font-extrabold leading-none text-ink num sm:text-4xl">
+              <p className="score-display font-display text-[34px] font-black leading-none text-ink num sm:text-[48px]">
                 {status.utcTime ? formatKickoff(status.utcTime) : "vs"}
               </p>
             )}
-            <p className="mt-2 text-[10px] font-semibold uppercase tracking-[0.14em] text-dim">
-              {status.reason?.long ?? (finished ? "Full time" : status.utcTime ? "Kick-off" : "")}
-            </p>
-            {status.utcTime && (
-              <p className="mt-0.5 text-[9px] text-dim">
-                {new Intl.DateTimeFormat("en-GB", {
-                  weekday: "short",
-                  day: "numeric",
-                  month: "short",
-                }).format(new Date(status.utcTime))}
-              </p>
-            )}
+            <div className="mt-3 flex flex-col items-center gap-1">
+              {live ? (
+                <span className="inline-flex items-center gap-1.5 rounded-full border border-live/25 bg-live/10 px-2.5 py-1 text-[9px] font-bold uppercase tracking-[0.12em] text-live">
+                  <span className="live-dot h-1.5 w-1.5 rounded-full bg-live" />
+                  {status.liveTime?.short ?? "Live"}
+                </span>
+              ) : (
+                <span className="text-[9px] font-bold uppercase tracking-[0.16em] text-muted">
+                  {status.reason?.long ?? (finished ? "Full time" : "Kick-off")}
+                </span>
+              )}
+              {status.utcTime && (
+                <span className="text-[9px] text-dim">
+                  {new Intl.DateTimeFormat("en-GB", {
+                    weekday: "short",
+                    day: "numeric",
+                    month: "short",
+                  }).format(new Date(status.utcTime))}
+                </span>
+              )}
+            </div>
           </div>
-          <TeamHero team={away} side="away" />
+          <TeamHero team={away} side="away" accent={awayColor} />
         </div>
 
-        <div className="relative mt-4 flex items-center justify-center gap-3 border-t border-line/50 pt-3 text-[9px] text-dim">
+        <div className="relative mt-5 flex flex-wrap items-center justify-center gap-x-3 gap-y-1 border-t border-line/50 pt-3.5 text-[9px] text-dim">
           {facts?.infoBox?.Referee?.text && (
-            <span>Referee: {facts.infoBox.Referee.text}</span>
+            <span>Referee · {facts.infoBox.Referee.text}</span>
           )}
           {facts?.infoBox?.Attendance ? (
             <>
@@ -219,6 +241,12 @@ async function MatchContent({
               <span>{facts.infoBox.Attendance.toLocaleString("en-GB")} fans</span>
             </>
           ) : null}
+          {venue?.name && (
+            <>
+              <span className="h-2.5 w-px bg-line sm:hidden" />
+              <span className="sm:hidden">{venue.name}</span>
+            </>
+          )}
         </div>
       </section>
 
@@ -234,6 +262,8 @@ async function MatchContent({
                 facts={facts}
                 homeTeam={{ id: home.id, name: home.name }}
                 awayTeam={{ id: away.id, name: away.name }}
+                live={live}
+                minute={status.liveTime?.short}
               />
               <MomentumChart
                 data={match.content.momentum?.main?.data}
@@ -361,24 +391,40 @@ async function MatchContent({
 function TeamHero({
   team,
   side,
+  accent,
 }: {
   team: { id: number | string; name: string; score?: number };
   side: "home" | "away";
+  accent: string;
 }) {
   return (
     <Link
       href={`/team/${team.id}`}
-      className={`group flex min-w-0 flex-col items-center gap-2 text-center transition-transform hover:-translate-y-0.5 sm:flex-row sm:gap-3 ${
-        side === "home" ? "sm:text-left" : "sm:flex-row-reverse sm:text-right"
+      className={`group flex min-w-0 flex-col items-center gap-2 text-center sm:gap-3 ${
+        side === "home" ? "sm:flex-row sm:text-left" : "sm:flex-row-reverse sm:text-right"
       }`}
     >
-      <Crest id={team.id} name={team.name} size={54} />
+      <span className="team-crest-frame flex h-[58px] w-[58px] shrink-0 items-center justify-center transition-transform duration-300 group-hover:scale-[1.04] sm:h-[76px] sm:w-[76px]">
+        <Image
+          src={teamCrest(team.id)}
+          alt={team.name}
+          width={76}
+          height={76}
+          priority
+          className="h-[78%] w-[78%] object-contain"
+        />
+      </span>
       <div className="min-w-0">
-        <p className="max-w-[130px] truncate font-display text-sm font-extrabold text-ink sm:max-w-[220px] sm:text-lg">
-          {team.name}
+        <p className="flex items-center justify-center gap-1 text-[8px] font-bold uppercase tracking-[0.16em] text-dim sm:justify-start">
+          <span
+            className="h-1.5 w-1.5 rounded-full"
+            style={{ backgroundColor: accent }}
+            aria-hidden="true"
+          />
+          {side}
         </p>
-        <p className="text-[9px] font-semibold uppercase tracking-[0.12em] text-dim">
-          {side === "home" ? "Home" : "Away"}
+        <p className="mt-1 max-w-[112px] truncate font-display text-[13px] font-black leading-[1.05] tracking-[-0.03em] text-ink sm:max-w-[240px] sm:text-2xl">
+          {team.name}
         </p>
       </div>
     </Link>
@@ -440,6 +486,15 @@ function TopPlayers({
               href={`/player/${player.playerId}`}
               className="flex items-center gap-2 py-2 transition-colors hover:text-ink"
             >
+              <span className="h-6 w-6 shrink-0 overflow-hidden rounded-full bg-white/[0.05] ring-1 ring-inset ring-white/10">
+                <Image
+                  src={playerImage(player.playerId)}
+                  alt=""
+                  width={24}
+                  height={24}
+                  className="h-full w-full object-cover object-top"
+                />
+              </span>
               <span className="min-w-0 flex-1 truncate text-[11px] font-semibold text-muted">
                 {player.name.fullName ??
                   `${player.name.firstName ?? ""} ${player.name.lastName ?? ""}`}

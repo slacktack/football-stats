@@ -146,7 +146,7 @@ async function TeamContent({
   return (
     <div className="shell py-6 md:py-8">
       <section
-        className="card relative overflow-hidden p-4 sm:p-5 md:p-6"
+        className="card relative overflow-hidden rounded-[28px] p-4 sm:p-6"
         style={{
           backgroundImage: `radial-gradient(720px 260px at -5% -40%, ${hexAlpha(color, 0.2)}, transparent 68%), radial-gradient(480px 200px at 105% -30%, ${hexAlpha("#67c7ff", 0.06)}, transparent 70%)`,
         }}
@@ -154,20 +154,25 @@ async function TeamContent({
         <Image
           src={teamCrest(details.id)}
           alt=""
-          width={230}
-          height={230}
-          className="pointer-events-none absolute -right-8 -top-12 h-52 w-52 object-contain opacity-[0.055]"
+          width={240}
+          height={240}
+          className="pointer-events-none absolute -right-8 -top-12 h-60 w-60 object-contain opacity-[0.06]"
+          aria-hidden="true"
+        />
+        <span
+          className="pointer-events-none absolute inset-y-5 left-0 w-[3px] rounded-r-full"
+          style={{ backgroundColor: hexAlpha(color, 0.85) }}
           aria-hidden="true"
         />
         <div className="relative flex flex-col gap-4 sm:flex-row sm:items-center">
-          <span className="flex h-20 w-20 shrink-0 items-center justify-center rounded-2xl border border-white/10 bg-white/[0.05] p-2 shadow-[0_16px_40px_-18px_rgba(0,0,0,0.9)]">
+          <span className="team-crest-frame flex h-[88px] w-[88px] shrink-0 items-center justify-center border border-white/10 p-2.5">
             <Image
               src={teamCrest(details.id)}
               alt={details.name}
-              width={64}
-              height={64}
+              width={72}
+              height={72}
               priority
-              className="h-16 w-16 object-contain"
+              className="h-[72px] w-[72px] object-contain"
             />
           </span>
           <div className="min-w-0 flex-1">
@@ -196,7 +201,7 @@ async function TeamContent({
                 {details.latestSeason}
               </span>
             </div>
-            <h1 className="mt-1.5 font-display text-[30px] font-extrabold leading-none tracking-tight text-ink sm:text-4xl">
+            <h1 className="mt-2 font-display text-[34px] font-black leading-[0.92] tracking-[-0.04em] text-ink sm:text-[48px]">
               {details.name}
             </h1>
             <div className="mt-3 flex flex-wrap items-center gap-2">

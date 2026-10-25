@@ -5,7 +5,6 @@ import {
   formatKickoff,
   formatMarketValue,
   formatShortDate,
-  ordinal,
 } from "@/lib/format";
 import { scoreFromStatus } from "@/lib/stats";
 import type {
