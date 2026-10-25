@@ -129,7 +129,7 @@ async function LeagueContent({
           alt=""
           width={220}
           height={220}
-          className="pointer-events-none absolute -right-10 -top-12 h-52 w-52 rotate-6 object-contain opacity-[0.06]"
+          className="logo-watermark pointer-events-none absolute -right-10 -top-12 h-52 w-52 rotate-6 object-contain opacity-[0.06]"
           aria-hidden="true"
         />
         <div className="relative flex flex-col gap-4 sm:flex-row sm:items-center">
@@ -171,7 +171,7 @@ async function LeagueContent({
           </div>
           <Link
             href={`${basePath}?tab=table`}
-            className="hidden shrink-0 items-center gap-1.5 rounded-xl bg-accent px-4 py-2.5 text-xs font-bold text-base transition-opacity hover:opacity-90 sm:flex"
+            className="hidden shrink-0 items-center gap-1.5 rounded-xl bg-accent px-4 py-2.5 text-xs font-bold text-on-accent transition-opacity hover:opacity-90 sm:flex"
           >
             View table
             <ChevronRightIcon size={14} />
@@ -298,7 +298,7 @@ async function LeagueContent({
                     />
                   </span>
                   <span className="min-w-0">
-                    <span className="block truncate font-display text-base font-bold text-ink transition-colors group-hover:text-accent">
+                    <span className="block truncate font-display text-[15px] font-bold text-ink transition-colors group-hover:text-accent">
                       {topScorer.name}
                     </span>
                     <span className="mt-0.5 block truncate text-[11px] text-dim">

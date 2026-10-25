@@ -479,7 +479,7 @@ export function Lineups({
                     {player.name.split(" ").slice(-1)[0]}
                   </span>
                   {player.performance?.rating ? (
-                    <span className="hidden rounded bg-black/70 px-1 text-[7px] font-bold text-accent sm:block">
+                    <span className="hidden rounded bg-black/70 px-1 text-[7px] font-bold text-[#c8f751] sm:block">
                       {player.performance.rating.toFixed(1)}
                     </span>
                   ) : null}

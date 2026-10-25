@@ -233,7 +233,7 @@ async function TeamContent({
           </div>
           <Link
             href={`${basePath}?tab=fixtures`}
-            className="hidden shrink-0 items-center gap-1.5 rounded-xl bg-accent px-4 py-2.5 text-xs font-bold text-base transition-opacity hover:opacity-90 sm:flex"
+            className="hidden shrink-0 items-center gap-1.5 rounded-xl bg-accent px-4 py-2.5 text-xs font-bold text-on-accent transition-opacity hover:opacity-90 sm:flex"
           >
             Fixtures
             <ChevronRightIcon size={14} />

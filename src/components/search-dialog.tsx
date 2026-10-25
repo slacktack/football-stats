@@ -160,7 +160,7 @@ export function SearchDialog() {
             role="dialog"
             aria-modal="true"
             aria-label="Search"
-            className="dialog-in w-full max-w-[640px] overflow-hidden rounded-2xl border border-white/10 bg-[#0b121b] shadow-[0_40px_120px_-20px_rgba(0,0,0,0.9)]"
+            className="dialog-in w-full max-w-[640px] overflow-hidden rounded-2xl border border-line bg-card shadow-[0_40px_120px_-20px_rgba(0,0,0,0.9)]"
           >
             <div className="flex items-center gap-3 border-b border-line px-4">
               <SearchIcon size={19} className="shrink-0 text-dim" />

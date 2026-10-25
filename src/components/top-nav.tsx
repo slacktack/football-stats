@@ -5,14 +5,15 @@ import { usePathname } from "next/navigation";
 
 const ITEMS = [
   { href: "/", label: "Matches", exact: true },
-  { href: "/leagues", label: "Leagues", prefix: "/league" },
+  { href: "/leagues", label: "Competitions", prefix: "/league" },
+  { href: "/search", label: "Search", prefix: "/search" },
 ];
 
 export function TopNav() {
   const pathname = usePathname();
 
   return (
-    <nav className="hidden items-center gap-1 md:flex" aria-label="Primary">
+    <nav className="hidden items-center gap-0.5 md:flex" aria-label="Primary">
       {ITEMS.map((item) => {
         const active = item.exact
           ? pathname === item.href
@@ -21,24 +22,19 @@ export function TopNav() {
           <Link
             key={item.href}
             href={item.href}
-            className={`relative rounded-lg px-3 py-2 text-[13px] font-semibold transition-colors ${
+            className={`group relative rounded-lg px-3 py-2 text-[13px] font-semibold transition-colors ${
               active ? "text-ink" : "text-muted hover:text-ink"
             }`}
           >
             {item.label}
-            {active && (
-              <span className="absolute inset-x-3 -bottom-[13px] h-[2px] rounded-full bg-accent" />
-            )}
+            <span
+              className={`absolute inset-x-3 -bottom-[13px] h-[2px] origin-left rounded-full bg-accent transition-transform duration-300 ${
+                active ? "scale-x-100" : "scale-x-0 group-hover:scale-x-50"
+              }`}
+            />
           </Link>
         );
       })}
-      <Link
-        href="/?filter=live"
-        className="flex items-center gap-1.5 rounded-lg px-3 py-2 text-[13px] font-semibold text-muted transition-colors hover:text-ink"
-      >
-        <span className="live-dot h-1.5 w-1.5 rounded-full bg-live" />
-        Live
-      </Link>
     </nav>
   );
 }

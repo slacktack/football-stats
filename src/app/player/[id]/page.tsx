@@ -216,7 +216,7 @@ async function PlayerContent({
             {team && (
               <Link
                 href={`/team/${team.teamId}`}
-                className="flex items-center gap-1.5 rounded-lg bg-accent px-3 py-1.5 text-[10px] font-bold text-base transition-opacity hover:opacity-90"
+                className="flex items-center gap-1.5 rounded-lg bg-accent px-3 py-1.5 text-[10px] font-bold text-on-accent transition-opacity hover:opacity-90"
               >
                 View club
                 <ChevronRightIcon size={12} />

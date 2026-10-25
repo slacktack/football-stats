@@ -65,7 +65,7 @@ export function MatchRow({
   return (
     <Link
       href={href ?? `/match/${match.id}`}
-      className={`group grid grid-cols-[44px_minmax(0,1fr)_auto] items-center gap-x-2.5 gap-y-1.5 px-3 py-2.5 transition-colors hover:bg-white/[0.032] sm:grid-cols-[54px_minmax(0,1fr)_auto] sm:gap-x-3 sm:px-4 sm:py-3 ${className}`}
+      className={`group relative grid grid-cols-[42px_minmax(0,1fr)_auto] items-center gap-x-2.5 gap-y-1.5 px-3 py-3 transition-colors before:absolute before:inset-y-2 before:left-0 before:w-[2px] before:rounded-full before:bg-accent before:opacity-0 hover:bg-white/[0.03] hover:before:opacity-100 sm:grid-cols-[56px_minmax(0,1fr)_auto] sm:gap-x-3 sm:px-4 sm:py-3.5 ${live ? "bg-live/[0.018]" : ""} ${className}`}
       aria-label={`${match.home.name} vs ${match.away.name}`}
     >
       <div className="row-span-2 flex flex-col items-start gap-0.5">
@@ -131,37 +131,38 @@ export function LeagueMatchGroup({
   const href = `/league/${primaryId ?? leagueId}`;
   return (
     <section className="card overflow-hidden">
-      <div className="flex items-center gap-2 border-b border-line/60 bg-white/[0.014] px-3 py-2.5 sm:px-4">
-        <Link href={href} className="group flex min-w-0 items-center gap-2.5">
-          <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-white/[0.045] ring-1 ring-inset ring-white/[0.05]">
+      <div className="flex items-center gap-2 border-b border-line/60 bg-white/[0.014] px-3 py-3 sm:px-4">
+        <Link href={href} className="group flex min-w-0 items-center gap-3">
+          <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border border-line/70 bg-card-2/70">
             <Image
               src={leagueLogo(leagueId)}
               alt=""
-              width={22}
-              height={22}
-              className="h-[74%] w-[74%] object-contain"
+              width={24}
+              height={24}
+              className="h-6 w-6 object-contain"
             />
           </span>
           <span className="min-w-0">
             <span className="flex items-center gap-2">
-              <span className="truncate text-[13px] font-bold text-ink transition-colors group-hover:text-accent">
+              <span className="truncate text-sm font-bold text-ink transition-colors group-hover:text-accent">
                 {name}
               </span>
-              <span className="hidden rounded bg-white/[0.055] px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wider text-dim sm:inline">
+              <span className="hidden rounded-md border border-line/80 px-1.5 py-0.5 text-[8px] font-bold uppercase tracking-[0.12em] text-dim sm:inline">
                 {ccode}
               </span>
             </span>
+            <span className="mt-0.5 block text-[9px] font-medium uppercase tracking-[0.12em] text-dim">
+              {matches.length} {matches.length === 1 ? "fixture" : "fixtures"}
+            </span>
           </span>
         </Link>
-        <span className="ml-auto shrink-0 text-[10px] font-medium text-dim">
-          {matches.length} {matches.length === 1 ? "match" : "matches"}
-        </span>
         {showTableLink && (
           <Link
             href={href}
-            className="flex items-center gap-0.5 rounded-md px-1.5 py-1 text-[10px] font-semibold text-dim transition-colors hover:text-accent"
+            aria-label={`Open ${name}`}
+            className="ml-auto flex shrink-0 items-center gap-1 rounded-lg border border-transparent px-1.5 py-1.5 text-[10px] font-semibold text-dim transition-colors hover:border-line hover:bg-white/[0.03] hover:text-accent sm:px-2"
           >
-            View
+            <span className="hidden sm:inline">View league</span>
             <ChevronRightIcon size={12} />
           </Link>
         )}

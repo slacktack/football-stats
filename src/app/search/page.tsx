@@ -71,7 +71,7 @@ async function SearchContent({ searchParams }: { searchParams: SearchParams }) {
           />
           <button
             type="submit"
-            className="absolute right-1.5 top-1/2 -translate-y-1/2 rounded-lg bg-accent px-3 py-1.5 text-[11px] font-bold text-base transition-opacity hover:opacity-90"
+            className="absolute right-1.5 top-1/2 -translate-y-1/2 rounded-lg bg-accent px-3 py-1.5 text-[11px] font-bold text-on-accent transition-opacity hover:opacity-90"
           >
             Search
           </button>
