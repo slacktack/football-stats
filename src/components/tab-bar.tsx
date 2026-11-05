@@ -62,7 +62,7 @@ export function TabBar({
               href={href}
               scroll={false}
               aria-current={isActive ? "page" : undefined}
-              className={`group relative shrink-0 snap-start border-b-2 pb-3 pt-3.5 text-[12px] font-semibold transition-colors sm:text-[13px] ${
+              className={`group relative shrink-0 snap-start border-b-2 pb-3 pt-3.5 text-[14px] font-semibold transition-colors sm:text-[15px] ${
                 isActive
                   ? "border-accent text-ink"
                   : "border-transparent text-muted hover:border-line hover:text-ink"

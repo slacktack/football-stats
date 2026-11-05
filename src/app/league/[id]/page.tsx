@@ -3,11 +3,12 @@ import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { Suspense } from "react";
+import { Suspense, ViewTransition } from "react";
 import { FixtureRow, FixtureList } from "@/components/fixture-list";
 import { ChartIcon as DataIcon, ChevronRightIcon, TrophyIcon } from "@/components/icons";
-import { LeagueTable } from "@/components/league-table";
+import { LeagueTable, XgTable, type XgRow } from "@/components/league-table";
 import { StatLeaders } from "@/components/stat-leaders";
+import { asTopPlayers, TopPlayersBoard } from "@/components/team/team-insights";
 import { TabBar } from "@/components/tab-bar";
 import { TransfersList } from "@/components/transfers-list";
 import {
@@ -46,7 +47,8 @@ export async function generateMetadata({
   const { id } = await params;
   try {
     const league = await getLeague(id);
-    const name = league.details.name;
+    const name = league?.details?.name;
+    if (!name) return {};
     return {
       title: `${name} — Table, fixtures, results & stats`,
       description: `Follow ${name}: live scores, the latest table, fixtures, form, top scorers, transfers and season stats.`,
@@ -68,8 +70,16 @@ export default function LeaguePage({
   searchParams: SearchParams;
 }) {
   return (
-    <Suspense fallback={<LeagueSkeleton />}>
-      <LeagueContent params={params} searchParams={searchParams} />
+    <Suspense
+      fallback={
+        <ViewTransition exit="skeleton-out" default="none">
+          <LeagueSkeleton />
+        </ViewTransition>
+      }
+    >
+      <ViewTransition enter="content-in" default="none">
+        <LeagueContent params={params} searchParams={searchParams} />
+      </ViewTransition>
     </Suspense>
   );
 }
@@ -88,7 +98,8 @@ async function LeagueContent({
   const rawTab = typeof sp.tab === "string" ? sp.tab : "overview";
   const tab = VALID_TABS.has(rawTab) ? rawTab : "overview";
   const season = typeof sp.season === "string" ? sp.season : undefined;
-  const league = await getLeague(id, season);
+  const league = await getLeague(id, season).catch(() => null);
+  if (!league?.details) notFound();
 
   const color = league.details.leagueColor ?? "#39ff6b";
   const table = league.table?.[0];
@@ -99,6 +110,7 @@ async function LeagueContent({
     ? league.stats.players
     : [];
   const teamGroups = league.stats?.teams ?? [];
+  const leagueTopPlayers = asTopPlayers(league.overview?.topPlayers);
   const transferList = Array.isArray(league.transfers?.data) ? league.transfers.data : [];
   const overviewFixtures = league.overview?.matches?.allMatches ?? fixtures;
   const unplayedIndex =
@@ -133,11 +145,6 @@ async function LeagueContent({
           className="logo-watermark pointer-events-none absolute -right-10 -top-12 h-56 w-56 rotate-6 object-contain opacity-[0.055]"
           aria-hidden="true"
         />
-        <span
-          className="pointer-events-none absolute inset-y-5 left-0 w-[3px] rounded-r-full"
-          style={{ backgroundColor: hexAlpha(color, 0.85) }}
-          aria-hidden="true"
-        />
         <div className="relative flex flex-col gap-5 sm:flex-row sm:items-center">
           <span className="flex h-16 w-16 shrink-0 items-center justify-center rounded-[20px] border border-white/10 bg-white/[0.05] p-2 shadow-[0_18px_44px_-22px_rgba(0,0,0,0.9)] sm:h-[76px] sm:w-[76px] sm:rounded-[22px]">
             <Image
@@ -151,11 +158,11 @@ async function LeagueContent({
           </span>
           <div className="min-w-0 flex-1">
             <div className="flex flex-wrap items-center gap-2">
-              <span className="text-[10px] font-bold uppercase tracking-[0.18em] text-muted">
+              <span className="text-[11px] font-bold text-muted">
                 {countryName(league.details.country)}
               </span>
               <span className="h-1 w-1 rounded-full bg-white/20" />
-              <span className="text-[10px] font-bold uppercase tracking-[0.18em] text-dim">
+              <span className="text-[11px] font-bold text-dim">
                 {league.details.selectedSeason ?? league.details.latestSeason}
               </span>
               {league.details.gender === "female" && <Pill tone="info">Women&apos;s</Pill>}
@@ -178,7 +185,7 @@ async function LeagueContent({
           </div>
           <div className="flex shrink-0 items-center gap-3 sm:flex-col sm:items-end">
             <div className="hidden text-right sm:block">
-              <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-dim">Season</p>
+              <p className="text-[11px] font-bold text-dim">Season</p>
               <p className="font-display text-xl font-extrabold text-ink num">
                 {league.details.selectedSeason ?? league.details.latestSeason ?? "—"}
               </p>
@@ -229,7 +236,7 @@ async function LeagueContent({
                 <div className="mt-3 grid gap-3 sm:grid-cols-2">
                   <div className="card overflow-hidden">
                     <div className="border-b border-line/60 bg-white/[0.014] px-3.5 py-2.5">
-                      <h3 className="text-[11px] font-bold uppercase tracking-wider text-muted">
+                      <h3 className="text-xs font-bold text-muted">
                         Latest results
                       </h3>
                     </div>
@@ -243,7 +250,7 @@ async function LeagueContent({
                   </div>
                   <div className="card overflow-hidden">
                     <div className="border-b border-line/60 bg-white/[0.014] px-3.5 py-2.5">
-                      <h3 className="text-[11px] font-bold uppercase tracking-wider text-muted">
+                      <h3 className="text-xs font-bold text-muted">
                         Upcoming
                       </h3>
                     </div>
@@ -269,7 +276,11 @@ async function LeagueContent({
                   icon={<DataIcon size={17} />}
                 />
                 <div className="mt-3">
-                  <StatLeaders groups={playerGroups} limit={4} />
+                  {leagueTopPlayers ? (
+                    <TopPlayersBoard data={leagueTopPlayers} showTeam />
+                  ) : (
+                    <StatLeaders groups={playerGroups} limit={4} />
+                  )}
                 </div>
               </section>
             )}
@@ -297,7 +308,7 @@ async function LeagueContent({
                   <p className="eyebrow flex items-center gap-1.5">
                     <TrophyIcon size={12} /> Golden boot
                   </p>
-                  <span className="text-[10px] font-semibold text-dim">Top scorer</span>
+                  <span className="text-[11px] font-semibold text-dim">Top scorer</span>
                 </div>
                 <Link
                   href={`/player/${topScorer.id}`}
@@ -316,14 +327,14 @@ async function LeagueContent({
                     <span className="block truncate font-display text-[15px] font-bold text-ink transition-colors group-hover:text-accent">
                       {topScorer.name}
                     </span>
-                    <span className="mt-0.5 block truncate text-[11px] text-dim">
+                    <span className="mt-0.5 block truncate text-xs text-dim">
                       {topScorer.teamName}
                     </span>
                     <span className="mt-2 flex items-baseline gap-1">
                       <span className="font-display text-2xl font-extrabold text-accent num">
                         {topScorer.value}
                       </span>
-                      <span className="text-[10px] font-semibold uppercase tracking-wider text-dim">
+                      <span className="text-[11px] font-semibold text-dim">
                         goals
                       </span>
                     </span>
@@ -374,11 +385,17 @@ async function LeagueContent({
               season={season}
             />
           </div>
-          <LeagueTable
-            wrapper={tableView(table, typeof sp.view === "string" ? sp.view : "all")}
-            form={form}
-            showLegend
-          />
+          {sp.view === "xg" ? (
+            <XgTable
+              rows={(table?.data?.table as { xg?: XgRow[] } | undefined)?.xg}
+            />
+          ) : (
+            <LeagueTable
+              wrapper={tableView(table, typeof sp.view === "string" ? sp.view : "all")}
+              form={form}
+              showLegend
+            />
+          )}
         </div>
       )}
 
@@ -503,6 +520,7 @@ function ViewToggle({
     { value: "all", label: "Overall" },
     { value: "home", label: "Home" },
     { value: "away", label: "Away" },
+    { value: "xg", label: "xG" },
   ];
   return (
     <div className="flex gap-1 rounded-lg border border-line bg-black/25 p-1">
@@ -515,8 +533,8 @@ function ViewToggle({
             key={item.value}
             href={`${basePath}?${params.toString()}`}
             scroll={false}
-            className={`rounded-md px-2.5 py-1 text-[11px] font-semibold transition-colors ${
-              active ? "bg-white/[0.08] text-ink" : "text-dim hover:text-muted"
+            className={`press rounded-md px-2.5 py-1 text-xs font-semibold transition-colors ${
+              active ? "bg-accent text-on-accent" : "text-dim hover:text-ink"
             }`}
           >
             {item.label}

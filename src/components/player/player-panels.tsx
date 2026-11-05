@@ -15,29 +15,30 @@ import type {
   PlayerShot,
   PlayerStatsSection,
 } from "@/lib/types";
-import { ChartIcon, TrophyIcon } from "../icons";
+import { TrophyIcon } from "../icons";
 import { Crest, FormPill, RatingChip, SectionHeading } from "../ui";
+import { percentileTier } from "./player-insights";
 
 export function PlayerStatStrip({ player }: { player: PlayerResponse }) {
   const stats = player.mainLeague?.stats ?? [];
   if (!stats.length) return null;
 
   return (
-    <div className="card grid grid-cols-4 divide-x divide-line/50 overflow-hidden sm:grid-cols-8">
+    <div className="card grid grid-cols-4 divide-x divide-y divide-line/50 overflow-hidden sm:grid-cols-8 sm:divide-y-0">
       {stats.map((stat) => {
         const isRating = stat.localizedTitleId === "rating";
         return (
-          <div key={stat.title} className="px-1.5 py-3 text-center">
-            <p className="flex min-h-[20px] items-center justify-center text-[10px] font-semibold uppercase leading-tight tracking-[0.06em] text-dim">
+          <div key={stat.title} className="flex flex-col items-center justify-between px-1.5 py-3 text-center">
+            <p className="flex min-h-[24px] items-center justify-center text-[11px] font-semibold uppercase leading-tight tracking-[0.06em] text-dim">
               {stat.title}
             </p>
-            <p
-              className={`mt-1 font-display text-lg font-extrabold tracking-tight num ${
-                isRating ? "text-accent" : "text-ink"
-              }`}
-            >
-              {typeof stat.value === "number" ? stat.value : stat.value}
-            </p>
+            {isRating ? (
+              <RatingChip rating={stat.value} size="md" className="mt-1.5" />
+            ) : (
+              <p className="mt-1 font-display text-xl font-extrabold tracking-tight text-ink num">
+                {stat.value}
+              </p>
+            )}
           </div>
         );
       })}
@@ -48,70 +49,31 @@ export function PlayerStatStrip({ player }: { player: PlayerResponse }) {
 export function TopStatCards({ section }: { section?: PlayerStatsSection }) {
   if (!section?.items?.length) return null;
   return (
-    <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 xl:grid-cols-6">
+    <div className="stagger grid grid-cols-2 gap-2 sm:grid-cols-3 xl:grid-cols-6">
       {section.items.map((item) => (
-        <div key={item.localizedTitleId ?? item.title} className="card p-3">
-          <p className="text-[10px] font-semibold uppercase tracking-[0.08em] text-dim">
+        <div key={item.localizedTitleId ?? item.title} className="card p-3.5">
+          <p className="text-[11px] font-semibold text-dim">
             {item.title}
           </p>
-          <p className="mt-1 font-display text-2xl font-extrabold tracking-tight text-ink num">
-            {formatStatValue(item)}
-          </p>
-          <div className="mt-2 h-1 overflow-hidden rounded-full bg-white/[0.06]">
+          {item.localizedTitleId === "rating" ? (
+            <RatingChip rating={item.statValue} size="lg" className="mt-1.5" />
+          ) : (
+            <p className="mt-1 font-display text-[26px] font-extrabold leading-tight tracking-tight text-ink num">
+              {formatStatValue(item)}
+            </p>
+          )}
+          <div className="mt-2.5 h-1.5 overflow-hidden rounded-full bg-white/[0.06]">
             <span
-              className="block h-full rounded-full bg-accent"
-              style={{ width: `${Math.min(100, Math.max(0, item.percentileRank ?? 0))}%` }}
+              className="rating-bar bar-grow block h-full rounded-full"
+              data-tier={percentileTier(item.percentileRank ?? 0)}
+              style={{ width: `${Math.min(100, Math.max(2, item.percentileRank ?? 0))}%` }}
             />
           </div>
-          <p className="mt-1 text-[10px] text-dim">
+          <p className="mt-1.5 text-[11px] font-semibold text-dim">
             {ordinal(Math.round(item.percentileRank ?? 0))} percentile
           </p>
         </div>
       ))}
-    </div>
-  );
-}
-
-export function TraitsCard({ player }: { player: PlayerResponse }) {
-  const traits = player.traits;
-  if (!traits?.items?.length) return null;
-
-  return (
-    <div className="card p-4">
-      <div className="flex items-start justify-between gap-3">
-        <div>
-          <p className="eyebrow">Playing style</p>
-          <p className="mt-0.5 text-xs font-semibold text-muted">{traits.title}</p>
-        </div>
-        <ChartIcon size={16} className="text-dim" />
-      </div>
-      <div className="mt-4 grid gap-x-5 gap-y-3 sm:grid-cols-2">
-        {traits.items.map((item) => {
-          const percentile = Math.min(100, Math.max(0, item.value * 100));
-          return (
-            <div key={item.key}>
-              <div className="flex items-baseline justify-between gap-2">
-                <span className="truncate text-[10px] font-semibold text-muted">{item.title}</span>
-                <span className="shrink-0 text-[10px] font-bold text-accent num">
-                  {ordinal(Math.round(percentile))}
-                </span>
-              </div>
-              <div className="mt-1.5 h-1.5 overflow-hidden rounded-full bg-white/[0.055]">
-                <span
-                  className={`block h-full rounded-full ${
-                    percentile >= 75
-                      ? "bg-accent"
-                      : percentile >= 40
-                        ? "bg-sky-400/80"
-                        : "bg-white/20"
-                  }`}
-                  style={{ width: `${percentile}%` }}
-                />
-              </div>
-            </div>
-          );
-        })}
-      </div>
     </div>
   );
 }
@@ -137,11 +99,11 @@ export function ShotMapCard({ shots }: { shots?: PlayerShot[] }) {
       <div className="flex flex-wrap items-center justify-between gap-2">
         <div>
           <p className="eyebrow">Shot map</p>
-          <p className="mt-0.5 text-[10px] text-dim">
+          <p className="mt-0.5 text-[11px] text-dim">
             {shots.length} shots · {goals} goals · {onTarget} on target · {xg.toFixed(2)} xG
           </p>
         </div>
-        <div className="flex items-center gap-3 text-[10px] text-dim">
+        <div className="flex items-center gap-3 text-[11px] text-dim">
           <span className="flex items-center gap-1">
             <span className="h-2 w-2 rounded-full bg-accent" /> Goal
           </span>
@@ -214,8 +176,8 @@ export function ShotMapCard({ shots }: { shots?: PlayerShot[] }) {
               {types.map(([type, count]) => (
                 <div key={type}>
                   <div className="flex items-baseline justify-between gap-2">
-                    <span className="text-[10px] text-muted">{formatShotType(type)}</span>
-                    <span className="text-[10px] font-bold text-ink num">{count}</span>
+                    <span className="text-[11px] text-muted">{formatShotType(type)}</span>
+                    <span className="text-[11px] font-bold text-ink num">{count}</span>
                   </div>
                   <div className="mt-1 h-1 overflow-hidden rounded-full bg-white/[0.055]">
                     <span
@@ -236,7 +198,7 @@ export function ShotMapCard({ shots }: { shots?: PlayerShot[] }) {
 function ShotMetric({ label, value }: { label: string; value: string }) {
   return (
     <div>
-      <p className="text-[10px] text-dim">{label}</p>
+      <p className="text-[11px] text-dim">{label}</p>
       <p className="text-sm font-bold text-ink num">{value}</p>
     </div>
   );
@@ -262,13 +224,13 @@ export function DeepStats({
   }
 
   return (
-    <div className="grid gap-3 lg:grid-cols-2">
+    <div className="stagger grid gap-3 lg:grid-cols-2">
       {visible.map((group) => (
         <div key={group.localizedTitleId ?? group.title} className="card p-4">
-          <p className="text-[10px] font-bold uppercase tracking-[0.12em] text-accent">
+          <p className="text-xs font-bold text-accent">
             {group.title ?? group.localizedTitleId}
           </p>
-          <div className="mt-2 divide-y divide-line/40">
+          <div className="mt-2 divide-y divide-line/30">
             {(group.items ?? []).map((item) => {
               const percentile =
                 metric === "per90"
@@ -279,24 +241,25 @@ export function DeepStats({
                   ? `${item.per90 !== undefined ? item.per90.toFixed(2) : "—"}`
                   : formatStatValue(item);
               return (
-                <div key={item.localizedTitleId ?? item.title} className="py-2">
+                <div key={item.localizedTitleId ?? item.title} className="py-2.5">
                   <div className="flex items-baseline justify-between gap-3">
-                    <span className="text-[11px] font-semibold text-muted">{item.title}</span>
-                    <span className="shrink-0 text-xs font-bold text-ink num">
+                    <span className="text-[13px] font-semibold text-muted">{item.title}</span>
+                    <span className="shrink-0 font-display text-sm font-extrabold text-ink num">
                       {value}
                       {metric === "per90" && (
-                        <span className="ml-0.5 text-[10px] font-medium text-dim">/90</span>
+                        <span className="ml-0.5 text-[11px] font-medium text-dim">/90</span>
                       )}
                     </span>
                   </div>
-                  <div className="mt-1 flex items-center gap-2">
-                    <div className="h-1 flex-1 overflow-hidden rounded-full bg-white/[0.055]">
+                  <div className="mt-1.5 flex items-center gap-2.5">
+                    <div className="h-2 flex-1 overflow-hidden rounded-full bg-white/[0.06]">
                       <span
-                        className="block h-full rounded-full bg-accent/75"
-                        style={{ width: `${Math.min(100, Math.max(0, percentile))}%` }}
+                        className="rating-bar bar-grow block h-full rounded-full"
+                        data-tier={percentileTier(percentile)}
+                        style={{ width: `${Math.min(100, Math.max(2, percentile))}%` }}
                       />
                     </div>
-                    <span className="w-8 shrink-0 text-right text-[10px] text-dim num">
+                    <span className="w-9 shrink-0 text-right text-[11px] font-bold text-muted num">
                       {ordinal(Math.round(percentile))}
                     </span>
                   </div>
@@ -344,38 +307,55 @@ function PlayerMatchRow({ match }: { match: PlayerRecentMatch }) {
           ? -1
           : 0;
 
+  const benched = match.onBench || match.playedInMatch === false;
+
   return (
     <Link
       href={`/match/${match.id}`}
-      className="group grid grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-3 px-3 py-2.5 transition-colors hover:bg-white/[0.025] sm:grid-cols-[auto_minmax(0,1fr)_auto_auto]"
+      className="group grid grid-cols-[auto_minmax(0,1fr)_auto_auto] items-center gap-3 px-3 py-3 transition-colors hover:bg-white/[0.025] sm:px-4"
     >
-      <FormPill result={result} size={20} />
+      <FormPill result={result} size={22} />
       <div className="min-w-0">
         <div className="flex items-center gap-1.5">
-          <span className="text-[10px] font-semibold uppercase tracking-wider text-dim">
+          <span className="text-[11px] font-semibold text-dim">
             {match.isHomeTeam ? "vs" : "@"}
           </span>
-          <Crest id={match.opponentTeamId} name={match.opponentTeamName} size={17} />
-          <span className="truncate text-[11px] font-semibold text-ink group-hover:text-accent">
+          <Crest id={match.opponentTeamId} name={match.opponentTeamName} size={18} />
+          <span className="truncate text-[13px] font-semibold text-ink group-hover:text-accent">
             {match.opponentTeamName}
           </span>
         </div>
-        <p className="mt-0.5 truncate text-[10px] text-dim">
-          <LocalTime value={match.matchDate.utcTime} kind="short" /> · {match.leagueName ?? "Match"}
-          {match.onBench ? " · bench" : !match.playedInMatch ? " · unused" : ""}
+        <p className="mt-0.5 flex flex-wrap items-center gap-x-1.5 text-[11px] text-dim">
+          <LocalTime value={match.matchDate.utcTime} kind="short" />
+          <span>· {match.leagueName ?? "Match"}</span>
+          {benched ? (
+            <span>· {match.onBench ? "bench" : "unused"}</span>
+          ) : (
+            <span className="num">· {match.minutesPlayed ?? 0}&apos;</span>
+          )}
         </p>
       </div>
-      <div className="text-right">
+      <div className="flex flex-col items-end gap-1">
         <p className="font-display text-sm font-extrabold text-ink num">
           {match.homeScore ?? 0}–{match.awayScore ?? 0}
         </p>
-        <p className="text-[10px] text-dim num">{match.minutesPlayed ?? 0}&apos;</p>
-      </div>
-      <div className="hidden w-24 items-center justify-end gap-2 sm:flex">
-        <span className="text-[10px] font-semibold text-dim num">
-          {match.goals ? `${match.goals}G` : ""} {match.assists ? `${match.assists}A` : ""}
+        <span className="flex items-center gap-1">
+          {Array.from({ length: Math.min(4, match.goals ?? 0) }, (_, index) => (
+            <span key={`g${index}`} className="rounded bg-accent/15 px-1 text-[10px] font-extrabold text-accent">G</span>
+          ))}
+          {Array.from({ length: Math.min(4, match.assists ?? 0) }, (_, index) => (
+            <span key={`a${index}`} className="rounded bg-sky/15 px-1 text-[10px] font-extrabold text-sky">A</span>
+          ))}
+          {match.yellowCards ? <span className="h-3 w-2 rounded-[2px] bg-yellow-300" title="Yellow card" /> : null}
+          {match.redCards ? <span className="h-3 w-2 rounded-[2px] bg-orange-500" title="Red card" /> : null}
         </span>
-        <RatingChip rating={match.ratingProps?.rating} />
+      </div>
+      <div className="flex w-12 justify-end">
+        {benched ? (
+          <span className="text-[11px] text-dim">—</span>
+        ) : (
+          <RatingChip rating={match.ratingProps?.rating} star={match.playerOfTheMatch} size="md" />
+        )}
       </div>
     </Link>
   );
@@ -394,16 +374,16 @@ export function PlayerProfileCard({ player }: { player: PlayerResponse }) {
       <div className="divide-y divide-line/40">
         {rows.map((row) => (
           <div key={row.label} className="flex items-center justify-between gap-3 py-2">
-            <span className="text-[10px] text-dim">{row.label}</span>
-            <span className="text-[11px] font-semibold text-muted">{row.value}</span>
+            <span className="text-[11px] text-dim">{row.label}</span>
+            <span className="text-xs font-semibold text-muted">{row.value}</span>
           </div>
         ))}
         {player.primaryTeam && (
           <div className="flex items-center justify-between gap-3 py-2">
-            <span className="text-[10px] text-dim">Club</span>
+            <span className="text-[11px] text-dim">Club</span>
             <Link
               href={`/team/${player.primaryTeam.teamId}`}
-              className="flex items-center gap-1.5 text-[11px] font-semibold text-accent hover:underline"
+              className="flex items-center gap-1.5 text-xs font-semibold text-accent hover:underline"
             >
               <Crest id={player.primaryTeam.teamId} name={player.primaryTeam.teamName} size={15} />
               {player.primaryTeam.teamName}
@@ -422,24 +402,24 @@ export function PlayerNextMatchCard({ match }: { match?: PlayerNextMatch }) {
     <Link href={`/match/${match.matchId}`} className="card card-hover block p-4">
       <div className="flex items-center justify-between">
         <p className="eyebrow">Next match</p>
-        <span className="text-[10px] font-semibold uppercase tracking-wider text-dim">
+        <span className="text-[11px] font-semibold text-dim">
           {match.leagueName}
         </span>
       </div>
       <div className="mt-3 flex items-center justify-between gap-2">
         <div className="flex flex-1 flex-col items-center gap-1 text-center">
           <Crest id={match.homeId} name={match.homeName} size={30} />
-          <span className="w-full truncate text-[10px] font-semibold text-muted">{match.homeName}</span>
+          <span className="w-full truncate text-[11px] font-semibold text-muted">{match.homeName}</span>
         </div>
         <div className="text-center">
           <p className="font-display text-sm font-extrabold text-ink">
             <LocalTime value={match.status.utcTime} />
           </p>
-          <p className="text-[10px] text-dim"><LocalTime value={match.matchDate} kind="monthDay" /></p>
+          <p className="text-[11px] text-dim"><LocalTime value={match.matchDate} kind="monthDay" /></p>
         </div>
         <div className="flex flex-1 flex-col items-center gap-1 text-center">
           <Crest id={match.awayId} name={match.awayName} size={30} />
-          <span className="w-full truncate text-[10px] font-semibold text-muted">{match.awayName}</span>
+          <span className="w-full truncate text-[11px] font-semibold text-muted">{match.awayName}</span>
         </div>
       </div>
     </Link>
@@ -472,10 +452,10 @@ export function PlayerTrophies({ player }: { player: PlayerResponse }) {
           >
             <TrophyIcon size={13} className="shrink-0 text-accent/80" />
             <div className="min-w-0 flex-1">
-              <p className="truncate text-[11px] font-semibold text-muted">
+              <p className="truncate text-xs font-semibold text-muted">
                 {tournament.leagueName}
               </p>
-              <p className="truncate text-[10px] text-dim">{team.teamName}</p>
+              <p className="truncate text-[11px] text-dim">{team.teamName}</p>
             </div>
             <span className="text-xs font-bold text-ink num">
               {tournament.seasonsWon?.length ?? 0}
@@ -508,7 +488,7 @@ export function CareerList({ player }: { player: PlayerResponse }) {
         <section key={section.title}>
           <SectionHeading
             title={capitalize(section.title)}
-            subtitle={`${section.entries.length} clubs`}
+            subtitle={`${section.entries.length} ${section.title === "national team" ? "teams" : "clubs"} · ${sum(section.entries, "appearances")} apps · ${sum(section.entries, "goals")} goals · ${sum(section.entries, "assists")} assists`}
           />
           <div className="card mt-2 overflow-hidden">
             <div className="divide-y divide-line/40">
@@ -530,16 +510,16 @@ function CareerRow({ entry }: { entry: PlayerCareerEntry }) {
       <div className="min-w-0 flex-1">
         <Link
           href={`/team/${entry.teamId}`}
-          className="truncate text-xs font-bold text-ink hover:text-accent"
+          className="block truncate text-[13px] font-bold text-ink hover:text-accent"
         >
           {entry.team}
         </Link>
-        <p className="mt-0.5 text-[10px] text-dim">
+        <p className="mt-0.5 text-[11px] text-dim">
           {formatYear(entry.startDate)} – {entry.active ? "Present" : formatYear(entry.endDate)}
           {entry.transferType?.text ? ` · ${entry.transferType.text}` : ""}
         </p>
       </div>
-      <div className="grid grid-cols-3 gap-3 text-right">
+      <div className="grid shrink-0 grid-cols-3 gap-3 text-right sm:gap-5">
         <CareerStat label="Apps" value={entry.appearances} />
         <CareerStat label="Goals" value={entry.goals} />
         <CareerStat label="Assists" value={entry.assists} />
@@ -551,8 +531,8 @@ function CareerRow({ entry }: { entry: PlayerCareerEntry }) {
 function CareerStat({ label, value }: { label: string; value?: string }) {
   return (
     <div>
-      <p className="text-[10px] font-semibold text-muted num">{value ?? "—"}</p>
-      <p className="text-[10px] uppercase tracking-wider text-dim">{label}</p>
+      <p className="font-display text-sm font-extrabold text-ink num">{value ?? "—"}</p>
+      <p className="text-[11px] text-dim">{label}</p>
     </div>
   );
 }
@@ -589,7 +569,7 @@ export function MarketValueChart({ player }: { player: PlayerResponse }) {
             {formatMarketValue(latest.value)}
           </p>
         </div>
-        <div className="text-right text-[10px] text-dim">
+        <div className="text-right text-[11px] text-dim">
           <p>Peak {formatMarketValue(peak.value)}</p>
           <p>{formatShortDate(latest.date)}</p>
         </div>
@@ -613,7 +593,7 @@ export function MarketValueChart({ player }: { player: PlayerResponse }) {
         />
         <circle cx={points[points.length - 1].x} cy={points[points.length - 1].y} r="1.6" fill="var(--color-accent)" />
       </svg>
-      <div className="flex items-center justify-between text-[10px] text-dim">
+      <div className="flex items-center justify-between text-[11px] text-dim">
         <span>{new Date(sampled[0].date).getFullYear()}</span>
         <span>Low {formatMarketValue(min)}</span>
         <span>{new Date(latest.date).getFullYear()}</span>
@@ -650,6 +630,10 @@ function formatStatValue(item: PlayerDeepStat) {
     return Number.isNaN(number) ? item.statValue : number.toFixed(2);
   }
   return compactNumber(item.statValue);
+}
+
+function sum(entries: PlayerCareerEntry[], key: "appearances" | "goals" | "assists") {
+  return entries.reduce((total, entry) => total + (Number(entry[key]) || 0), 0);
 }
 
 function capitalize(value: string) {

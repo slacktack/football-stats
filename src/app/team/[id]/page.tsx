@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { Suspense } from "react";
+import { Suspense, ViewTransition } from "react";
 import { TeamFixtureList } from "@/components/fixture-list";
 import {
   ChartIcon,
@@ -10,12 +10,21 @@ import {
   GlobeIcon,
   MapPinIcon,
   ShirtIcon,
+  StarIcon,
   TransferIcon,
   TrophyIcon,
   UsersIcon,
 } from "@/components/icons";
 import { LeagueTable } from "@/components/league-table";
 import { StatLeaders } from "@/components/stat-leaders";
+import {
+  asTopPlayers,
+  FixtureDifficultyCard,
+  LastLineupCard,
+  TopPlayersBoard,
+  type FixtureDifficulty,
+  type LastLineup,
+} from "@/components/team/team-insights";
 import { TabBar } from "@/components/tab-bar";
 import {
   MatchResultCard,
@@ -30,14 +39,14 @@ import { TransfersList } from "@/components/transfers-list";
 import {
   DataRow,
   EmptyState,
-  Pill,
   SectionHeading,
   SkeletonBlock,
   SkeletonRows,
+  FormPill,
 } from "@/components/ui";
-import { leagueLogo, teamCrest } from "@/lib/assets";
+import { teamCrest } from "@/lib/assets";
 import { getTeam } from "@/lib/fotmob";
-import { countryName, hexAlpha, ordinal } from "@/lib/format";
+import { countryName, inkFor, ordinal } from "@/lib/format";
 import { findTeamRow } from "@/lib/stats";
 import type {
   LeagueTableWrapper,
@@ -89,8 +98,16 @@ export default function TeamPage({
   searchParams: SearchParams;
 }) {
   return (
-    <Suspense fallback={<TeamSkeleton />}>
-      <TeamContent params={params} searchParams={searchParams} />
+    <Suspense
+      fallback={
+        <ViewTransition exit="skeleton-out" default="none">
+          <TeamSkeleton />
+        </ViewTransition>
+      }
+    >
+      <ViewTransition enter="content-in" default="none">
+        <TeamContent params={params} searchParams={searchParams} />
+      </ViewTransition>
     </Suspense>
   );
 }
@@ -142,108 +159,73 @@ async function TeamContent({
   const news = team.overview?.newsSummary?.items?.[0];
   const venue = team.overview?.venue;
   const venuePairs = new Map(venue?.statPairs ?? []);
+  const overviewExtra = team.overview as
+    | { topPlayers?: unknown; lastLineupStats?: LastLineup; fixtureDifficulty?: FixtureDifficulty }
+    | undefined;
+  const topPlayers = asTopPlayers(overviewExtra?.topPlayers);
 
   return (
     <div className="shell py-6 md:py-8">
-      <section
-        className="card relative overflow-hidden rounded-[28px] p-4 sm:p-6"
-        style={{
-          backgroundImage: `radial-gradient(720px 260px at -5% -40%, ${hexAlpha(color, 0.2)}, transparent 68%), radial-gradient(480px 200px at 105% -30%, ${hexAlpha("#67c7ff", 0.06)}, transparent 70%)`,
-        }}
-      >
-        <Image
-          src={teamCrest(details.id)}
-          alt=""
-          width={240}
-          height={240}
-          className="pointer-events-none absolute -right-8 -top-12 h-60 w-60 object-contain opacity-[0.06]"
-          aria-hidden="true"
-        />
-        <span
-          className="pointer-events-none absolute inset-y-5 left-0 w-[3px] rounded-r-full"
-          style={{ backgroundColor: hexAlpha(color, 0.85) }}
-          aria-hidden="true"
-        />
-        <div className="relative flex flex-col gap-4 sm:flex-row sm:items-center">
-          <span className="team-crest-frame flex h-[88px] w-[88px] shrink-0 items-center justify-center border border-white/10 p-2.5">
-            <Image
-              src={teamCrest(details.id)}
-              alt={details.name}
-              width={72}
-              height={72}
-              priority
-              className="h-[72px] w-[72px] object-contain"
-            />
-          </span>
-          <div className="min-w-0 flex-1">
-            <div className="flex flex-wrap items-center gap-2">
-              {details.primaryLeagueId && (
-                <Link
-                  href={`/league/${details.primaryLeagueId}`}
-                  className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-[0.14em] text-muted transition-colors hover:text-accent"
-                >
-                  <Image
-                    src={leagueLogo(details.primaryLeagueId)}
-                    alt=""
-                    width={16}
-                    height={16}
-                    className="h-4 w-4 object-contain"
-                  />
-                  {details.primaryLeagueName}
-                </Link>
-              )}
-              <span className="h-1 w-1 rounded-full bg-white/20" />
-              <span className="text-[10px] font-bold uppercase tracking-[0.14em] text-dim">
-                {countryName(details.country)}
-              </span>
-              <span className="h-1 w-1 rounded-full bg-white/20" />
-              <span className="text-[10px] font-bold uppercase tracking-[0.14em] text-dim">
-                {details.latestSeason}
-              </span>
-            </div>
-            <h1 className="mt-2 font-display text-[34px] font-black leading-[0.92] tracking-[-0.04em] text-ink sm:text-[48px]">
-              {details.name}
-            </h1>
-            <div className="mt-3 flex flex-wrap items-center gap-2">
+      <section className="kit-hero" style={{ "--kit": color, "--kit-ink": inkFor(color) } as React.CSSProperties}>
+        <div className="kit-hero-slab">
+          <div className="relative z-[1] min-w-0 flex-1 self-center py-5 pl-4 sm:py-8 sm:pl-7">
+            {details.primaryLeagueId && (
+              <Link href={`/league/${details.primaryLeagueId}`} className="text-[13px] font-semibold opacity-85 hover:underline hover:opacity-100">
+                {details.primaryLeagueName} {details.latestSeason}
+              </Link>
+            )}
+            <h1 className="kit-hero-name">{details.name}</h1>
+            <p className="mt-3 flex flex-wrap items-baseline gap-x-4 gap-y-1 text-sm font-semibold">
               {teamRow && (
-                <Pill tone="accent">
-                  {ordinal(teamRow.idx)} · {teamRow.pts} pts
-                </Pill>
-              )}
-              {roster.length > 0 && (
-                <Pill>
-                  <UsersIcon size={12} /> {roster.length} players
-                </Pill>
-              )}
-              {team.overview?.teamForm?.length ? (
-                <span className="flex items-center gap-1">
-                  {team.overview.teamForm.slice(0, 5).map((item, index) => (
-                    <span
-                      key={`${item.date?.utcTime ?? index}`}
-                      className={`flex h-5 w-5 items-center justify-center rounded-md text-[10px] font-extrabold ${
-                        item.result === 1
-                          ? "bg-emerald-400/15 text-emerald-300"
-                          : item.result === -1
-                            ? "bg-red-500/15 text-red-400"
-                            : "bg-white/[0.07] text-muted"
-                      }`}
-                      title={`${item.home?.name ?? ""} ${item.score ?? ""} ${item.away?.name ?? ""}`}
-                    >
-                      {item.resultString}
-                    </span>
-                  ))}
+                <span>
+                  <span className="kit-hero-number">{ordinal(teamRow.idx)}</span> with {teamRow.pts} pts
                 </span>
-              ) : null}
-            </div>
+              )}
+              {coach?.name && <span className="opacity-80">Coach {coach.name}</span>}
+              <span className="opacity-80">{countryName(details.country)}</span>
+            </p>
           </div>
-          <Link
-            href={`${basePath}?tab=fixtures`}
-            className="hidden shrink-0 items-center gap-1.5 rounded-xl bg-accent px-4 py-2.5 text-xs font-bold text-on-accent transition-opacity hover:opacity-90 sm:flex"
-          >
-            Fixtures
-            <ChevronRightIcon size={14} />
-          </Link>
+          <div className="kit-hero-photo flex items-center justify-center p-3 sm:p-6">
+            <Image src={teamCrest(details.id)} alt={details.name} width={240} height={240} priority className="h-full w-full object-contain" />
+          </div>
         </div>
+        <dl className="kit-hero-facts">
+          {team.overview?.teamForm?.length ? (
+            <div>
+              <dt>Last five</dt>
+              <dd className="flex gap-1">
+                {team.overview.teamForm.slice(0, 5).map((item, index) => (
+                  <FormPill key={`${item.date?.utcTime ?? index}`} result={item.result} size={24} />
+                ))}
+              </dd>
+            </div>
+          ) : null}
+          {teamRow && (
+            <div>
+              <dt>Record</dt>
+              <dd className="num">
+                {teamRow.wins}W {teamRow.draws}D {teamRow.losses}L
+              </dd>
+            </div>
+          )}
+          {teamRow && (
+            <div>
+              <dt>Goals</dt>
+              <dd className="num">{teamRow.scoresStr}</dd>
+            </div>
+          )}
+          {roster.length > 0 && (
+            <div>
+              <dt>Squad</dt>
+              <dd className="num">
+                {roster.length} players{averageAge ? `, avg ${averageAge.toFixed(1)}` : ""}
+              </dd>
+            </div>
+          )}
+          <Link href={`${basePath}?tab=fixtures`} className="btn-primary press ml-auto px-4 py-2 text-sm">
+            Fixtures
+          </Link>
+        </dl>
       </section>
 
       <TabBar tabs={TABS} active={tab} basePath={basePath} className="mt-4" />
@@ -264,6 +246,34 @@ async function TeamContent({
                 />
               </div>
             </section>
+
+            {topPlayers && (
+              <section>
+                <SectionHeading
+                  title="Top performers"
+                  subtitle={`${details.primaryLeagueName ?? "League"} · this season`}
+                  action="All stats"
+                  actionHref={`${basePath}?tab=stats`}
+                  icon={<ChartIcon size={17} />}
+                />
+                <div className="mt-3">
+                  <TopPlayersBoard data={topPlayers} />
+                </div>
+              </section>
+            )}
+
+            {overviewExtra?.lastLineupStats?.starters?.length ? (
+              <section>
+                <SectionHeading
+                  title="Player ratings"
+                  subtitle="Starting XI from the last match"
+                  icon={<StarIcon size={17} />}
+                />
+                <div className="mt-3">
+                  <LastLineupCard data={overviewExtra.lastLineupStats} />
+                </div>
+              </section>
+            ) : null}
 
             <section>
               <SectionHeading
@@ -313,7 +323,7 @@ async function TeamContent({
                       href={news.source.uri}
                       target="_blank"
                       rel="noreferrer noopener"
-                      className="mt-3 inline-flex items-center gap-1 text-[11px] font-bold text-accent hover:underline"
+                      className="mt-3 inline-flex items-center gap-1 text-xs font-bold text-accent hover:underline"
                     >
                       Read the full story
                       <ChevronRightIcon size={12} />
@@ -340,6 +350,7 @@ async function TeamContent({
           </div>
 
           <aside className="space-y-4 lg:sticky lg:top-24">
+            <FixtureDifficultyCard data={overviewExtra?.fixtureDifficulty} />
             <div className="card p-4">
               <p className="eyebrow mb-1">Club profile</p>
               <div className="divide-y divide-line/40">
@@ -384,7 +395,7 @@ async function TeamContent({
                   <p className="eyebrow">Honours</p>
                   <Link
                     href={`${basePath}?tab=history`}
-                    className="text-[10px] font-semibold text-dim transition-colors hover:text-accent"
+                    className="text-[11px] font-semibold text-dim transition-colors hover:text-accent"
                   >
                     All trophies
                   </Link>
@@ -393,7 +404,7 @@ async function TeamContent({
                   {trophies.filter((trophy) => (trophy.won ?? 0) > 0).slice(0, 5).map((trophy) => (
                     <div key={trophy.name} className="flex items-center gap-2 py-2.5">
                       <TrophyIcon size={13} className="shrink-0 text-accent/80" />
-                      <span className="min-w-0 flex-1 truncate text-[11px] font-semibold text-muted">
+                      <span className="min-w-0 flex-1 truncate text-xs font-semibold text-muted">
                         {trophy.name}
                       </span>
                       <span className="text-xs font-bold text-ink num">{trophy.won ?? 0}</span>
@@ -569,7 +580,7 @@ function ManagerHistory({ team }: { team: TeamResponse }) {
         <div className="divide-y divide-line/40">
           {managers.map((manager) => (
             <div key={manager.name} className="flex items-center gap-3 px-4 py-3">
-              <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-white/[0.06] text-[10px] font-bold text-accent">
+              <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-white/[0.06] text-[11px] font-bold text-accent">
                 {manager.name
                   .split(" ")
                   .map((part) => part[0])
@@ -578,11 +589,11 @@ function ManagerHistory({ team }: { team: TeamResponse }) {
               </span>
               <div className="min-w-0 flex-1">
                 <p className="truncate text-xs font-bold text-ink">{manager.name}</p>
-                <p className="text-[10px] text-dim">
+                <p className="text-[11px] text-dim">
                   {manager.first} – {manager.last} · {manager.seasons} seasons
                 </p>
               </div>
-              <div className="text-right text-[10px] text-dim">
+              <div className="text-right text-[11px] text-dim">
                 <p className="font-semibold text-muted num">
                   {manager.win}W {manager.draw}D {manager.loss}L
                 </p>

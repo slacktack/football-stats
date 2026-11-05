@@ -7,7 +7,9 @@ import { ChevronRightIcon, SearchIcon, SparkIcon } from "@/components/icons";
 import { EmptyState, SkeletonRows } from "@/components/ui";
 import { leagueLogo, playerImage, teamCrest } from "@/lib/assets";
 import { isLive } from "@/lib/format";
-import { searchSuggest } from "@/lib/fotmob";
+import { searchGrouped } from "@/lib/fotmob";
+import { PlayerPhoto } from "@/components/player-photo";
+import { SafeImage } from "@/components/safe-image";
 import type { SearchGroup, SearchSuggestion } from "@/lib/types";
 
 type SearchParams = Promise<Record<string, string | string[] | undefined>>;
@@ -46,7 +48,7 @@ async function SearchContent({ searchParams }: { searchParams: SearchParams }) {
   const sp = await searchParams;
   const query = typeof sp.q === "string" ? sp.q.trim() : "";
   const groups: SearchGroup[] = query
-    ? await searchSuggest(query).catch(() => [])
+    ? await searchGrouped(query).catch(() => [])
     : [];
   const sections = groups.filter(
     (group) => group.title.key !== "all" && group.suggestions.length > 0,
@@ -72,7 +74,7 @@ async function SearchContent({ searchParams }: { searchParams: SearchParams }) {
           />
           <button
             type="submit"
-            className="absolute right-1.5 top-1/2 -translate-y-1/2 rounded-lg bg-accent px-3 py-1.5 text-[11px] font-bold text-on-accent transition-opacity hover:opacity-90"
+            className="absolute right-1.5 top-1/2 -translate-y-1/2 rounded-lg bg-accent px-3 py-1.5 text-xs font-bold text-on-accent transition-opacity hover:opacity-90"
           >
             Search
           </button>
@@ -120,8 +122,8 @@ async function SearchContent({ searchParams }: { searchParams: SearchParams }) {
             </section>
             <div className="flex items-start gap-3 rounded-xl border border-accent/15 bg-accent/[0.045] p-4">
               <SparkIcon size={16} className="mt-0.5 shrink-0 text-accent" />
-              <p className="text-[11px] leading-relaxed text-muted">
-                Tip: press <kbd className="rounded border border-line bg-white/[0.06] px-1 py-0.5 text-[10px] text-ink">⌘ K</kbd>{" "}
+              <p className="text-xs leading-relaxed text-muted">
+                Tip: press <kbd className="rounded border border-line bg-white/[0.06] px-1 py-0.5 text-[11px] text-ink">⌘ K</kbd>{" "}
                 anywhere to search without leaving the page.
               </p>
             </div>
@@ -136,7 +138,7 @@ async function SearchContent({ searchParams }: { searchParams: SearchParams }) {
           </div>
         ) : (
           <div className="mt-7 space-y-7">
-            <p className="text-[11px] text-dim">
+            <p className="text-xs text-dim">
               {total} result{total === 1 ? "" : "s"} for{" "}
               <span className="font-semibold text-muted">“{query}”</span>
             </p>
@@ -146,7 +148,7 @@ async function SearchContent({ searchParams }: { searchParams: SearchParams }) {
                   <h2 className="font-display text-sm font-bold text-ink">
                     {group.title.value}
                   </h2>
-                  <span className="rounded-full bg-white/[0.05] px-1.5 py-0.5 text-[10px] font-bold text-dim num">
+                  <span className="rounded-full bg-white/[0.05] px-1.5 py-0.5 text-[11px] font-bold text-dim num">
                     {group.suggestions.length}
                   </span>
                 </div>
@@ -189,7 +191,7 @@ function TeamResult({ suggestion }: { suggestion: SearchSuggestion }) {
       </span>
       <div className="min-w-0 flex-1">
         <p className="truncate text-sm font-bold text-ink">{suggestion.name}</p>
-        <p className="truncate text-[10px] text-dim">{suggestion.leagueName ?? "Team"}</p>
+        <p className="truncate text-[11px] text-dim">{suggestion.leagueName ?? "Team"}</p>
       </div>
       <ChevronRightIcon size={15} className="text-dim" />
     </Link>
@@ -221,17 +223,15 @@ function SearchRow({ suggestion }: { suggestion: SearchSuggestion }) {
           isPlayer ? "rounded-full" : "rounded-lg"
         }`}
       >
-        <Image
-          src={image}
-          alt=""
-          width={isPlayer ? 40 : 26}
-          height={isPlayer ? 40 : 26}
-          className={isPlayer ? "h-10 w-10 object-cover object-top" : "h-[26px] w-[26px] object-contain"}
-        />
+        {isPlayer ? (
+          <PlayerPhoto playerId={suggestion.id} alt="" width={40} height={40} className="h-10 w-10 object-cover object-top" />
+        ) : (
+          <SafeImage src={image} label={suggestion.name ?? ""} alt="" width={26} height={26} className="h-[26px] w-[26px] object-contain" />
+        )}
       </span>
       <div className="min-w-0 flex-1">
         <p className="truncate text-sm font-semibold text-ink">{suggestion.name}</p>
-        <p className="truncate text-[10px] text-dim">
+        <p className="truncate text-[11px] text-dim">
           {isPlayer
             ? [suggestion.position, suggestion.teamName].filter(Boolean).join(" · ")
             : isLeague
@@ -253,7 +253,7 @@ function MatchResult({ suggestion }: { suggestion: SearchSuggestion }) {
       href={`/match/${suggestion.id}`}
       className="flex items-center gap-3 px-3.5 py-3 transition-colors hover:bg-white/[0.025]"
     >
-      <div className="w-[70px] shrink-0 text-[10px] leading-tight text-dim">
+      <div className="w-[70px] shrink-0 text-[11px] leading-tight text-dim">
         {live ? (
           <span className="font-bold text-live">LIVE</span>
         ) : started ? (
@@ -305,7 +305,7 @@ function MatchResult({ suggestion }: { suggestion: SearchSuggestion }) {
         </div>
       </div>
       {finished && (
-        <span className="rounded bg-white/[0.05] px-1.5 py-0.5 text-[10px] font-bold text-dim">
+        <span className="rounded bg-white/[0.05] px-1.5 py-0.5 text-[11px] font-bold text-dim">
           FT
         </span>
       )}

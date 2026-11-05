@@ -26,7 +26,7 @@ function TeamScore({
         {team.shortName ?? team.name}
       </span>
       <span
-        className={`font-display text-[15px] leading-none num ${leading ? "font-black text-ink" : "font-bold text-muted"}`}
+        className={`font-display text-[18px] leading-none num ${leading ? "font-black text-ink" : "font-bold text-muted"}`}
       >
         {score}
       </span>
@@ -56,12 +56,14 @@ export function LiveRail({ matches, total }: { matches: LiveRailMatch[]; total: 
       <ul className="no-scrollbar -mx-4 flex snap-x snap-mandatory scroll-pl-4 gap-2.5 overflow-x-auto px-4 pb-1 sm:-mx-6 sm:scroll-pl-6 sm:px-6 lg:mx-0 lg:scroll-pl-0 lg:px-0">
         {matches.map((match) => {
           const [home, away] = scorePair(match);
+          const minute = Number.parseInt(match.status.liveTime?.short ?? "", 10);
+          const progress = Number.isFinite(minute) ? Math.min(100, (minute / 90) * 100) : 50;
           return (
             <li key={match.id} className="w-[184px] shrink-0 snap-start sm:w-[208px]">
               <Link
                 href={`/match/${match.id}`}
                 aria-label={`${match.home.name} ${home}, ${match.away.name} ${away}`}
-                className="card card-hover block px-3 py-2.5"
+                className="press card card-hover relative block overflow-hidden px-3 pb-3 pt-2.5"
               >
                 <div className="mb-2 flex items-center gap-1.5">
                   <Image
@@ -71,10 +73,10 @@ export function LiveRail({ matches, total }: { matches: LiveRailMatch[]; total: 
                     height={14}
                     className="h-3.5 w-3.5 shrink-0 object-contain"
                   />
-                  <span className="min-w-0 flex-1 truncate text-[11px] text-dim">
+                  <span className="min-w-0 flex-1 truncate text-xs text-dim">
                     {match.leagueName}
                   </span>
-                  <span className="shrink-0 text-[11px] font-bold text-live num">
+                  <span className="shrink-0 text-xs font-bold text-live num">
                     {statusLabel(match.status)}
                   </span>
                 </div>
@@ -82,6 +84,12 @@ export function LiveRail({ matches, total }: { matches: LiveRailMatch[]; total: 
                   <TeamScore team={match.home} score={home} leading={Number(home) >= Number(away)} />
                   <TeamScore team={match.away} score={away} leading={Number(away) >= Number(home)} />
                 </div>
+                <span className="absolute inset-x-0 bottom-0 h-[3px] bg-white/[0.05]" aria-hidden="true">
+                  <span
+                    className="bar-grow block h-full bg-live shadow-[0_0_10px_var(--color-live)]"
+                    style={{ width: `${progress}%` }}
+                  />
+                </span>
               </Link>
             </li>
           );

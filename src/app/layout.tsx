@@ -1,16 +1,10 @@
 import type { Metadata, Viewport } from "next";
-import { Archivo, Geist, Geist_Mono } from "next/font/google";
+import { Geist_Mono, Plus_Jakarta_Sans } from "next/font/google";
 import { Suspense } from "react";
 import { MobileNav } from "@/components/mobile-nav";
 import { SiteFooter } from "@/components/site-footer";
 import { SiteHeader } from "@/components/site-header";
 import "./globals.css";
-
-const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
-  display: "swap",
-});
 
 const geistMono = Geist_Mono({
   variable: "--font-geist-mono",
@@ -18,9 +12,9 @@ const geistMono = Geist_Mono({
   display: "swap",
 });
 
-const archivo = Archivo({
-  variable: "--font-archivo",
-  subsets: ["latin"],
+const jakarta = Plus_Jakarta_Sans({
+  variable: "--font-jakarta",
+  subsets: ["latin", "latin-ext"],
   display: "swap",
 });
 
@@ -75,7 +69,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
       data-theme="dark"
       data-accent="neon"
       suppressHydrationWarning
-      className={`${geistSans.variable} ${geistMono.variable} ${archivo.variable} h-full antialiased`}
+      className={`${jakarta.variable} ${geistMono.variable} h-full antialiased`}
     >
       <head>
         <script

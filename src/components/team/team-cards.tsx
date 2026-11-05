@@ -45,14 +45,14 @@ export function NextMatchCard({
       <div className="pointer-events-none absolute -right-8 -top-10 h-32 w-32 rounded-full bg-accent/8 blur-2xl" />
       <div className="flex items-center justify-between gap-3">
         <p className="eyebrow">Next match</p>
-        <span className="rounded-md bg-white/[0.05] px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-dim">
+        <span className="rounded-md bg-white/[0.05] px-2 py-0.5 text-[11px] font-bold text-dim">
           {fixture.tournament?.name ?? "Fixture"}
         </span>
       </div>
       <div className="my-auto flex items-center justify-between gap-3 py-5">
         <div className="flex min-w-0 flex-1 flex-col items-center gap-1.5 text-center">
           <Crest id={fixture.home.id} name={fixture.home.name} size={42} />
-          <span className="w-full truncate text-[11px] font-semibold text-ink">
+          <span className="w-full truncate text-xs font-semibold text-ink">
             {fixture.home.name}
           </span>
         </div>
@@ -60,18 +60,18 @@ export function NextMatchCard({
           <p className="font-display text-lg font-extrabold text-ink">
             {fixture.status.started ? fixture.status.scoreStr ?? "vs" : <LocalTime value={fixture.status.utcTime} />}
           </p>
-          <p className="mt-0.5 text-[10px] font-semibold uppercase tracking-wider text-dim">
+          <p className="mt-0.5 text-[11px] font-semibold text-dim">
             <LocalTime value={fixture.status.utcTime} kind="short" />
           </p>
         </div>
         <div className="flex min-w-0 flex-1 flex-col items-center gap-1.5 text-center">
           <Crest id={fixture.away.id} name={fixture.away.name} size={42} />
-          <span className="w-full truncate text-[11px] font-semibold text-ink">
+          <span className="w-full truncate text-xs font-semibold text-ink">
             {fixture.away.name}
           </span>
         </div>
       </div>
-      <div className="mt-auto flex items-center justify-center gap-1 border-t border-line/50 pt-2.5 text-[10px] font-semibold text-dim transition-colors group-hover:text-accent">
+      <div className="mt-auto flex items-center justify-center gap-1 border-t border-line/50 pt-2.5 text-[11px] font-semibold text-dim transition-colors group-hover:text-accent">
         Match centre
         <ChevronRightIcon size={12} />
       </div>
@@ -104,7 +104,7 @@ export function TeamFormCard({
         <p className="eyebrow">Recent form</p>
         <Link
           href={href ?? "#"}
-          className="text-[10px] font-semibold text-dim transition-colors hover:text-accent"
+          className="text-[11px] font-semibold text-dim transition-colors hover:text-accent"
         >
           All results
         </Link>
@@ -123,15 +123,15 @@ export function TeamFormCard({
                   ? `/match/${item.linkToMatch.split("#").pop()}`
                   : "#"
               }
-              className="group flex items-center gap-2 rounded-lg bg-white/[0.025] px-2 py-2 ring-1 ring-inset ring-white/[0.04] transition-colors hover:bg-white/[0.05]"
+              className="press group flex items-center gap-2 rounded-lg bg-white/[0.025] px-2 py-2 ring-1 ring-inset ring-white/[0.04] transition-colors hover:bg-white/[0.05]"
               title={`${item.home?.name ?? ""} ${item.score ?? ""} ${item.away?.name ?? ""}`}
             >
               <FormPill result={item.result} size={22} />
               <div className="min-w-0 flex-1">
-                <p className="truncate text-[10px] font-semibold text-ink">
+                <p className="truncate text-xs font-semibold text-ink">
                   {opponent?.shortName ?? opponent?.name ?? "Match"}
                 </p>
-                <p className="mt-0.5 truncate text-[10px] text-dim">
+                <p className="mt-0.5 truncate text-[11px] text-dim">
                   <span className="num">{item.score ?? "—"}</span>
                   {item.tournamentName ? ` · ${item.tournamentName}` : ""}
                 </p>
@@ -167,10 +167,10 @@ export function MatchResultCard({
   const score = scoreFromStatus(fixture.status);
 
   return (
-    <Link href={`/match/${fixture.id}`} className="card card-hover flex h-full flex-col p-4">
+    <Link href={`/match/${fixture.id}`} className="press card card-hover flex h-full flex-col p-4">
       <div className="flex items-center justify-between">
         <p className="eyebrow">{label}</p>
-        <span className="text-[10px] font-semibold uppercase tracking-wider text-dim">
+        <span className="text-[11px] font-semibold text-dim">
           {fixture.tournament?.name ?? ""}
         </span>
       </div>
@@ -185,8 +185,8 @@ export function MatchResultCard({
             {fixture.home.shortName ?? fixture.home.name}
           </span>
         </div>
-        <span className="shrink-0 font-display text-lg font-extrabold text-ink num">
-          {score ? `${score[0]} – ${score[1]}` : <LocalTime value={fixture.status.utcTime} />}
+        <span className="shrink-0 font-display text-[26px] font-black leading-none text-ink num">
+          {score ? `${score[0]}–${score[1]}` : <LocalTime value={fixture.status.utcTime} />}
         </span>
         <div className="flex flex-1 items-center justify-end gap-2 text-right">
           <span
@@ -199,7 +199,7 @@ export function MatchResultCard({
           <Crest id={fixture.away.id} name={fixture.away.name} size={32} />
         </div>
       </div>
-      <p className="mt-auto text-center text-[10px] font-semibold uppercase tracking-wider text-dim">
+      <p className="mt-auto text-center text-[11px] font-semibold text-dim">
         <LocalTime value={fixture.status.utcTime} kind="short" />
       </p>
     </Link>
@@ -212,7 +212,7 @@ export function SquadPlayer({ member }: { member: SquadMember }) {
   return (
     <Link
       href={`/player/${member.id}`}
-      className="group flex items-center gap-3 rounded-xl border border-line/70 bg-card/60 p-2.5 transition-colors hover:border-accent/25 hover:bg-white/[0.03]"
+      className="press group flex items-center gap-3 rounded-xl border border-line/70 bg-card/60 p-2.5 transition-colors hover:border-accent/25 hover:bg-white/[0.03]"
     >
       <span className="relative flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-full bg-white/[0.05] ring-1 ring-inset ring-white/10">
         <PlayerPhoto
@@ -223,17 +223,17 @@ export function SquadPlayer({ member }: { member: SquadMember }) {
           className="h-full w-full object-cover object-top"
         />
         {member.shirtNumber !== undefined && (
-          <span className="absolute bottom-0 right-0 flex h-4 min-w-4 items-center justify-center rounded-full bg-base/90 px-1 text-[10px] font-bold text-muted ring-1 ring-white/10">
+          <span className="absolute bottom-0 right-0 flex h-4 min-w-4 items-center justify-center rounded-full bg-base/90 px-1 text-[11px] font-bold text-muted ring-1 ring-white/10">
             {member.shirtNumber}
           </span>
         )}
       </span>
       <div className="min-w-0 flex-1">
-        <p className="truncate text-[11px] font-bold text-ink group-hover:text-accent">
+        <p className="truncate text-[13px] font-bold text-ink group-hover:text-accent">
           {member.name}
-          {member.isCaptain && <span className="ml-1 text-[10px] font-bold text-accent">C</span>}
+          {member.isCaptain && <span className="ml-1 text-[11px] font-bold text-accent">C</span>}
         </p>
-        <p className="truncate text-[10px] text-dim">
+        <p className="truncate text-[11px] text-dim">
           {position}
           {member.age ? ` · ${member.age}y` : ""}
           {member.injury ? " · injured" : ""}
@@ -241,7 +241,7 @@ export function SquadPlayer({ member }: { member: SquadMember }) {
       </div>
       <div className="flex shrink-0 flex-col items-end gap-1">
         {member.rating ? <RatingChip rating={member.rating} /> : null}
-        <span className="text-[10px] font-semibold text-dim num">
+        <span className="text-[11px] font-semibold text-dim num">
           {formatMarketValue(member.transferValue)}
         </span>
       </div>
@@ -280,11 +280,11 @@ export function SquadGrid({ groups }: { groups?: SquadGroup[] }) {
           <section key={group.title}>
             <div className="mb-2 flex items-baseline justify-between">
               <p className="eyebrow capitalize">{group.title}</p>
-              <span className="text-[10px] font-semibold text-dim">
+              <span className="text-[11px] font-semibold text-dim">
                 {group.members.length} players
               </span>
             </div>
-            <div className="grid gap-2 sm:grid-cols-2 xl:grid-cols-3">
+            <div className="stagger grid gap-2 sm:grid-cols-2 xl:grid-cols-3">
               {group.members.map((member) => (
                 <SquadPlayer key={member.id} member={member} />
               ))}
@@ -335,11 +335,11 @@ export function TeamStatGrid({
             className={`card p-3.5 ${highlighted ? "border-accent/20 bg-accent/[0.03]" : ""}`}
           >
             <div className="flex items-start justify-between gap-2">
-              <p className="text-[10px] font-semibold uppercase tracking-[0.08em] text-dim">
+              <p className="text-[11px] font-semibold text-dim">
                 {group.header}
               </p>
               {entry?.rank ? (
-                <span className="rounded bg-white/[0.05] px-1.5 py-0.5 text-[10px] font-bold text-dim num">
+                <span className="rounded bg-white/[0.05] px-1.5 py-0.5 text-[11px] font-bold text-dim num">
                   #{entry.rank}
                 </span>
               ) : null}
@@ -347,7 +347,7 @@ export function TeamStatGrid({
             <p className="mt-2 font-display text-2xl font-extrabold tracking-tight text-ink num">
               {statDisplay(entry)}
             </p>
-            <p className="mt-0.5 truncate text-[10px] text-dim">
+            <p className="mt-0.5 truncate text-[11px] text-dim">
               {entry?.teamName ?? entry?.name ?? "—"}
             </p>
           </div>
@@ -380,8 +380,8 @@ export function TrophyGrid({
               <TrophyIcon size={16} className="mt-0.5 shrink-0 text-accent" />
               <span className="font-display text-xl font-extrabold text-ink num">{trophy.won}</span>
             </div>
-            <p className="mt-2 text-[11px] font-bold text-ink">{trophy.name}</p>
-            <p className="mt-1 text-[10px] text-dim">
+            <p className="mt-2 text-xs font-bold text-ink">{trophy.name}</p>
+            <p className="mt-1 text-[11px] text-dim">
               {trophy.runnerup ? `${trophy.runnerup} runner-up · ` : ""}
               {seasons.length ? seasons.join(", ") : "—"}
             </p>

@@ -74,7 +74,7 @@ export function LeagueBrowser({
           <button
             type="button"
             onClick={() => setQuery("")}
-            className="absolute right-3 top-1/2 -translate-y-1/2 rounded-md bg-white/[0.06] px-2 py-1 text-[10px] font-semibold text-muted transition-colors hover:text-ink"
+            className="absolute right-3 top-1/2 -translate-y-1/2 rounded-md bg-white/[0.06] px-2 py-1 text-[11px] font-semibold text-muted transition-colors hover:text-ink"
           >
             Clear
           </button>
@@ -87,7 +87,7 @@ export function LeagueBrowser({
             <h2 className="font-display text-lg font-bold text-ink">
               {results.length} {results.length === 1 ? "competition" : "competitions"}
             </h2>
-            <span className="text-[11px] text-dim">for “{deferredQuery.trim()}”</span>
+            <span className="text-xs text-dim">for “{deferredQuery.trim()}”</span>
           </div>
           {results.length > 0 ? (
             <div className="mt-3 grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
@@ -109,7 +109,7 @@ export function LeagueBrowser({
           <section className="mt-8">
             <div className="flex items-end justify-between">
               <h2 className="font-display text-xl font-bold text-ink">Popular</h2>
-              <span className="text-[11px] text-dim">The competitions everyone follows</span>
+              <span className="text-xs text-dim">The competitions everyone follows</span>
             </div>
             <div className="mt-3 grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
               {popular.map((league) => (
@@ -131,7 +131,7 @@ export function LeagueBrowser({
                     <span className="block truncate text-sm font-bold text-ink transition-colors group-hover:text-accent">
                       {league.name}
                     </span>
-                    <span className="mt-0.5 block text-[10px] font-semibold uppercase tracking-wider text-dim">
+                    <span className="mt-0.5 block text-[11px] font-semibold text-dim">
                       {league.ccode}
                     </span>
                   </span>
@@ -152,7 +152,7 @@ export function LeagueBrowser({
                   <div key={group.ccode} className="card p-3.5">
                     <div className="flex items-center justify-between px-1 pb-2">
                       <h3 className="text-xs font-bold text-ink">{group.name}</h3>
-                      <span className="text-[10px] text-dim">{group.leagues.length}</span>
+                      <span className="text-[11px] text-dim">{group.leagues.length}</span>
                     </div>
                     <div className="grid gap-0.5">
                       {group.leagues.map((league) => (
@@ -168,7 +168,7 @@ export function LeagueBrowser({
           <section className="mt-8">
             <div className="flex items-end justify-between">
               <h2 className="font-display text-xl font-bold text-ink">Browse by country</h2>
-              <span className="text-[11px] text-dim">
+              <span className="text-xs text-dim">
                 {countries.length} countries · tap to expand
               </span>
             </div>
@@ -184,13 +184,13 @@ export function LeagueBrowser({
                       className="flex w-full items-center gap-2.5 px-3.5 py-2.5 text-left transition-colors hover:bg-white/[0.025]"
                       aria-expanded={expanded}
                     >
-                      <span className="flex h-7 min-w-7 items-center justify-center rounded-md bg-white/[0.05] px-1 text-[10px] font-bold tracking-wider text-muted">
+                      <span className="flex h-7 min-w-7 items-center justify-center rounded-md bg-white/[0.05] px-1 text-[11px] font-bold tracking-wider text-muted">
                         {country.ccode}
                       </span>
                       <span className="flex-1 truncate text-xs font-bold text-ink">
                         {country.name}
                       </span>
-                      <span className="text-[10px] text-dim">{country.leagues.length}</span>
+                      <span className="text-[11px] text-dim">{country.leagues.length}</span>
                       <ChevronDownIcon
                         size={14}
                         className={`text-dim transition-transform ${expanded ? "rotate-180" : ""}`}
@@ -205,7 +205,7 @@ export function LeagueBrowser({
                           <button
                             type="button"
                             onClick={() => toggle(country.ccode)}
-                            className="w-full px-2 py-1.5 text-left text-[10px] font-semibold text-accent/80 transition-colors hover:text-accent"
+                            className="w-full px-2 py-1.5 text-left text-[11px] font-semibold text-accent/80 transition-colors hover:text-accent"
                           >
                             +{country.leagues.length - 3} more
                           </button>
@@ -250,10 +250,10 @@ function LeagueLink({
         <span className="block truncate text-xs font-semibold text-muted transition-colors group-hover:text-ink">
           {league.name}
         </span>
-        {subtitle && <span className="block truncate text-[10px] text-dim">{subtitle}</span>}
+        {subtitle && <span className="block truncate text-[11px] text-dim">{subtitle}</span>}
       </span>
       {!compact && (
-        <span className="text-[10px] font-bold uppercase tracking-wider text-dim">{league.ccode}</span>
+        <span className="text-[11px] font-bold text-dim">{league.ccode}</span>
       )}
     </Link>
   );

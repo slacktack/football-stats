@@ -119,26 +119,83 @@ function hrefForSuggestion(suggestion: SearchSuggestion) {
   }
 }
 
-export function normalizeSearchResults(groups: SearchGroup[]): SearchResult[] {
-  const seen = new Set<string>();
-  const all = groups.find((group) => group.title.key === "all") ?? groups[0];
-  if (!all) return [];
+const SEARCHABLE = new Set(["team", "player", "league", "match"]);
 
-  return all.suggestions
+function fold(value: string) {
+  return value.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().replace(/[^a-z0-9 ]/g, "");
+}
+
+function editDistance(a: string, b: string) {
+  if (Math.abs(a.length - b.length) > 3) return 9;
+  const row = Array.from({ length: b.length + 1 }, (_, i) => i);
+  for (let i = 1; i <= a.length; i++) {
+    let prev = row[0];
+    row[0] = i;
+    for (let j = 1; j <= b.length; j++) {
+      const tmp = row[j];
+      row[j] = Math.min(row[j] + 1, row[j - 1] + 1, prev + (a[i - 1] === b[j - 1] ? 0 : 1));
+      prev = tmp;
+    }
+  }
+  return row[b.length];
+}
+
+// 0 = exact word/prefix, higher = weaker; typos cost one step each.
+function matchDistance(name: string, term: string) {
+  const q = fold(term);
+  const words = fold(name).split(" ").filter(Boolean);
+  const full = words.join(" ");
+  if (full === q || full.startsWith(q)) return 0;
+  let best = 9;
+  for (const word of words) {
+    if (word === q) return 0;
+    if (word.startsWith(q)) best = Math.min(best, 0.5);
+    best = Math.min(best, editDistance(word, q), editDistance(word.slice(0, q.length), q) + 0.5);
+  }
+  if (full.includes(q)) best = Math.min(best, 1);
+  return best;
+}
+
+export function searchVariants(term: string) {
+  const q = fold(term.trim());
+  const variants = [term.trim(), q.replace(/(.)\1+/g, "$1")];
+  if (q.length > 4) variants.push(q.slice(0, -1));
+  if (q.length >= 5) variants.push(q.slice(0, 3));
+  return [...new Set(variants.filter((v) => v.length >= 2))].slice(0, 4);
+}
+
+export function rankSuggestions(groups: SearchGroup[], term = "", limit = 12): SearchSuggestion[] {
+  const seen = new Set<string>();
+  const pool = groups.flatMap((group) => (group.title.key === "all" ? group.suggestions : []));
+
+  return pool
     .filter((suggestion) => {
+      if (!SEARCHABLE.has(suggestion.type)) return false;
       const key = `${suggestion.type}-${suggestion.id}`;
       if (seen.has(key)) return false;
       seen.add(key);
       return true;
     })
-    .slice(0, 12)
+    .map((suggestion) => ({
+      suggestion,
+      distance: term ? matchDistance(nameForSuggestion(suggestion), term) : 0,
+      // FotMob scores are match-tier + popularity; the remainder is popularity.
+      popularity: (suggestion.score ?? 0) % 100000,
+    }))
+    .sort((a, b) => Math.floor(a.distance) - Math.floor(b.distance) || b.popularity - a.popularity || a.distance - b.distance)
+    .slice(0, limit)
+    .map(({ suggestion }) => suggestion);
+}
+
+export function normalizeSearchResults(groups: SearchGroup[], term = ""): SearchResult[] {
+  return rankSuggestions(groups, term)
     .map((suggestion) => ({
       type: suggestion.type,
       id: String(suggestion.id),
       name: nameForSuggestion(suggestion),
       subtitle:
         suggestion.type === "team" || suggestion.type === "player"
-          ? suggestion.leagueName ?? suggestion.teamName ?? undefined
+          ? suggestion.teamName ?? suggestion.leagueName ?? undefined
           : suggestion.type === "match"
             ? `${suggestion.leagueName ?? "Match"}${suggestion.matchDate ? ` · ${new Date(suggestion.matchDate).toLocaleDateString("en-GB", { day: "numeric", month: "short" })}` : ""}`
             : "Competition",
@@ -154,15 +211,30 @@ export function normalizeSearchResults(groups: SearchGroup[]): SearchResult[] {
     }));
 }
 
+async function fetchVariants(term: string) {
+  const settled = await Promise.allSettled(searchVariants(term).map((v) => searchSuggest(v)));
+  return settled.flatMap((r) => (r.status === "fulfilled" && Array.isArray(r.value) ? r.value : []));
+}
+
 export async function searchFotMob(term: string): Promise<SearchResult[]> {
   const cleaned = term.trim();
   if (cleaned.length < 2) return [];
-  try {
-    const groups = await searchSuggest(cleaned);
-    return normalizeSearchResults(groups);
-  } catch {
-    return [];
-  }
+  return normalizeSearchResults(await fetchVariants(cleaned), cleaned);
+}
+
+const SECTION_TITLES = { player: "Players", team: "Teams", league: "Competitions", match: "Matches" } as const;
+
+export async function searchGrouped(term: string): Promise<SearchGroup[]> {
+  const cleaned = term.trim();
+  if (cleaned.length < 2) return [];
+  const ranked = rankSuggestions(await fetchVariants(cleaned), cleaned, 60);
+  return (Object.keys(SECTION_TITLES) as (keyof typeof SECTION_TITLES)[])
+    .map((type) => ({
+      title: { key: `${type}s`, value: SECTION_TITLES[type] },
+      suggestions: ranked.filter((s) => s.type === type),
+    }))
+    .filter((group) => group.suggestions.length)
+    .sort((a, b) => ranked.indexOf(a.suggestions[0]) - ranked.indexOf(b.suggestions[0]));
 }
 
 export function hasLiveMatches(leagues: { matches: { status: { started?: boolean; finished?: boolean; cancelled?: boolean } }[] }[]) {

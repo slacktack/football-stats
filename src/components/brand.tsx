@@ -22,7 +22,7 @@ export function Brand({ compact = false }: { compact?: boolean }) {
           <span className="font-display text-[18px] font-black leading-none tracking-[-0.01em] text-ink">
             TOUCHLINE<span className="text-accent">.</span>
           </span>
-          <span className="mt-1 whitespace-nowrap text-[10px] font-semibold tracking-[0.04em] text-dim">
+          <span className="mt-1 whitespace-nowrap text-[11px] font-semibold tracking-[0.04em] text-dim">
             Live football, every number
           </span>
         </span>

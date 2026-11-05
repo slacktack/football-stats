@@ -2,12 +2,9 @@ import { PlayerPhoto } from "@/components/player-photo";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { Suspense } from "react";
+import { Suspense, ViewTransition } from "react";
 import {
   ChartIcon,
-  ChevronRightIcon,
-  GlobeIcon,
-  ShirtIcon,
   TrophyIcon,
 } from "@/components/icons";
 import {
@@ -21,12 +18,18 @@ import {
   PlayerTrophies,
   ShotMapCard,
   TopStatCards,
-  TraitsCard,
 } from "@/components/player/player-panels";
+import {
+  FormSummary,
+  InjuryNotice,
+  PositionMap,
+  RatingForm,
+  TraitsRadar,
+} from "@/components/player/player-insights";
 import { TabBar } from "@/components/tab-bar";
-import { Crest, Pill, SectionHeading, SkeletonBlock, SkeletonRows } from "@/components/ui";
+import { Crest, RatingChip, SectionHeading, SkeletonBlock, SkeletonRows } from "@/components/ui";
 import { getPlayer } from "@/lib/fotmob";
-import { formatShortDate } from "@/lib/format";
+import { formatShortDate, inkFor } from "@/lib/format";
 import type { PlayerInfoItem, PlayerResponse } from "@/lib/types";
 
 type Params = Promise<{ id: string }>;
@@ -72,8 +75,16 @@ export default function PlayerPage({
   searchParams: SearchParams;
 }) {
   return (
-    <Suspense fallback={<PlayerSkeleton />}>
-      <PlayerContent params={params} searchParams={searchParams} />
+    <Suspense
+      fallback={
+        <ViewTransition exit="skeleton-out" default="none">
+          <PlayerSkeleton />
+        </ViewTransition>
+      }
+    >
+      <ViewTransition enter="content-in" default="none">
+        <PlayerContent params={params} searchParams={searchParams} />
+      </ViewTransition>
     </Suspense>
   );
 }
@@ -99,7 +110,6 @@ async function PlayerContent({
     (player.playerInformation ?? []).map((item) => [item.title, item]),
   );
   const country = info.get("Country");
-  const countryCode = country?.countryCode;
   const countryName = infoText(country?.value);
   const age = infoText(info.get("Age")?.value);
   const height = infoText(info.get("Height")?.value);
@@ -111,126 +121,89 @@ async function PlayerContent({
   const otherPositions = player.positionDescription?.nonPrimaryPositions ?? [];
   const team = player.primaryTeam;
   const basePath = `/player/${id}`;
-  const accent = team?.teamColors?.darkMode ?? "#39ff6b";
+  const kit = team?.teamColors?.color ?? team?.teamColors?.lightMode ?? "#14301f";
+  const kitInk = inkFor(kit);
   const allMatches = player.initialMatchesPage?.matches ?? player.recentMatches ?? [];
   const deepGroups = player.firstSeasonStats?.statsSection?.items ?? [];
+  const seasonRating = player.mainLeague?.stats?.find((stat) => stat.localizedTitleId === "rating")?.value;
+  const formMatches = player.recentMatches?.length ? player.recentMatches : allMatches;
 
   return (
     <div className="shell py-6 md:py-8">
-      <section
-        className="card relative overflow-hidden rounded-[28px] p-4 sm:p-6"
-        style={{
-          backgroundImage: `radial-gradient(680px 260px at 100% -30%, ${hex(accent, 0.2)}, transparent 70%), radial-gradient(420px 220px at 0% 0%, rgba(255,74,56,0.05), transparent 70%)`,
-        }}
-      >
-        <span
-          className="pointer-events-none absolute inset-y-5 left-0 w-[3px] rounded-r-full"
-          style={{ backgroundColor: hex(accent, 0.85) }}
-          aria-hidden="true"
-        />
-        <div className="relative flex items-start gap-4">
-          <div className="min-w-0 flex-1">
-            <div className="flex flex-wrap items-center gap-2">
+      <section className="kit-hero" style={{ "--kit": kit, "--kit-ink": kitInk } as React.CSSProperties}>
+        <div className="kit-hero-slab">
+          <div className="relative z-[1] min-w-0 flex-1 self-center py-5 pl-4 sm:py-8 sm:pl-7">
+            <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-[13px] font-semibold">
               {team && (
-                <Link
-                  href={`/team/${team.teamId}`}
-                  className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-[0.14em] text-muted transition-colors hover:text-accent"
-                >
-                  <Crest id={team.teamId} name={team.teamName} size={16} />
+                <Link href={`/team/${team.teamId}`} className="flex items-center gap-1.5 hover:underline">
+                  <Crest id={team.teamId} name={team.teamName} size={22} />
                   {team.teamName}
                 </Link>
               )}
               {player.mainLeague && (
-                <>
-                  <span className="h-1 w-1 rounded-full bg-white/20" />
-                  <Link
-                    href={`/league/${player.mainLeague.leagueId}`}
-                    className="text-[10px] font-bold uppercase tracking-[0.14em] text-dim transition-colors hover:text-accent"
-                  >
-                    {player.mainLeague.leagueName}
-                  </Link>
-                </>
-              )}
-              {player.mainLeague?.season && (
-                <>
-                  <span className="h-1 w-1 rounded-full bg-white/20" />
-                  <span className="text-[10px] font-bold uppercase tracking-[0.14em] text-dim">
-                    {player.mainLeague.season}
-                  </span>
-                </>
+                <Link href={`/league/${player.mainLeague.leagueId}`} className="opacity-75 hover:underline hover:opacity-100">
+                  {player.mainLeague.leagueName} {player.mainLeague.season}
+                </Link>
               )}
             </div>
-            <h1 className="mt-2 font-display text-[34px] font-black leading-[0.92] tracking-[-0.04em] text-ink sm:text-[48px]">
+            <h1 className="kit-hero-name">
               {player.name}
             </h1>
-            <div className="mt-2.5 flex flex-wrap items-center gap-1.5">
-              <Pill tone="accent">{position}</Pill>
-              {otherPositions.slice(0, 2).map((item) => (
-                <Pill key={item.key ?? item.label}>{item.label}</Pill>
-              ))}
-              {age && age !== "—" && <Pill>{age} yrs</Pill>}
-              {height && height !== "—" && <Pill>{height}</Pill>}
-              {shirt && shirt !== "—" && (
-                <Pill>
-                  <ShirtIcon size={12} /> {shirt}
-                </Pill>
-              )}
-            </div>
-            <div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-1 text-[10px] text-dim">
-              {countryCode && (
-                <span className="flex items-center gap-1">
-                  <GlobeIcon size={12} />
-                  <span className="rounded bg-white/[0.06] px-1 py-0.5 text-[10px] font-bold tracking-wider text-muted">
-                    {countryCode}
-                  </span>
-                  {countryName}
-                </span>
-              )}
-              {foot && foot !== "—" && <span>{foot} footed</span>}
-              {contract && contract !== "—" && <span>Contract to {contract}</span>}
-            </div>
-          </div>
-          <div className="relative shrink-0">
-            <span
-              className="absolute -inset-3 rounded-[26px] opacity-30 blur-xl"
-              style={{ background: accent }}
-              aria-hidden="true"
-            />
-            <span className="relative block h-[92px] w-[76px] overflow-hidden rounded-2xl border border-white/10 bg-white/[0.04] shadow-[0_18px_40px_-20px_rgba(0,0,0,0.9)] sm:h-[150px] sm:w-[124px] md:h-[176px] md:w-[146px]">
-              <PlayerPhoto
-                playerId={player.id}
-                alt={player.name}
-                width={192}
-                height={192}
-                priority
-                className="h-full w-full object-cover object-top"
-              />
-            </span>
-          </div>
-        </div>
-        <div className="relative mt-4 flex flex-wrap items-end justify-between gap-3 border-t border-line/50 pt-3">
-          <div>
-            <p className="text-[10px] uppercase tracking-[0.14em] text-dim">Market value</p>
-            <p className="font-display text-xl font-extrabold tracking-tight text-ink">
-              {marketValue !== "—" ? marketValue : "—"}
+            <p className="mt-3 flex flex-wrap items-baseline gap-x-4 gap-y-1 text-sm font-semibold">
+              {shirt && shirt !== "—" && <span className="kit-hero-number">{shirt}</span>}
+              <span>{position}</span>
+              {age && age !== "—" && <span className="opacity-80">{age} years</span>}
+              {height && height !== "—" && <span className="opacity-80">{height}</span>}
+              {countryName && countryName !== "—" && <span className="opacity-80">{countryName}</span>}
             </p>
           </div>
-          <div className="flex flex-wrap items-center gap-3 text-[10px] text-dim">
-            {player.traits?.title && <span className="hidden sm:inline">{player.traits.title}</span>}
-            {team && (
-              <Link
-                href={`/team/${team.teamId}`}
-                className="flex items-center gap-1.5 rounded-lg bg-accent px-3 py-1.5 text-[10px] font-bold text-on-accent transition-opacity hover:opacity-90"
-              >
-                View club
-                <ChevronRightIcon size={12} />
-              </Link>
-            )}
+          <div className="kit-hero-photo">
+            <PlayerPhoto
+              playerId={player.id}
+              alt={player.name}
+              width={320}
+              height={320}
+              priority
+              className="h-full w-full object-contain object-bottom"
+            />
           </div>
         </div>
+        <dl className="kit-hero-facts">
+          {seasonRating !== undefined && (
+            <div>
+              <dt>Season rating</dt>
+              <dd>
+                <RatingChip rating={seasonRating} size="lg" />
+              </dd>
+            </div>
+          )}
+          <div>
+            <dt>Market value</dt>
+            <dd><span className="font-display text-[28px] font-black leading-none">{marketValue !== "—" ? marketValue : "—"}</span></dd>
+          </div>
+          {foot && foot !== "—" && (
+            <div>
+              <dt>Foot</dt>
+              <dd>{foot}</dd>
+            </div>
+          )}
+          {contract && contract !== "—" && (
+            <div>
+              <dt>Contract until</dt>
+              <dd>{contract}</dd>
+            </div>
+          )}
+          {otherPositions.length > 0 && (
+            <div className="hidden sm:flex">
+              <dt>Also plays</dt>
+              <dd>{otherPositions.slice(0, 2).map((item) => item.label).join(", ")}</dd>
+            </div>
+          )}
+        </dl>
       </section>
 
-      <div className="mt-3">
+      <div className="mt-3 space-y-3">
+        <InjuryNotice player={player} />
         <PlayerStatStrip player={player} />
       </div>
 
@@ -239,6 +212,8 @@ async function PlayerContent({
       {tab === "overview" && (
         <div className="mt-6 grid items-start gap-7 lg:grid-cols-[minmax(0,1fr)_320px]">
           <div className="space-y-6">
+            <RatingForm matches={formMatches} />
+
             <section>
               <SectionHeading
                 title="Season so far"
@@ -250,7 +225,7 @@ async function PlayerContent({
               </div>
             </section>
 
-            <TraitsCard player={player} />
+            <TraitsRadar player={player} />
 
             <ShotMapCard shots={player.firstSeasonStats?.shotmap} />
 
@@ -268,8 +243,10 @@ async function PlayerContent({
           </div>
 
           <aside className="space-y-4 lg:sticky lg:top-24">
-            <PlayerProfileCard player={player} />
             {player.nextMatch && <PlayerNextMatchCard match={player.nextMatch} />}
+            <FormSummary matches={formMatches} />
+            <PositionMap player={player} />
+            <PlayerProfileCard player={player} />
             <PlayerTrophies player={player} />
             <SeasonSummary player={player} age={age} height={height} foot={foot} />
           </aside>
@@ -283,10 +260,10 @@ async function PlayerContent({
               title="Season stats"
               subtitle={`${player.mainLeague?.leagueName ?? ""} ${
                 player.mainLeague?.season ?? ""
-              } · compared with other forwards`}
+              } · percentiles vs other ${(position ?? "player").toLowerCase()}s`}
               icon={<ChartIcon size={17} />}
             />
-            <div className="flex rounded-lg border border-line bg-black/25 p-0.5">
+            <div className="flex rounded-lg border border-line bg-card-2/60 p-0.5">
               {[
                 { value: "total", label: "Total" },
                 { value: "per90", label: "Per 90" },
@@ -295,10 +272,10 @@ async function PlayerContent({
                   key={option.value}
                   href={`${basePath}?tab=stats&metric=${option.value}`}
                   scroll={false}
-                  className={`rounded-md px-3 py-1.5 text-[10px] font-bold transition-colors ${
+                  className={`press rounded-md px-3.5 py-1.5 text-xs font-bold transition-colors ${
                     metric === option.value
-                      ? "bg-accent/15 text-accent"
-                      : "text-dim hover:text-muted"
+                      ? "bg-accent text-on-accent"
+                      : "text-muted hover:text-ink"
                   }`}
                 >
                   {option.label}
@@ -307,19 +284,23 @@ async function PlayerContent({
             </div>
           </div>
           <TopStatCards section={player.firstSeasonStats?.topStatCard} />
+          <TraitsRadar player={player} />
           <DeepStats groups={deepGroups} metric={metric} />
           <ShotMapCard shots={player.firstSeasonStats?.shotmap} />
         </div>
       )}
 
       {tab === "matches" && (
-        <div className="mt-6">
-          <SectionHeading
-            title="Match log"
-            subtitle={`${allMatches.length} appearances · ${player.mainLeague?.season ?? ""}`}
-          />
-          <div className="mt-3">
-            <PlayerMatchList matches={allMatches} />
+        <div className="mt-6 space-y-6">
+          <RatingForm matches={allMatches} limit={20} />
+          <div>
+            <SectionHeading
+              title="Match log"
+              subtitle={`${allMatches.length} appearances · ${player.mainLeague?.season ?? ""}`}
+            />
+            <div className="mt-3">
+              <PlayerMatchList matches={allMatches} />
+            </div>
           </div>
         </div>
       )}
@@ -374,8 +355,8 @@ function SeasonSummary({
       <div className="divide-y divide-line/40">
         {rows.map((row) => (
           <div key={row.label} className="flex items-center justify-between gap-3 py-2">
-            <span className="text-[10px] text-dim">{row.label}</span>
-            <span className="text-[11px] font-semibold capitalize text-muted">{row.value}</span>
+            <span className="text-[11px] text-dim">{row.label}</span>
+            <span className="text-xs font-semibold capitalize text-muted">{row.value}</span>
           </div>
         ))}
       </div>
@@ -425,11 +406,3 @@ function infoText(value: PlayerInfoItem["value"] | undefined): string {
   return "—";
 }
 
-function hex(value: string, alpha: number) {
-  const normalized = value.replace("#", "");
-  if (normalized.length !== 6) return `rgba(255,74,56,${alpha})`;
-  const r = parseInt(normalized.slice(0, 2), 16);
-  const g = parseInt(normalized.slice(2, 4), 16);
-  const b = parseInt(normalized.slice(4, 6), 16);
-  return `rgba(${r},${g},${b},${alpha})`;
-}

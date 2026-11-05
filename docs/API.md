@@ -544,3 +544,17 @@ curl -s 'https://www.fotmob.com/api/data/teams?id=9825' | jq '.details | {name, 
 # Search
 curl -s 'https://www.fotmob.com/api/data/search/suggest?term=arsenal' | jq '.[].title'
 ```
+
+---
+
+## Extra `/matchDetails` fields used by the match centre
+
+- `content.matchFacts.highlights`: `{ image, url, source }`. `url` is usually a YouTube watch link;
+  the app extracts the id and embeds it via `youtube-nocookie.com` on click.
+- `content.playerStats[playerId].stats[]`: per-player groups (`top_stats`, `attack`, `defense`,
+  `duels`, `physical_metrics`). Each stat is `{ key, stat: { value, total?, type } }`.
+  Normalised in `src/lib/match-players.ts` for the Player ratings tab.
+- `content.matchFacts.insights[]`: `{ type, teamId, playerId, text }` talking points.
+- `content.attackingZones.{home,away}.total`: `{ left, center, right }` percentages.
+- `header.events.{homeTeamGoals,awayTeamGoals}`: scorer name → goal events, used in the hero.
+- Match/home league logos must use the parent id (`primaryId` / `parentLeagueId`); stage ids 403 on the CDN.

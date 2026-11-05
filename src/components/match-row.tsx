@@ -40,7 +40,7 @@ function TeamLine({
         {team.name}
       </span>
       {redCards > 0 && (
-        <span className="inline-flex h-3.5 min-w-3.5 shrink-0 items-center justify-center rounded-[3px] bg-red-500 px-1 text-[10px] font-bold leading-none text-white">
+        <span className="inline-flex h-3.5 min-w-3.5 shrink-0 items-center justify-center rounded-[3px] bg-red-500 px-1 text-[11px] font-bold leading-none text-white">
           {redCards}
         </span>
       )}
@@ -70,7 +70,7 @@ export function MatchRow({
   return (
     <Link
       href={href ?? `/match/${match.id}`}
-      className={`group relative grid grid-cols-[46px_minmax(0,1fr)_auto] items-center gap-x-2.5 gap-y-2 px-3 py-3 transition-colors before:absolute before:inset-y-2 before:left-0 before:w-[2px] before:rounded-full before:bg-accent before:opacity-0 hover:bg-white/[0.03] hover:before:opacity-100 sm:grid-cols-[64px_minmax(0,1fr)_88px_minmax(0,1fr)_16px] sm:gap-x-4 sm:px-5 sm:py-3.5 ${live ? "bg-live/[0.018]" : ""} ${className}`}
+      className={`press group relative grid grid-cols-[46px_minmax(0,1fr)_auto] items-center gap-x-2.5 gap-y-2 px-3 py-3 transition-colors hover:bg-white/[0.03] sm:grid-cols-[56px_minmax(0,1fr)_84px_minmax(0,1fr)_16px] sm:gap-x-4 sm:px-5 sm:py-2.5 ${live ? "bg-live/[0.035]" : ""} ${className}`}
       aria-label={`${match.home.name} ${showScore ? `${homeScore}, ` : "vs "}${match.away.name}${showScore ? ` ${awayScore}` : ""}`}
     >
       <div className="row-span-2 flex flex-col items-start gap-0.5 sm:row-span-1">
@@ -82,16 +82,20 @@ export function MatchRow({
         ) : (
           <span
             className={`text-xs font-semibold num ${
-              tone === "scheduled" ? "text-ink" : tone === "cancelled" ? "text-red-400" : "text-dim"
+              tone === "scheduled" ? "text-ink" : tone === "cancelled" ? "text-sky line-through" : "text-dim"
             }`}
           >
-            {tone === "scheduled"
-              ? <LocalTime value={match.status.utcTime} />
-              : statusLabel(match.status)}
+            {tone === "scheduled" ? (
+              <span className="sm:hidden">
+                <LocalTime value={match.status.utcTime} />
+              </span>
+            ) : (
+              statusLabel(match.status)
+            )}
           </span>
         )}
         {tone === "scheduled" && match.status.reason?.short && (
-          <span className="text-[10px] font-medium text-dim">
+          <span className="text-[11px] font-medium text-dim">
             {match.status.reason.short}
           </span>
         )}
@@ -99,34 +103,48 @@ export function MatchRow({
 
       <TeamLine side="home" team={match.home} redCards={match.status.numberOfHomeRedCards ?? 0} winner={homeWinner} live={live} />
       <span
-        className={`score-chip flex h-7 min-w-8 items-center justify-center rounded-md px-1.5 text-[14px] leading-none num sm:hidden ${
-          showScore ? (homeWinner ? "font-extrabold text-ink" : "font-semibold text-muted") : "invisible"
+        className={`score-chip flex h-8 min-w-9 items-center justify-center rounded-lg px-1.5 font-display text-[17px] leading-none num sm:hidden ${
+          showScore
+            ? live
+              ? "border-live/40 font-black text-live"
+              : homeWinner
+                ? "font-black text-ink"
+                : "font-bold text-muted"
+            : "invisible"
         }`}
       >
         {showScore ? homeScore : "0"}
       </span>
 
       <span
-        className={`score-chip hidden h-9 items-center justify-center gap-2 rounded-lg font-display text-[15px] leading-none num sm:flex ${
-          showScore ? (live ? "border-live/40 text-ink" : "text-ink") : "text-dim"
+        className={`score-chip hidden h-9 items-center justify-center gap-2.5 rounded-xl font-display text-[19px] leading-none num sm:flex ${
+          showScore ? (live ? "border-live/45 bg-live/[0.08] text-live" : "text-ink") : "!border-transparent !bg-transparent"
         }`}
         aria-hidden="true"
       >
         {showScore ? (
           <>
-            <b className={homeWinner || live ? "font-extrabold" : "font-semibold text-muted"}>{homeScore}</b>
+            <b className={homeWinner || live ? "font-black" : "font-bold text-muted"}>{homeScore}</b>
             <i className="h-px w-2 bg-dim not-italic" />
-            <b className={awayWinner || live ? "font-extrabold" : "font-semibold text-muted"}>{awayScore}</b>
+            <b className={awayWinner || live ? "font-black" : "font-bold text-muted"}>{awayScore}</b>
           </>
         ) : (
-          <span className="text-xs font-semibold">vs</span>
+          <span className="text-[15px] font-semibold text-ink">
+            <LocalTime value={match.status.utcTime} />
+          </span>
         )}
       </span>
 
       <TeamLine team={match.away} redCards={match.status.numberOfAwayRedCards ?? 0} winner={awayWinner} live={live} />
       <span
-        className={`score-chip flex h-7 min-w-8 items-center justify-center rounded-md px-1.5 text-[14px] leading-none num sm:hidden ${
-          showScore ? (awayWinner ? "font-extrabold text-ink" : "font-semibold text-muted") : "invisible"
+        className={`score-chip flex h-8 min-w-9 items-center justify-center rounded-lg px-1.5 font-display text-[17px] leading-none num sm:hidden ${
+          showScore
+            ? live
+              ? "border-live/40 font-black text-live"
+              : awayWinner
+                ? "font-black text-ink"
+                : "font-bold text-muted"
+            : "invisible"
         }`}
       >
         {showScore ? awayScore : "0"}
@@ -161,7 +179,7 @@ export function LeagueMatchGroup({
         <Link href={href} className="group flex min-w-0 items-center gap-3">
           <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border border-line/70 bg-card-2/70">
             <Image
-              src={leagueLogo(leagueId)}
+              src={leagueLogo(primaryId ?? leagueId)}
               alt=""
               width={24}
               height={24}
@@ -173,11 +191,11 @@ export function LeagueMatchGroup({
               <span className="truncate text-sm font-bold text-ink transition-colors group-hover:text-accent">
                 {name}
               </span>
-              <span className="hidden rounded-md border border-line/80 px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-[0.12em] text-dim sm:inline">
+              <span className="hidden rounded-md border border-line/80 px-1.5 py-0.5 text-[11px] font-bold text-dim sm:inline">
                 {ccode}
               </span>
             </span>
-            <span className="mt-0.5 block text-[10px] font-medium uppercase tracking-[0.12em] text-dim">
+            <span className="mt-0.5 block text-[11px] font-medium text-dim">
               {matches.length} {matches.length === 1 ? "fixture" : "fixtures"}
             </span>
           </span>
@@ -186,14 +204,14 @@ export function LeagueMatchGroup({
           <Link
             href={href}
             aria-label={`Open ${name}`}
-            className="ml-auto flex shrink-0 items-center gap-1 rounded-lg border border-transparent px-1.5 py-1.5 text-[10px] font-semibold text-dim transition-colors hover:border-line hover:bg-white/[0.03] hover:text-accent sm:px-2"
+            className="ml-auto flex shrink-0 items-center gap-1 rounded-lg border border-transparent px-1.5 py-1.5 text-[11px] font-semibold text-dim transition-colors hover:border-line hover:bg-white/[0.03] hover:text-accent sm:px-2"
           >
             <span className="hidden sm:inline">View league</span>
             <ChevronRightIcon size={12} />
           </Link>
         )}
       </div>
-      <div className="divide-y divide-line/45">
+      <div className="stagger divide-y divide-line/45">
         {matches.map((match) => (
           <MatchRow key={match.id} match={match} />
         ))}

@@ -107,8 +107,8 @@ export function ThemeToggle({ className = "" }: { className?: string }) {
           className="absolute right-0 top-[calc(100%+8px)] z-[70] w-[262px] rounded-2xl border border-line bg-card p-3 shadow-[0_24px_60px_-20px_rgba(0,0,0,0.65)]"
         >
           <div className="flex items-center justify-between px-0.5">
-            <p className="text-[10px] font-bold uppercase tracking-[0.16em] text-dim">Appearance</p>
-            <span className="text-[10px] font-semibold text-dim">Saved locally</span>
+            <p className="text-[11px] font-bold text-dim">Appearance</p>
+            <span className="text-[11px] font-semibold text-dim">Saved locally</span>
           </div>
 
           <div className="mt-2 grid grid-cols-2 gap-1.5">
@@ -117,7 +117,7 @@ export function ThemeToggle({ className = "" }: { className?: string }) {
                 key={mode}
                 type="button"
                 onClick={() => setMode(mode)}
-                className={`flex h-9 items-center justify-center gap-1.5 rounded-lg border text-[11px] font-bold capitalize transition-colors ${
+                className={`flex h-9 items-center justify-center gap-1.5 rounded-lg border text-xs font-bold capitalize transition-colors ${
                   theme === mode
                     ? "border-accent bg-accent text-on-accent"
                     : "border-line/70 bg-card-2/50 text-muted hover:border-accent/30 hover:text-ink"
@@ -129,7 +129,7 @@ export function ThemeToggle({ className = "" }: { className?: string }) {
             ))}
           </div>
 
-          <p className="mt-3 px-0.5 text-[10px] font-bold uppercase tracking-[0.16em] text-dim">
+          <p className="mt-3 px-0.5 text-[11px] font-bold text-dim">
             Accent
           </p>
           <div className="mt-2 grid grid-cols-2 gap-1.5">
@@ -141,7 +141,7 @@ export function ThemeToggle({ className = "" }: { className?: string }) {
                   type="button"
                   onClick={() => setAccent(item.id)}
                   aria-pressed={active}
-                  className={`flex h-9 items-center gap-2 rounded-lg border px-2 text-[11px] font-semibold transition-colors ${
+                  className={`flex h-9 items-center gap-2 rounded-lg border px-2 text-xs font-semibold transition-colors ${
                     active
                       ? "border-accent/60 bg-accent/[0.09] text-ink"
                       : "border-line/70 bg-card-2/50 text-muted hover:border-accent/30 hover:text-ink"

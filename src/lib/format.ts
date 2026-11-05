@@ -315,3 +315,27 @@ export function hexAlpha(hex: string | undefined, alpha: number) {
   if ([red, green, blue].some(Number.isNaN)) return `rgba(200, 247, 81, ${alpha})`;
   return `rgba(${red}, ${green}, ${blue}, ${alpha})`;
 }
+
+export type RatingTier = "elite" | "great" | "good" | "average" | "poor";
+
+export function ratingTier(value: number): RatingTier {
+  if (value >= 9) return "elite";
+  if (value >= 8) return "great";
+  if (value >= 7) return "good";
+  if (value >= 6) return "average";
+  return "poor";
+}
+
+export function parseRating(rating?: number | string | null) {
+  if (rating === undefined || rating === null || rating === "") return null;
+  const value = Number(rating);
+  return Number.isFinite(value) && value > 0 ? value : null;
+}
+
+export function inkFor(hex?: string) {
+  const h = (hex ?? "").replace("#", "");
+  if (h.length !== 6) return "#ffffff";
+  const [r, g, b] = [0, 2, 4].map((i) => Number.parseInt(h.slice(i, i + 2), 16) / 255);
+  const lum = 0.2126 * r + 0.7152 * g + 0.0722 * b;
+  return lum > 0.6 ? "#0b100d" : "#ffffff";
+}

@@ -1,16 +1,16 @@
 import Image from "next/image";
 import Link from "next/link";
 import { connection } from "next/server";
-import { Suspense } from "react";
+import { Suspense, ViewTransition } from "react";
 import { DateStrip } from "@/components/date-strip";
 import { ActivityIcon, ChevronRightIcon, TrophyIcon } from "@/components/icons";
 import { LiveRefresher } from "@/components/live-refresher";
 import { LeagueMatchGroup } from "@/components/match-row";
 import { LiveRail, type LiveRailMatch } from "@/components/live-rail";
-import { EmptyState, SkeletonBlock, SkeletonRows } from "@/components/ui";
+import { Crest, EmptyState, SkeletonBlock, SkeletonRows } from "@/components/ui";
 import { leagueLogo } from "@/lib/assets";
 import { getAllLeagues, getMatchesByDate, hasLiveMatches } from "@/lib/fotmob";
-import { isLive } from "@/lib/format";
+import { isLive, scorePair } from "@/lib/format";
 import {
   addDays,
   buildDateStrip,
@@ -39,8 +39,16 @@ function matchesFilter(status: MatchStatus, filter: string) {
 
 export default function HomePage({ searchParams }: { searchParams: SearchParams }) {
   return (
-    <Suspense fallback={<HomeSkeleton />}>
-      <HomeContent searchParams={searchParams} />
+    <Suspense
+      fallback={
+        <ViewTransition exit="skeleton-out" default="none">
+          <HomeSkeleton />
+        </ViewTransition>
+      }
+    >
+      <ViewTransition enter="content-in" default="none">
+        <HomeContent searchParams={searchParams} />
+      </ViewTransition>
     </Suspense>
   );
 }
@@ -135,7 +143,7 @@ async function HomeContent({ searchParams }: { searchParams: SearchParams }) {
                     key={item.value}
                     href={href}
                     scroll={false}
-                    className={`flex shrink-0 items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-[11px] font-bold transition-all sm:px-3 sm:text-xs ${
+                    className={`press flex shrink-0 items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-xs font-bold transition-all sm:px-3 sm:text-xs ${
                       active
                         ? "bg-ink text-canvas shadow-sm"
                         : "text-muted hover:bg-white/[0.045] hover:text-ink"
@@ -143,7 +151,7 @@ async function HomeContent({ searchParams }: { searchParams: SearchParams }) {
                   >
                     {item.label}
                     <span
-                      className={`rounded px-1 text-[10px] num ${
+                      className={`rounded px-1 text-[11px] num ${
                         active ? "bg-canvas/15 text-canvas/70" : "text-dim"
                       }`}
                     >
@@ -153,16 +161,16 @@ async function HomeContent({ searchParams }: { searchParams: SearchParams }) {
                 );
               })}
             </div>
-            <span className="hidden shrink-0 text-[10px] font-medium text-dim sm:block">
+            <span className="hidden shrink-0 text-[11px] font-medium text-dim sm:block">
               Grouped by competition
             </span>
           </div>
 
           {groups.length > 0 ? (
-            <div className="space-y-4">
+            <div className="stagger space-y-4">
               {groups.map((league) => (
                 <LeagueMatchGroup
-                  key={league.id}
+                  key={`${league.id}-${league.name}`}
                   leagueId={league.id}
                   primaryId={league.primaryId}
                   name={league.name}
@@ -193,7 +201,7 @@ async function HomeContent({ searchParams }: { searchParams: SearchParams }) {
             />
           )}
 
-          <p className="mt-4 flex items-center gap-1.5 text-[10px] text-dim">
+          <p className="mt-4 flex items-center gap-1.5 text-[11px] text-dim">
             <span className="inline-block h-1 w-1 rounded-full bg-dim" />
             Squads, lineups and live data update automatically during play.
           </p>
@@ -205,7 +213,7 @@ async function HomeContent({ searchParams }: { searchParams: SearchParams }) {
               <h2 className="text-[13px] font-bold text-ink">Top competitions</h2>
               <Link
                 href="/leagues"
-                className="flex items-center gap-0.5 text-[11px] font-semibold text-dim transition-colors hover:text-accent"
+                className="flex items-center gap-0.5 text-xs font-semibold text-dim transition-colors hover:text-accent"
               >
                 All
                 <ChevronRightIcon size={12} />
@@ -216,7 +224,7 @@ async function HomeContent({ searchParams }: { searchParams: SearchParams }) {
                 <Link
                   key={`${league.ccode}-${league.id}`}
                   href={`/league/${league.id}`}
-                  className="group flex items-center gap-2.5 px-4 py-2.5 transition-colors hover:bg-white/[0.025]"
+                  className="press group flex items-center gap-2.5 px-4 py-2.5 transition-colors hover:bg-white/[0.025]"
                 >
                   <Image
                     src={leagueLogo(league.id)}
@@ -228,7 +236,7 @@ async function HomeContent({ searchParams }: { searchParams: SearchParams }) {
                   <span className="min-w-0 flex-1 truncate text-xs font-semibold text-muted transition-colors group-hover:text-ink">
                     {league.name}
                   </span>
-                  <span className="rounded border border-line/80 px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-wider text-dim">
+                  <span className="rounded border border-line/80 px-1.5 py-0.5 text-[11px] font-bold text-dim">
                     {league.ccode}
                   </span>
                   <ChevronRightIcon
@@ -240,24 +248,7 @@ async function HomeContent({ searchParams }: { searchParams: SearchParams }) {
             </div>
           </div>
 
-          <div className="card relative overflow-hidden p-4">
-            <div className="pointer-events-none absolute -right-6 -top-8 h-24 w-24 rounded-full bg-accent/10 blur-2xl" />
-            <p className="eyebrow">Match centre</p>
-            <p className="mt-2 font-display text-lg font-bold leading-snug text-ink">
-              Every match in one place
-            </p>
-            <p className="mt-1.5 text-xs leading-relaxed text-dim">
-              Go beyond the score with live xG, shot maps, average positions, player ratings and
-              head-to-head records.
-            </p>
-            <Link
-              href="/leagues"
-              className="mt-3 inline-flex items-center gap-1 text-xs font-bold text-accent hover:underline"
-            >
-              Explore competitions
-              <ChevronRightIcon size={14} />
-            </Link>
-          </div>
+          <DayInNumbers leagues={data.leagues} />
         </aside>
       </div>
     </div>
@@ -282,6 +273,90 @@ function HomeSkeleton() {
           <SkeletonBlock className="h-80" />
           <SkeletonBlock className="h-40" />
         </div>
+      </div>
+    </div>
+  );
+}
+
+type DayMatch = {
+  id: string | number;
+  home: { id: string | number; name: string; score?: number };
+  away: { id: string | number; name: string; score?: number };
+  status: MatchStatus;
+};
+
+function DayInNumbers({ leagues }: { leagues: { name: string; matches: DayMatch[] }[] }) {
+  const played = leagues
+    .flatMap((league) => league.matches.map((match) => ({ match, league: league.name })))
+    .map((item) => {
+      const [home, away] = scorePair(item.match).map(Number);
+      return { ...item, home, away };
+    })
+    .filter(
+      (item) =>
+        (item.match.status.started || item.match.status.finished) &&
+        Number.isFinite(item.home) &&
+        Number.isFinite(item.away),
+    );
+  if (!played.length) return null;
+
+  const goals = played.reduce((sum, item) => sum + item.home + item.away, 0);
+  const draws = played.filter((item) => item.match.status.finished && item.home === item.away).length;
+  const goalless = played.filter((item) => item.home + item.away === 0).length;
+  const thriller = [...played].sort((a, b) => b.home + b.away - (a.home + a.away))[0];
+  const rout = [...played].sort(
+    (a, b) => Math.abs(b.home - b.away) - Math.abs(a.home - a.away),
+  )[0];
+
+  return (
+    <div className="card overflow-hidden">
+      <div className="border-b border-line/60 px-4 py-3">
+        <h2 className="text-[13px] font-bold text-ink">Day in numbers</h2>
+      </div>
+      <div className="grid grid-cols-3 divide-x divide-line/50 border-b border-line/50 text-center">
+        {[
+          { label: "Goals", value: goals },
+          { label: "Per game", value: (goals / played.length).toFixed(1) },
+          { label: "Draws", value: draws },
+        ].map((item) => (
+          <div key={item.label} className="px-2 py-3">
+            <p className="font-display text-[22px] font-black leading-none text-ink num">{item.value}</p>
+            <p className="mt-1 text-[11px] font-semibold text-dim">
+              {item.label}
+            </p>
+          </div>
+        ))}
+      </div>
+      <div className="divide-y divide-line/40">
+        {[
+          { label: "Most goals", item: thriller },
+          { label: "Biggest margin", item: rout },
+        ]
+          .filter((row) => row.item && row.item.home + row.item.away > 0)
+          .map(({ label, item }) => (
+            <Link
+              key={label}
+              href={`/match/${item.match.id}`}
+              className="press group block px-4 py-3 transition-colors hover:bg-white/[0.025]"
+            >
+              <p className="eyebrow">{label}</p>
+              <div className="mt-1.5 flex items-center gap-2">
+                <Crest id={item.match.home.id} name={item.match.home.name} size={18} />
+                <span className="min-w-0 flex-1 truncate text-[13px] font-semibold text-ink group-hover:text-accent">
+                  {item.match.home.name} – {item.match.away.name}
+                </span>
+                <span className="font-display text-[15px] font-black text-ink num">
+                  {item.home}–{item.away}
+                </span>
+              </div>
+              <p className="mt-0.5 truncate text-[11px] text-dim">{item.league}</p>
+            </Link>
+          ))}
+        {goalless > 0 && (
+          <p className="px-4 py-2.5 text-[11px] text-dim">
+            {goalless} goalless {goalless === 1 ? "game" : "games"} so far
+          </p>
+        )}
       </div>
     </div>
   );

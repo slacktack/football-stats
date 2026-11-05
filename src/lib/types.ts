@@ -839,7 +839,7 @@ export interface LineupTeam {
   starters?: LineupPlayer[];
   coach?: { id?: number; name?: string; countryCode?: string };
   subs?: LineupPlayer[];
-  unavailable?: { id?: number; name?: string; reason?: string }[];
+  unavailable?: { id?: number; name?: string; reason?: string; unavailability?: { type?: string; expectedReturn?: string } }[];
   averageStarterAge?: number;
   totalStarterMarketValue?: number;
 }

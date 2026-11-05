@@ -3,6 +3,7 @@ import Link from "next/link";
 import type { ReactNode } from "react";
 import { ChevronRightIcon } from "./icons";
 import { teamCrest } from "@/lib/assets";
+import { parseRating, ratingTier } from "@/lib/format";
 
 export function Crest({
   id,
@@ -59,7 +60,7 @@ export function Pill({
 
   return (
     <span
-      className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[11px] font-semibold ring-1 ring-inset ${tones[tone]} ${className}`}
+      className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-semibold ring-1 ring-inset ${tones[tone]} ${className}`}
     >
       {children}
     </span>
@@ -168,7 +169,7 @@ export function FormPill({ result, size = 22 }: { result?: number; size?: number
           : "bg-white/[0.04] text-dim ring-white/10";
   return (
     <span
-      className={`inline-flex items-center justify-center rounded-md text-[10px] font-bold ring-1 ring-inset ${tone}`}
+      className={`inline-flex items-center justify-center rounded-md text-[11px] font-bold ring-1 ring-inset ${tone}`}
       style={{ width: size, height: size }}
       title={label === "W" ? "Win" : label === "D" ? "Draw" : label === "L" ? "Loss" : "Unknown"}
     >
@@ -177,23 +178,33 @@ export function FormPill({ result, size = 22 }: { result?: number; size?: number
   );
 }
 
-export function RatingChip({ rating, className = "" }: { rating?: number | string | null; className?: string }) {
-  if (rating === undefined || rating === null || rating === "") return null;
-  const value = Number(rating);
-  const tone = Number.isNaN(value)
-    ? "bg-white/[0.06] text-muted"
-    : value >= 8
-      ? "bg-emerald-500/18 text-emerald-300"
-      : value >= 7
-        ? "bg-accent/16 text-accent"
-        : value >= 6.5
-          ? "bg-white/[0.07] text-ink"
-          : "bg-orange-500/15 text-orange-300";
+export function RatingChip({
+  rating,
+  size = "md",
+  star = false,
+  className = "",
+}: {
+  rating?: number | string | null;
+  size?: "sm" | "md" | "lg" | "xl";
+  star?: boolean;
+  className?: string;
+}) {
+  const value = parseRating(rating);
+  if (value === null) return null;
+  const sizes = {
+    sm: "h-5 min-w-[30px] px-1 text-[11px] rounded-[5px]",
+    md: "h-6 min-w-[36px] px-1.5 text-[12.5px] rounded-md",
+    lg: "h-8 min-w-[44px] px-2 text-[15px] rounded-lg",
+    xl: "h-12 min-w-[64px] px-3 text-[24px] rounded-xl",
+  } as const;
   return (
     <span
-      className={`inline-flex h-6 min-w-8 items-center justify-center rounded-md px-1.5 text-[11px] font-bold num ${tone} ${className}`}
+      className={`rating-chip inline-flex shrink-0 items-center justify-center gap-0.5 font-display font-extrabold leading-none num ${sizes[size]} ${className}`}
+      data-tier={ratingTier(value)}
+      title={`Rating ${value.toFixed(1)}`}
     >
-      {Number.isNaN(value) ? rating : value.toFixed(1)}
+      {star && <span aria-hidden="true">★</span>}
+      {value.toFixed(1)}
     </span>
   );
 }

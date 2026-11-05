@@ -28,20 +28,20 @@ export function FixtureRow({
   return (
     <Link
       href={`/match/${fixture.id}`}
-      className={`group grid grid-cols-[52px_minmax(0,1fr)_auto] items-center gap-x-2.5 gap-y-1.5 px-3 py-2.5 transition-colors hover:bg-white/[0.032] sm:grid-cols-[64px_minmax(0,1fr)_auto] sm:gap-x-3 sm:px-4`}
+      className={`press group grid grid-cols-[52px_minmax(0,1fr)_auto] items-center gap-x-2.5 gap-y-1.5 px-3 py-2.5 transition-colors hover:bg-white/[0.032] sm:grid-cols-[64px_minmax(0,1fr)_auto] sm:gap-x-3 sm:px-4`}
     >
       <div className="row-span-2 flex flex-col items-start gap-0.5">
-        <span className="text-[10px] font-medium uppercase tracking-wide text-dim">
+        <span className="text-[11px] font-medium text-dim">
           <LocalTime value={fixture.status.utcTime} kind="monthDay" />
         </span>
         {tone === "live" ? (
-          <span className="flex items-center gap-1 text-[11px] font-bold uppercase text-live">
+          <span className="flex items-center gap-1 text-xs font-bold uppercase text-live">
             <LiveDot />
             {statusLabel(fixture.status)}
           </span>
         ) : (
           <span
-            className={`text-[11px] font-semibold num ${
+            className={`text-xs font-semibold num ${
               tone === "scheduled" ? "text-muted" : "text-dim"
             }`}
           >
@@ -49,7 +49,7 @@ export function FixtureRow({
           </span>
         )}
         {showTournament && fixture.tournament?.name && (
-          <span className="hidden max-w-[64px] truncate text-[10px] text-dim lg:block">
+          <span className="hidden max-w-[64px] truncate text-[11px] text-dim lg:block">
             {fixture.tournament.name}
           </span>
         )}
@@ -70,8 +70,8 @@ export function FixtureRow({
         </span>
       </div>
       <span
-        className={`text-right text-[14px] leading-none num ${
-          score ? (homeWinner ? "font-extrabold text-ink" : "font-semibold text-muted") : "text-transparent"
+        className={`text-right font-display text-[16px] leading-none num ${
+          score ? (homeWinner ? "font-black text-ink" : "font-bold text-muted") : "text-transparent"
         }`}
       >
         {score ? score[0] : "0"}
@@ -92,8 +92,8 @@ export function FixtureRow({
         </span>
       </div>
       <span
-        className={`text-right text-[14px] leading-none num ${
-          score ? (awayWinner ? "font-extrabold text-ink" : "font-semibold text-muted") : "text-transparent"
+        className={`text-right font-display text-[16px] leading-none num ${
+          score ? (awayWinner ? "font-black text-ink" : "font-bold text-muted") : "text-transparent"
         }`}
       >
         {score ? score[1] : "0"}
@@ -136,7 +136,7 @@ export function FixtureList({
             <h3 className="text-xs font-bold text-ink">
               {/^\d+$/.test(round) ? `Matchday ${round}` : round}
             </h3>
-            <span className="text-[10px] text-dim">
+            <span className="text-[11px] text-dim">
               {list.length} {list.length === 1 ? "match" : "matches"}
             </span>
           </div>
@@ -189,7 +189,7 @@ export function TeamFixtureList({
             <h3 className="text-xs font-bold text-ink">{name}</h3>
             <Link
               href={group.leagueId ? `/league/${group.leagueId}` : "/leagues"}
-              className="ml-auto text-[10px] font-semibold text-dim transition-colors hover:text-accent"
+              className="ml-auto text-[11px] font-semibold text-dim transition-colors hover:text-accent"
             >
               Table
             </Link>

@@ -1,19 +1,16 @@
-import { LocalTime } from "@/components/local-time";
-import { PlayerPhoto } from "@/components/player-photo";
 import type { Metadata } from "next";
-import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { Suspense } from "react";
-import {
-  ChevronRightIcon,
-  MapPinIcon,
-  TrophyIcon,
-  ArrowUpRightIcon,
-} from "@/components/icons";
+import { Suspense, ViewTransition } from "react";
+import { ChevronRightIcon, TrophyIcon } from "@/components/icons";
 import { LeagueTable } from "@/components/league-table";
-import { LiveRefresher } from "@/components/live-refresher";
+import { HighlightsPlayer } from "@/components/match/highlights";
+import { ScoreBug } from "@/components/match/scorebug";
+import { PlayerRatingsBoard, RatingLegend } from "@/components/match/player-ratings";
 import {
+  AttackingZones,
+  InsightsCard,
+  TopRatedCard,
   FormStrip,
   H2HList,
   Lineups,
@@ -26,16 +23,17 @@ import {
 } from "@/components/match/match-panels";
 import { TabBar } from "@/components/tab-bar";
 import { EmptyState, SectionHeading, SkeletonBlock } from "@/components/ui";
-import { leagueLogo, teamCrest } from "@/lib/assets";
 import { getLeague, getMatch } from "@/lib/fotmob";
-import { hexAlpha, isLive } from "@/lib/format";
-import type { MatchTopPlayer, TeamFormEntry } from "@/lib/types";
+import { isLive } from "@/lib/format";
+import { normalizeMatchPlayers, youtubeId } from "@/lib/match-players";
+import type { MatchStats, TeamFormEntry } from "@/lib/types";
 
 type Params = Promise<{ id: string }>;
 type SearchParams = Promise<Record<string, string | string[] | undefined>>;
 
 const TABS = [
   { value: "summary", label: "Summary" },
+  { value: "players", label: "Player ratings" },
   { value: "lineups", label: "Lineups" },
   { value: "stats", label: "Stats" },
   { value: "table", label: "Table" },
@@ -68,8 +66,16 @@ export default function MatchPage({
   searchParams: SearchParams;
 }) {
   return (
-    <Suspense fallback={<MatchSkeleton />}>
-      <MatchContent params={params} searchParams={searchParams} />
+    <Suspense
+      fallback={
+        <ViewTransition exit="skeleton-out" default="none">
+          <MatchSkeleton />
+        </ViewTransition>
+      }
+    >
+      <ViewTransition enter="content-in" default="none">
+        <MatchContent params={params} searchParams={searchParams} />
+      </ViewTransition>
     </Suspense>
   );
 }
@@ -107,18 +113,25 @@ async function MatchContent({
   const venue = facts?.infoBox?.Stadium;
   const tableSource =
     match.content.table?.parentLeagueId ?? general.parentLeagueId ?? general.leagueId;
+  const videoId = youtubeId(facts?.highlights?.url);
+  const players =
+    tab === "players"
+      ? normalizeMatchPlayers(match.content.playerStats, Number(home.id), match.content.lineup)
+      : [];
+  const xg = statPair(match.content.stats, "expected_goals");
+  const scorers = goalScorers(match.header.events);
   const tableLeague =
     tab === "table" ? await getLeague(tableSource).catch(() => null) : null;
 
   return (
     <div className="shell py-5 md:py-7">
-      <nav className="mb-3 flex flex-wrap items-center gap-1 text-[10px] text-dim" aria-label="Breadcrumb">
+      <nav className="mb-3 flex flex-wrap items-center gap-1 text-[11px] text-dim" aria-label="Breadcrumb">
         <Link href="/" className="transition-colors hover:text-ink">
           Football
         </Link>
         <ChevronRightIcon size={10} />
         <Link
-          href={`/league/${general.leagueId}`}
+          href={`/league/${general.parentLeagueId ?? general.leagueId}`}
           className="transition-colors hover:text-ink"
         >
           {general.leagueName ?? "Competition"}
@@ -131,133 +144,46 @@ async function MatchContent({
         )}
       </nav>
 
-      <section
-        className="match-hero card relative overflow-hidden rounded-[28px] p-4 sm:p-6"
-        style={{
-          backgroundImage: `radial-gradient(620px 320px at -4% 0%, ${hexAlpha(
-            homeColor,
-            0.24,
-          )}, transparent 64%), radial-gradient(580px 300px at 104% 4%, ${hexAlpha(
-            awayColor,
-            0.22,
-          )}, transparent 64%), linear-gradient(108deg, ${hexAlpha(
-            homeColor,
-            0.055,
-          )} 0%, transparent 40%, transparent 60%, ${hexAlpha(awayColor, 0.055)} 100%)`,
-        }}
-      >
-        <div className="relative flex items-center justify-between gap-2">
-          <div className="flex min-w-0 items-center gap-2.5">
-            <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border border-line/70 bg-card-2/80">
-              <Image
-                src={leagueLogo(general.leagueId)}
-                alt=""
-                width={22}
-                height={22}
-                className="h-[22px] w-[22px] object-contain"
-              />
-            </span>
-            <div className="min-w-0">
-              <Link
-                href={`/league/${general.leagueId}`}
-                className="block truncate text-[12px] font-bold text-ink transition-colors hover:text-accent"
-              >
-                {general.leagueName ?? "Match"}
-              </Link>
-              <span className="mt-0.5 block text-[10px] font-semibold uppercase tracking-[0.14em] text-dim">
-                {general.matchRound ? `Round ${general.matchRound}` : "Match centre"}
-              </span>
-            </div>
-          </div>
-          <div className="flex shrink-0 items-center gap-2">
-            {venue?.name && (
-              <span className="hidden items-center gap-1 rounded-full border border-line/70 bg-card-2/60 px-2.5 py-1.5 text-[10px] font-medium text-dim sm:flex">
-                <MapPinIcon size={11} />
-                {venue.name}
-              </span>
-            )}
-            {live ? (
-              <LiveRefresher active />
-            ) : (
-              <span
-                className={`rounded-full px-2.5 py-1.5 text-[10px] font-bold uppercase tracking-[0.1em] ${
-                  finished
-                    ? "border border-accent/25 bg-accent/10 text-accent"
-                    : "border border-line bg-white/[0.035] text-muted"
-                }`}
-              >
-                {status.reason?.short ?? (finished ? "FT" : "Preview")}
-              </span>
-            )}
-          </div>
-        </div>
-
-        <div className="relative mt-5 grid grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] items-center gap-1 sm:mt-7 sm:gap-6">
-          <TeamHero team={home} side="home" accent={homeColor} />
-          <div className="relative z-10 flex min-w-[92px] flex-col items-center text-center sm:min-w-[176px]">
-            {started || finished ? (
-              <p className="score-display flex items-baseline justify-center font-display text-[46px] font-black leading-[0.8] text-ink num sm:text-[76px]">
-                <span>{String(status.scoreStr?.split(" - ")[0] ?? home.score ?? "0").trim()}</span>
-                <span className="mx-1.5 h-[2px] w-4 self-center rounded-full bg-dim/80 sm:mx-2.5 sm:h-[3px] sm:w-6" />
-                <span>{String(status.scoreStr?.split(" - ")[1] ?? away.score ?? "0").trim()}</span>
-              </p>
-            ) : (
-              <p className="score-display font-display text-[34px] font-black leading-none text-ink num sm:text-[48px]">
-                {status.utcTime ? <LocalTime value={status.utcTime} /> : "vs"}
-              </p>
-            )}
-            <div className="mt-3 flex flex-col items-center gap-1">
-              {live ? (
-                <span className="inline-flex items-center gap-1.5 rounded-full border border-live/25 bg-live/10 px-2.5 py-1 text-[10px] font-bold uppercase tracking-[0.12em] text-live">
-                  <span className="live-dot h-1.5 w-1.5 rounded-full bg-live" />
-                  {status.liveTime?.short ?? "Live"}
-                </span>
-              ) : (
-                <span className="text-[10px] font-bold uppercase tracking-[0.16em] text-muted">
-                  {status.reason?.long ?? (finished ? "Full time" : "Kick-off")}
-                </span>
-              )}
-              {status.utcTime && (
-                <span className="text-[10px] text-dim">
-                  {new Intl.DateTimeFormat("en-GB", {
-                    weekday: "short",
-                    day: "numeric",
-                    month: "short",
-                  }).format(new Date(status.utcTime))}
-                </span>
-              )}
-            </div>
-          </div>
-          <TeamHero team={away} side="away" accent={awayColor} />
-        </div>
-
-        <div className="relative mt-5 flex flex-wrap items-center justify-center gap-x-3 gap-y-1 border-t border-line/50 pt-3.5 text-[10px] text-dim">
-          {facts?.infoBox?.Referee?.text && (
-            <span>Referee · {facts.infoBox.Referee.text}</span>
-          )}
-          {facts?.infoBox?.Attendance ? (
-            <>
-              <span className="h-2.5 w-px bg-line" />
-              <span>{facts.infoBox.Attendance.toLocaleString("en-GB")} fans</span>
-            </>
-          ) : null}
-          {venue?.name && (
-            <>
-              <span className="h-2.5 w-px bg-line sm:hidden" />
-              <span className="sm:hidden">{venue.name}</span>
-            </>
-          )}
-        </div>
-      </section>
+      <ScoreBug
+        home={{ id: home.id, name: home.name }}
+        away={{ id: away.id, name: away.name }}
+        homeColor={homeColor}
+        awayColor={awayColor}
+        photo={facts?.highlights?.image}
+        score={scoreParts(status.scoreStr, home.score, away.score)}
+        live={live}
+        started={started}
+        finished={finished}
+        statusLong={status.reason?.long}
+        liveMinute={status.liveTime?.short}
+        utcTime={status.utcTime}
+        league={{ id: general.parentLeagueId ?? general.leagueId, logoId: general.parentLeagueId ?? general.leagueId, name: general.leagueName }}
+        round={general.matchRound}
+        scorers={scorers}
+        xg={xg}
+        venue={[venue?.name, venue?.city].filter(Boolean).join(", ") || undefined}
+        referee={facts?.infoBox?.Referee?.text}
+        attendance={facts?.infoBox?.Attendance}
+      />
 
       <div className="mt-4">
         <TabBar tabs={TABS} active={tab} basePath={`/match/${id}`} />
       </div>
 
+      <ViewTransition key={tab} enter="tab-swap" exit="tab-swap" default="none">
       <div className="mt-5">
         {tab === "summary" && (
-          <div className="grid items-start gap-4 xl:grid-cols-[minmax(0,1fr)_310px]">
+          <div className="grid items-start gap-4 xl:grid-cols-[minmax(0,1fr)_340px]">
             <div className="space-y-4">
+              {videoId && facts?.highlights?.url && (
+                <HighlightsPlayer
+                  videoId={videoId}
+                  url={facts.highlights.url}
+                  thumbnail={facts.highlights.image}
+                  source={facts.highlights.source}
+                  title={`${home.name} ${status.scoreStr ?? "vs"} ${away.name}`}
+                />
+              )}
               <Timeline
                 facts={facts}
                 homeTeam={{ id: home.id, name: home.name }}
@@ -277,46 +203,31 @@ async function MatchContent({
                 homeName={home.name}
                 awayName={away.name}
               />
-              {facts?.highlights?.url && (
-                <a
-                  href={facts.highlights.url}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="card card-hover flex items-center gap-3 p-4"
-                >
-                  <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-red-500/15 text-red-400">
-                    <ArrowUpRightIcon size={18} />
-                  </span>
-                  <div className="min-w-0 flex-1">
-                    <p className="text-sm font-bold text-ink">Watch highlights</p>
-                    <p className="text-[10px] text-dim">{facts.highlights.source ?? "YouTube"}</p>
-                  </div>
-                  <ChevronRightIcon size={16} className="text-dim" />
-                </a>
-              )}
+              <AttackingZones zones={match.content.attackingZones} homeName={home.name} awayName={away.name} />
             </div>
-            <aside className="space-y-3">
+            <aside className="stagger space-y-3">
               {facts?.playerOfTheMatch && <PlayerOfTheMatch player={facts.playerOfTheMatch} />}
+              <TopRatedCard
+                home={{ id: home.id, name: home.name }}
+                away={{ id: away.id, name: away.name }}
+                topPlayers={facts?.topPlayers}
+              />
+              <InsightsCard
+                insights={facts?.insights}
+                home={{ id: home.id, name: home.name }}
+                away={{ id: away.id, name: away.name }}
+              />
+              <FormCard home={home} away={away} forms={facts?.teamForm} />
               <MatchInfoCard
                 facts={facts}
                 homeTeam={{ name: home.name }}
                 awayTeam={{ name: away.name }}
               />
-              <FormCard
-                home={home}
-                away={away}
-                forms={facts?.teamForm}
-              />
-              <TopPlayers
-                home={home}
-                away={away}
-                topPlayers={facts?.topPlayers}
-              />
               {match.content.weather?.description && (
                 <div className="card flex items-center justify-between p-4">
                   <div>
                     <p className="eyebrow">Weather</p>
-                    <p className="mt-0.5 text-[11px] font-semibold text-muted">
+                    <p className="mt-0.5 text-xs font-semibold text-muted">
                       {match.content.weather.description}
                     </p>
                   </div>
@@ -324,7 +235,7 @@ async function MatchContent({
                     <p className="font-display text-xl font-extrabold text-ink num">
                       {match.content.weather.temperature}°
                     </p>
-                    <p className="text-[10px] text-dim">
+                    <p className="text-[11px] text-dim">
                       Wind {match.content.weather.windSpeed ?? 0} km/h
                     </p>
                   </div>
@@ -332,6 +243,14 @@ async function MatchContent({
               )}
             </aside>
           </div>
+        )}
+
+        {tab === "players" && (
+          <PlayerRatingsBoard
+            players={players}
+            home={{ id: Number(home.id), name: home.name }}
+            away={{ id: Number(away.id), name: away.name }}
+          />
         )}
 
         {tab === "lineups" && (
@@ -383,52 +302,42 @@ async function MatchContent({
             />
           </div>
         )}
+        {tab === "lineups" && (
+          <div className="mt-3">
+            <RatingLegend />
+          </div>
+        )}
       </div>
+      </ViewTransition>
     </div>
   );
 }
 
-function TeamHero({
-  team,
-  side,
-  accent,
-}: {
-  team: { id: number | string; name: string; score?: number };
-  side: "home" | "away";
-  accent: string;
-}) {
-  return (
-    <Link
-      href={`/team/${team.id}`}
-      className={`group flex min-w-0 flex-col items-center gap-2 text-center sm:gap-3 ${
-        side === "home" ? "sm:flex-row sm:text-left" : "sm:flex-row-reverse sm:text-right"
-      }`}
-    >
-      <span className="team-crest-frame flex h-[58px] w-[58px] shrink-0 items-center justify-center transition-transform duration-300 group-hover:scale-[1.04] sm:h-[76px] sm:w-[76px]">
-        <Image
-          src={teamCrest(team.id)}
-          alt={team.name}
-          width={76}
-          height={76}
-          priority
-          className="h-[78%] w-[78%] object-contain"
-        />
-      </span>
-      <div className="min-w-0">
-        <p className="flex items-center justify-center gap-1 text-[10px] font-bold uppercase tracking-[0.16em] text-dim sm:justify-start">
-          <span
-            className="h-1.5 w-1.5 rounded-full"
-            style={{ backgroundColor: accent }}
-            aria-hidden="true"
-          />
-          {side}
-        </p>
-        <p className="mt-1 max-w-[112px] truncate font-display text-[13px] font-black leading-[1.05] tracking-[-0.03em] text-ink sm:max-w-[240px] sm:text-2xl">
-          {team.name}
-        </p>
-      </div>
-    </Link>
-  );
+function scoreParts(scoreStr?: string, home?: number, away?: number): [string, string] | null {
+  const parts = scoreStr?.split(" - ").map((v) => v.trim());
+  if (parts?.length === 2) return [parts[0], parts[1]];
+  return home != null && away != null ? [String(home), String(away)] : null;
+}
+
+function statPair(stats: MatchStats | undefined, key: string): [string, string] | null {
+  for (const group of stats?.Periods?.All?.stats ?? []) {
+    const row = group.stats?.find((item) => item.key === key);
+    if (row?.stats?.[0] != null && row.stats[1] != null) return [String(row.stats[0]), String(row.stats[1])];
+  }
+  return null;
+}
+
+type GoalEvent = { time?: number; timeStr?: string | number; ownGoal?: boolean | null; suffix?: string | null; player?: { id?: number; name?: string } };
+
+function goalScorers(events: unknown) {
+  const e = (events ?? {}) as { homeTeamGoals?: Record<string, GoalEvent[]>; awayTeamGoals?: Record<string, GoalEvent[]> };
+  const flatten = (map?: Record<string, GoalEvent[]>) =>
+    Object.entries(map ?? {}).map(([name, goals]) => ({
+      name,
+      id: goals[0]?.player?.id,
+      minutes: goals.map((g) => `${g.timeStr ?? g.time}'${g.ownGoal ? " OG" : g.suffix === "pen" ? " P" : ""}`),
+    }));
+  return { home: flatten(e.homeTeamGoals), away: flatten(e.awayTeamGoals) };
 }
 
 function FormCard({
@@ -449,64 +358,12 @@ function FormCard({
         { name: away.name, form: forms[1] },
       ].map((row) => (
         <div key={row.name} className="flex items-center justify-between gap-2 py-1.5">
-          <span className="min-w-0 flex-1 truncate text-[11px] font-semibold text-muted">
+          <span className="min-w-0 flex-1 truncate text-xs font-semibold text-muted">
             {row.name}
           </span>
           <FormStrip form={row.form} />
         </div>
       ))}
-    </div>
-  );
-}
-
-function TopPlayers({
-  home,
-  away,
-  topPlayers,
-}: {
-  home: { name: string };
-  away: { name: string };
-  topPlayers?: { homeTopPlayers?: MatchTopPlayer[]; awayTopPlayers?: MatchTopPlayer[] };
-}) {
-  const homePlayers = topPlayers?.homeTopPlayers ?? [];
-  const awayPlayers = topPlayers?.awayTopPlayers ?? [];
-  if (!homePlayers.length && !awayPlayers.length) return null;
-
-  return (
-    <div className="card p-4">
-      <p className="eyebrow mb-1">Top rated</p>
-      <div className="divide-y divide-line/40">
-        {[
-          { name: home.name, players: homePlayers },
-          { name: away.name, players: awayPlayers },
-        ].flatMap((group) =>
-          group.players.slice(0, 3).map((player) => (
-            <Link
-              key={player.playerId}
-              href={`/player/${player.playerId}`}
-              className="flex items-center gap-2 py-2 transition-colors hover:text-ink"
-            >
-              <span className="h-6 w-6 shrink-0 overflow-hidden rounded-full bg-white/[0.05] ring-1 ring-inset ring-white/10">
-                <PlayerPhoto
-                  playerId={player.playerId}
-                  alt=""
-                  width={24}
-                  height={24}
-                  className="h-full w-full object-cover object-top"
-                />
-              </span>
-              <span className="min-w-0 flex-1 truncate text-[11px] font-semibold text-muted">
-                {player.name.fullName ??
-                  `${player.name.firstName ?? ""} ${player.name.lastName ?? ""}`}
-              </span>
-              <span className="text-[10px] text-dim">{group.name}</span>
-              <span className="rounded bg-accent/12 px-1.5 py-0.5 text-[10px] font-bold text-accent num">
-                {player.playerRatingRounded ?? player.playerRating?.toFixed(1)}
-              </span>
-            </Link>
-          )),
-        )}
-      </div>
     </div>
   );
 }

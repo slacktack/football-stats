@@ -14,7 +14,7 @@ export function SiteHeader() {
         <div className="ml-auto flex items-center gap-2">
           <Link
             href="/?filter=live"
-            className="hidden items-center gap-2 rounded-full border border-line bg-white/[0.03] px-3 py-1.5 text-[11px] font-bold text-muted transition-colors hover:border-live/30 hover:text-ink lg:flex"
+            className="hidden items-center gap-2 rounded-full border border-line bg-white/[0.03] px-3 py-1.5 text-xs font-bold text-muted transition-colors hover:border-live/30 hover:text-ink lg:flex"
           >
             <span className="live-dot h-1.5 w-1.5 rounded-full bg-live" />
             Live now

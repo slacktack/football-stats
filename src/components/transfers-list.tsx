@@ -16,7 +16,7 @@ function TransferRow({ transfer }: { transfer: Transfer }) {
           >
             {transfer.name}
           </Link>
-          <span className="mt-0.5 flex items-center gap-1.5 text-[10px] text-dim">
+          <span className="mt-0.5 flex items-center gap-1.5 text-[11px] text-dim">
             <span className="truncate">{transfer.fromClubFullName ?? transfer.fromClub}</span>
             <ArrowRightIcon size={10} className="shrink-0" />
             <span className="truncate">{transfer.toClubFullName ?? transfer.toClub}</span>
@@ -25,8 +25,8 @@ function TransferRow({ transfer }: { transfer: Transfer }) {
         <Crest id={transfer.toClubId} name={transfer.toClub} size={26} />
       </div>
       <div className="shrink-0 text-right">
-        <div className="text-[11px] font-bold text-ink">{formatFee(transfer.fee, transfer.amountEuroEstimated)}</div>
-        <div className="text-[10px] text-dim">
+        <div className="text-xs font-bold text-ink">{formatFee(transfer.fee, transfer.amountEuroEstimated)}</div>
+        <div className="text-[11px] text-dim">
           {transfer.transferDate ? formatMonthDay(transfer.transferDate) : transfer.transferType?.text ?? ""}
         </div>
       </div>
@@ -62,7 +62,7 @@ export function TransfersList({
         <section className="card overflow-hidden">
           <div className="flex items-center justify-between border-b border-line/60 bg-white/[0.014] px-3.5 py-2.5">
             <h3 className="text-xs font-bold text-ink">Arrivals</h3>
-            <span className="text-[10px] text-dim">{arrivals.length}</span>
+            <span className="text-[11px] text-dim">{arrivals.length}</span>
           </div>
           <div className="divide-y divide-line/40">
             {(limit ? arrivals.slice(0, limit) : arrivals).map((transfer) => (
@@ -76,7 +76,7 @@ export function TransfersList({
         <section className="card overflow-hidden">
           <div className="flex items-center justify-between border-b border-line/60 bg-white/[0.014] px-3.5 py-2.5">
             <h3 className="text-xs font-bold text-ink">Departures</h3>
-            <span className="text-[10px] text-dim">{departures.length}</span>
+            <span className="text-[11px] text-dim">{departures.length}</span>
           </div>
           <div className="divide-y divide-line/40">
             {(limit ? departures.slice(0, limit) : departures).map((transfer) => (

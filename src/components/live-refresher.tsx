@@ -34,7 +34,7 @@ export function LiveRefresher({
   if (!active) return null;
 
   return (
-    <div className="flex items-center gap-2 rounded-full border border-live/20 bg-live/[0.07] px-3 py-1.5 text-[11px] font-semibold text-live">
+    <div className="flex items-center gap-2 rounded-full border border-live/20 bg-live/[0.07] px-3 py-1.5 text-xs font-semibold text-live">
       <LiveDot />
       <span className="hidden sm:inline">Live · auto-updating</span>
       <span className="sm:hidden">Live</span>
@@ -45,7 +45,7 @@ export function LiveRefresher({
           setSecondsAgo(0);
           startTransition(() => router.refresh());
         }}
-        className="flex items-center gap-1 text-[10px] font-medium text-live/80 transition-colors hover:text-live"
+        className="flex items-center gap-1 text-[11px] font-medium text-live/80 transition-colors hover:text-live"
         aria-label="Refresh scores"
       >
         <RefreshIcon size={12} className={isPending ? "animate-spin" : ""} />

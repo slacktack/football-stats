@@ -66,7 +66,7 @@ export function DateStrip({
               }`}
             >
               <span
-                className={`text-[10px] font-bold uppercase tracking-[0.12em] ${
+                className={`text-[11px] font-bold ${
                   active ? "text-on-accent/55" : "text-dim"
                 }`}
               >
@@ -74,7 +74,7 @@ export function DateStrip({
               </span>
               <span className="font-display text-[19px] font-extrabold leading-tight num">{day.day}</span>
               <span
-                className={`text-[10px] font-semibold uppercase tracking-[0.12em] ${
+                className={`text-[11px] font-semibold ${
                   active ? "text-on-accent/55" : "text-dim"
                 }`}
               >
