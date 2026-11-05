@@ -8,10 +8,11 @@ const ACCENT_KEY = "touchline-accent";
 const THEME_EVENT = "touchline-theme-change";
 
 type Theme = "dark" | "light";
-type Accent = "neon" | "gold" | "ocean" | "violet";
+type Accent = "neon" | "red" | "gold" | "ocean" | "violet";
 
 const ACCENTS: { id: Accent; label: string; light: string; dark: string }[] = [
   { id: "neon", label: "Neon", light: "#1ee85c", dark: "#39ff6b" },
+  { id: "red", label: "Red", light: "#e5383b", dark: "#ef4444" },
   { id: "gold", label: "Gold", light: "#f2b81c", dark: "#f5c542" },
   { id: "ocean", label: "Ocean", light: "#38bdf8", dark: "#4cc9ff" },
   { id: "violet", label: "Violet", light: "#a78bfa", dark: "#b79cff" },
@@ -43,7 +44,7 @@ function getServerAccent(): Accent {
   return "neon";
 }
 
-export function ThemeToggle({ className = "" }: { className?: string }) {
+export function ThemeToggle({ className = "", placement = "down" }: { className?: string; placement?: "down" | "up" }) {
   const theme = useSyncExternalStore(subscribe, getThemeSnapshot, getServerSnapshot);
   const accent = useSyncExternalStore(subscribe, getAccentSnapshot, getServerAccent);
   const [open, setOpen] = useState(false);
@@ -104,7 +105,7 @@ export function ThemeToggle({ className = "" }: { className?: string }) {
         <div
           role="dialog"
           aria-label="Appearance"
-          className="absolute right-0 top-[calc(100%+8px)] z-[70] w-[262px] rounded-2xl border border-line bg-card p-3 shadow-[0_24px_60px_-20px_rgba(0,0,0,0.65)]"
+          className={`absolute z-[70] ${placement === "up" ? "bottom-[calc(100%+8px)] left-0 !w-[220px]" : "right-0 top-[calc(100%+8px)]"} w-[262px] rounded-2xl border border-line bg-card p-3 shadow-[0_24px_60px_-20px_rgba(0,0,0,0.65)]`}
         >
           <div className="flex items-center justify-between px-0.5">
             <p className="text-[11px] font-bold text-dim">Appearance</p>

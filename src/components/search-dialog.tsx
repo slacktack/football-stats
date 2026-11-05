@@ -132,7 +132,7 @@ export function SearchDialog() {
       <button
         type="button"
         onClick={() => setOpen(true)}
-        className="group hidden h-10 w-[248px] items-center gap-2.5 rounded-xl border border-line bg-white/[0.035] px-3 text-left text-[13px] text-dim transition-colors hover:border-white/15 hover:bg-white/[0.055] md:flex xl:w-[300px]"
+        className="group hidden h-10 w-[248px] items-center gap-2.5 rounded-xl border border-line bg-white/[0.035] px-3 text-left text-[13px] text-dim transition-colors hover:border-white/15 hover:bg-white/[0.055] md:flex lg:w-[420px]"
         aria-label="Search players, teams and leagues"
       >
         <SearchIcon size={16} className="text-dim group-hover:text-muted" />

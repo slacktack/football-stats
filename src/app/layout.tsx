@@ -3,6 +3,7 @@ import { Geist_Mono, Plus_Jakarta_Sans } from "next/font/google";
 import { Suspense } from "react";
 import { MobileNav } from "@/components/mobile-nav";
 import { SiteFooter } from "@/components/site-footer";
+import { SideNav } from "@/components/side-nav";
 import { SiteHeader } from "@/components/site-header";
 import "./globals.css";
 
@@ -75,7 +76,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
         <script
           dangerouslySetInnerHTML={{
             __html:
-              "(function(){try{var t=localStorage.getItem('touchline-theme')==='light'?'light':'dark';var a=localStorage.getItem('touchline-accent');var ok={neon:1,gold:1,ocean:1,violet:1};if(!a||!ok[a])a='neon';document.documentElement.dataset.theme=t;document.documentElement.dataset.accent=a;document.documentElement.style.colorScheme=t;}catch(e){}})();",
+              "(function(){try{var t=localStorage.getItem('touchline-theme')==='light'?'light':'dark';var a=localStorage.getItem('touchline-accent');var ok={neon:1,red:1,gold:1,ocean:1,violet:1};if(!a||!ok[a])a='neon';document.documentElement.dataset.theme=t;document.documentElement.dataset.accent=a;document.documentElement.style.colorScheme=t;}catch(e){}})();",
           }}
         />
       </head>
@@ -86,7 +87,10 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
         >
           Skip to content
         </a>
-        <div className="flex min-h-dvh flex-col">
+        <Suspense fallback={null}>
+          <SideNav />
+        </Suspense>
+        <div className="flex min-h-dvh flex-col lg:pl-[var(--sidenav-w)]">
           <Suspense fallback={<div className="h-[57px] border-b border-line bg-base/80" />}>
             <SiteHeader />
           </Suspense>
