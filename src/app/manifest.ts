@@ -7,8 +7,8 @@ export default function manifest(): MetadataRoute.Manifest {
     description: "Live football scores, fixtures, tables and stats.",
     start_url: "/",
     display: "standalone",
-    background_color: "#e9e5e1",
-    theme_color: "#e9e5e1",
+    background_color: "#e3ded8",
+    theme_color: "#e3ded8",
     icons: [{ src: "/icon.svg", sizes: "any", type: "image/svg+xml", purpose: "any" }],
   };
 }

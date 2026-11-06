@@ -26,11 +26,11 @@
   --radius-4xl: 0;
   --radius: 0;
 
-  --color-base: #e9e5e1;
-  --color-canvas: #e9e5e1;
-  --color-raise: #e1dcd7;
-  --color-card: #efebe7;
-  --color-card-2: #e6e1db;
+  --color-base: #e3ded8;
+  --color-canvas: #e3ded8;
+  --color-raise: #dcd6cf;
+  --color-card: #f5f2ed;
+  --color-card-2: #ebe7e0;
   --color-line: rgba(17, 17, 17, 0.16);
   --color-line-strong: rgba(17, 17, 17, 0.32);
   --color-ink: #111111;
@@ -40,6 +40,7 @@
   --color-accent-strong: #2bd94a;
   --color-accent-ink: #0b7a60;
   --color-mint: #26b69a;
+  --color-mint-soft: #c9f3d2;
   --color-sky: #e0a526;
   --color-live: #12a144;
   --color-violet: #e2462b;
@@ -66,6 +67,7 @@
   --color-accent-strong: #7dffa0;
   --color-accent-ink: #2bd94a;
   --color-mint: #26b69a;
+  --color-mint-soft: #123024;
   --color-sky: #e0a526;
   --color-live: #2bd94a;
   --color-violet: #e2462b;

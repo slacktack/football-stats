@@ -94,7 +94,7 @@ export function MatchRow({
     <Link
       href={href ?? `/match/${match.id}`}
       className={`tl-row press group relative grid grid-cols-[56px_minmax(0,1fr)_auto] items-center gap-x-2.5 px-3 py-2.5 transition-colors hover:bg-hover sm:grid-cols-[64px_minmax(0,1fr)_18px_92px_18px_minmax(0,1fr)_14px] sm:gap-x-2.5 sm:px-4 ${
-        live ? "tl-row-live bg-live/[0.06]" : ""
+        live ? "tl-row-live bg-mint-soft/70" : ""
       } ${className}`}
       aria-label={`${match.home.name} ${showScore ? `${homeScore}, ` : "vs "}${match.away.name}${
         showScore ? ` ${awayScore}` : ""
@@ -235,7 +235,7 @@ export function LeagueMatchGroup({
   const href = `/league/${primaryId ?? leagueId}`;
   return (
     <section className={`card overflow-hidden ${hueClass(leagueId)}`}>
-      <div className="relative flex items-center gap-3 border-b border-line-strong px-3 py-2.5 before:absolute before:inset-y-0 before:left-0 before:w-[3px] before:bg-[var(--tl-hue)] sm:px-4 sm:before:w-[4px]">
+      <div className="tl-head tl-head-hue gap-3 py-2.5">
         <Link href={href} className="group flex min-w-0 items-center gap-3">
           <span className="flex h-11 w-11 shrink-0 items-center justify-center border border-[color:color-mix(in_srgb,var(--tl-hue)_40%,var(--color-line))] bg-[color:color-mix(in_srgb,var(--tl-hue)_10%,transparent)] transition-colors group-hover:border-[var(--tl-hue)]">
             <Image

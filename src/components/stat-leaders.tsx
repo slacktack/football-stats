@@ -124,7 +124,7 @@ export function StatLeaders({
         const max = Math.max(0, ...(group.topThree ?? []).map((entry) => Number(entry.value) || 0));
         return (
         <section key={group.header} className="card overflow-hidden">
-          <div className="border-b border-line px-3 py-2">
+          <div className="tl-head">
             <h3 className="tl-k">{group.header}</h3>
           </div>
           <div className="divide-y divide-line">

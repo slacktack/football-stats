@@ -60,7 +60,7 @@ export function TransfersList({
     return (
       <div className="grid gap-3 lg:grid-cols-2">
         <section className="card overflow-hidden">
-          <header className="flex items-center justify-between border-b border-line px-3.5 py-2 sm:px-4">
+          <header className="tl-head justify-between">
             <h3 className="tl-k">Arrivals</h3>
             <span className="tl-k tl-k-dim">{arrivals.length}</span>
           </header>
@@ -74,7 +74,7 @@ export function TransfersList({
           </div>
         </section>
         <section className="card overflow-hidden">
-          <header className="flex items-center justify-between border-b border-line px-3.5 py-2 sm:px-4">
+          <header className="tl-head justify-between">
             <h3 className="tl-k">Departures</h3>
             <span className="tl-k tl-k-dim">{departures.length}</span>
           </header>

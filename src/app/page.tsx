@@ -109,7 +109,7 @@ async function HomeContent({ searchParams }: { searchParams: SearchParams }) {
 
   return (
     <div className="shell tl-view py-5 md:py-7">
-      <header className="relative overflow-hidden border-b border-line pb-4">
+      <header className="tl-band relative overflow-hidden">
         <PixelField className="tl-field-right" step={24} />
         <div className="relative flex flex-wrap items-end justify-between gap-x-4 gap-y-3">
           <div className="min-w-0">

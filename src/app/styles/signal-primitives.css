@@ -6,13 +6,21 @@
   /* ---------- panel ---------- */
 
   .tl-panel {
+    --tl-pad-t: 16px;
+    --tl-pad-x: 18px;
     position: relative;
-    padding: 16px 18px 18px;
+    padding: var(--tl-pad-t) var(--tl-pad-x) 18px;
     background: var(--tl-panel);
     border: 1px solid var(--tl-hair-soft);
     border-radius: 0;
     min-width: 0;
     transition: border-color 350ms var(--tl-ease), box-shadow 350ms var(--tl-ease);
+  }
+
+  /* Panels that zero their own padding must zero the header bleed too. */
+  .tl-panel[class~="p-0"] {
+    --tl-pad-t: 0px;
+    --tl-pad-x: 0px;
   }
 
   .tl-panel:hover {
@@ -42,8 +50,59 @@
     justify-content: space-between;
     align-items: baseline;
     gap: 12px;
-    margin-bottom: 12px;
-    padding-bottom: 12px;
+    margin: calc(-1 * var(--tl-pad-t)) calc(-1 * var(--tl-pad-x)) 14px;
+    padding: 9px var(--tl-pad-x) 10px;
+    background: var(--tl-mint);
+    border-bottom: 1px solid var(--tl-mint-edge);
+  }
+
+  /* The header is the channel strip: a solid green lead-in reads as powered. */
+  .tl-panel-h::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: -1px;
+    width: 3px;
+    background: var(--tl-led);
+  }
+
+  /* Same channel strip for panels that build their own header row instead of
+     going through Panel. Bleed-free: it owns its own padding. */
+  .tl-head {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 9px 14px;
+    background: var(--tl-mint);
+    border-bottom: 1px solid var(--tl-mint-edge);
+  }
+
+  .tl-head::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 3px;
+    background: var(--tl-led);
+  }
+
+  .tl-head .tl-k-dim {
+    color: color-mix(in srgb, var(--tl-mint-ink) 78%, transparent);
+  }
+
+  /* Competition groups take their hue over the card, not over mint — mixing
+     two greens makes every league read as the same olive. */
+  .tl-head-hue {
+    background: color-mix(in srgb, var(--tl-hue) 22%, var(--color-card));
+    border-bottom-color: color-mix(in srgb, var(--tl-hue) 52%, transparent);
+  }
+
+  .tl-head-hue::before {
+    width: 4px;
+    background: var(--tl-hue);
   }
 
   /* Every panel header closes on a tick rule rather than a plain line.
@@ -142,9 +201,9 @@
   }
 
   .tl-chip-mint {
-    background: color-mix(in srgb, var(--tl-teal) 18%, transparent);
-    border-color: color-mix(in srgb, var(--tl-teal) 60%, transparent);
-    color: var(--color-ink);
+    background: var(--tl-mint);
+    border-color: var(--tl-mint-edge);
+    color: var(--tl-mint-ink);
   }
 
   a.tl-chip-inv:hover {
@@ -694,22 +753,25 @@
     align-content: start;
     padding: 12px 13px;
     background: var(--tl-panel);
+    box-shadow: inset 0 0 0 1px var(--tl-hair-soft);
     min-width: 0;
-    transition: background 0.2s;
+    transition: background 0.2s, box-shadow 0.2s;
   }
 
   a.tl-kpi:hover {
-    background: var(--tl-wash-strong);
+    background: var(--tl-mint-2);
+    box-shadow: inset 0 0 0 1px var(--tl-mint-edge);
   }
 
   /* The lead tile is the live channel: it carries the phosphor wash. */
   .tl-kpi:first-child {
     background: linear-gradient(
       165deg,
-      color-mix(in srgb, var(--tl-led) 15%, var(--tl-panel)),
-      color-mix(in srgb, var(--tl-teal) 7%, var(--tl-panel)) 62%,
+      var(--tl-mint),
+      var(--tl-mint-2) 58%,
       var(--tl-panel)
     );
+    box-shadow: inset 0 0 0 1px var(--tl-mint-edge);
   }
 
   .tl-kpi-v {
@@ -1108,15 +1170,15 @@
   }
 
   .tl-row:hover .tl-vs {
-    border-color: color-mix(in srgb, var(--tl-led) 55%, transparent);
+    border-color: var(--tl-mint-edge);
     border-style: solid;
-    background: color-mix(in srgb, var(--tl-led) 9%, var(--tl-panel));
+    background: var(--tl-mint);
   }
 
   .tl-vs-live {
     border-style: solid;
-    border-color: color-mix(in srgb, var(--color-live) 62%, transparent);
-    background: color-mix(in srgb, var(--color-live) 13%, var(--tl-panel));
+    border-color: var(--tl-mint-edge);
+    background: var(--tl-mint);
     box-shadow: inset 0 0 18px -8px color-mix(in srgb, var(--color-live) 70%, transparent);
   }
 
@@ -1157,4 +1219,42 @@
   }
 
   .tl-row-min > span { background: var(--color-live); }
+}
+
+/* Hero band. Deliberately unlayered: the hero markup carries text-ink and
+   text-muted utilities, and an unlayered rule is the only thing that can
+   beat the utilities layer without !important. */
+.tl-band {
+  margin-inline: -1rem;
+  padding: 15px 1rem 18px;
+  background: #111111;
+  color: #e9e5e1;
+  border-bottom: 1px solid #111111;
+
+  /* Re-declare the palette for the subtree rather than fighting each text-*
+     utility: every token-derived class, the hairlines and the PixelField's
+     ink grid all follow the local value automatically. */
+  --color-ink: #f2efe9;
+  --color-muted: rgba(233, 229, 225, 0.62);
+  --color-dim: rgba(233, 229, 225, 0.42);
+  --color-line: rgba(233, 229, 225, 0.18);
+  --color-line-strong: rgba(233, 229, 225, 0.34);
+  --tl-hair: rgba(233, 229, 225, 0.34);
+  --tl-hair-soft: rgba(233, 229, 225, 0.18);
+  --tl-hair-strong: rgba(233, 229, 225, 0.42);
+}
+
+/* The tall ruler ticks are the powered channel. */
+.tl-band .tl-ruler i.l { background: var(--tl-led); }
+
+@media (min-width: 640px) {
+  .tl-band {
+    margin-inline: -1.5rem;
+    padding: 17px 1.5rem 20px;
+  }
+}
+
+[data-theme="dark"] .tl-band {
+  background: linear-gradient(180deg, #101612, #090c0a);
+  border-bottom-color: var(--color-line);
 }

@@ -132,7 +132,7 @@ export function FixtureList({
     <div className="space-y-4">
       {Array.from(groups.entries()).map(([round, list]) => (
         <section key={round} className="card overflow-hidden">
-          <header className="flex items-center justify-between border-b border-line px-3.5 py-2 sm:px-4">
+          <header className="tl-head justify-between">
             <h3 className="tl-k">
               {/^\d+$/.test(round) ? `Matchday ${round}` : round}
             </h3>
@@ -176,7 +176,7 @@ export function TeamFixtureList({
     <div className="space-y-4">
       {Array.from(groups.entries()).map(([name, group]) => (
         <section key={name} className="card overflow-hidden">
-          <header className="flex items-center gap-2 border-b border-line px-3.5 py-2 sm:px-4">
+          <header className="tl-head">
             {group.leagueId && (
               <Image
                 src={leagueLogo(group.leagueId)}
