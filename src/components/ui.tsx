@@ -77,7 +77,7 @@ export function SectionHeading({
   className?: string;
 }) {
   return (
-    <div className={`tl-panel-h mb-0 ${className}`}>
+    <div className={`tl-head items-start ${className}`}>
       <div className="min-w-0">
         <h2 className="tl-k flex items-center gap-2">
           {icon && <span className="text-accent">{icon}</span>}
@@ -90,7 +90,7 @@ export function SectionHeading({
       {action && actionHref && (
         <Link
           href={actionHref}
-          className="group flex shrink-0 items-center gap-1 text-[10.5px] uppercase tracking-[0.08em] text-dim transition-colors hover:text-accent"
+          className="group ml-auto flex shrink-0 items-center gap-1 text-[10.5px] uppercase tracking-[0.08em] text-dim transition-colors hover:text-accent"
         >
           {action}
           <ChevronRightIcon size={12} className="transition-transform group-hover:translate-x-0.5" />

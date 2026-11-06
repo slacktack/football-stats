@@ -364,9 +364,11 @@ export function LastLineupCard({ data }: { data?: LastLineup | null }) {
 }
 
 function MiniStat({ label, value, hint }: { label: string; value: string; hint?: string }) {
+  // Doto has no em dash: it renders one as five dots, which reads as a code.
+  const numeric = /\d/.test(value);
   return (
     <div className="tl-kpi text-center">
-      <p className="tl-kpi-v tl-num mx-auto">{value}</p>
+      <p className={`tl-kpi-v mx-auto ${numeric ? "tl-num" : "text-[22px] text-dim"}`}>{value}</p>
       <p className="tl-kpi-src justify-center">{label}</p>
       {hint && <p className="truncate text-[10.5px] text-muted">{hint}</p>}
     </div>
