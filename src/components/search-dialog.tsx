@@ -9,6 +9,7 @@ import { useEffect, useRef, useState } from "react";
 import { searchAction } from "@/app/actions";
 import type { SearchResult } from "@/lib/types";
 import { ChevronRightIcon, CloseIcon, SearchIcon } from "./icons";
+import { Leds, TermBar } from "./tl";
 import { Crest } from "./ui";
 
 const QUICK_LINKS = [
@@ -132,12 +133,12 @@ export function SearchDialog() {
       <button
         type="button"
         onClick={() => setOpen(true)}
-        className="group hidden h-10 w-[248px] items-center gap-2.5 rounded-xl border border-line bg-white/[0.035] px-3 text-left text-[13px] text-dim transition-colors hover:border-white/15 hover:bg-white/[0.055] md:flex lg:w-[420px]"
+        className="group hidden h-9 w-[248px] items-center gap-2.5 border border-line bg-card-2/60 px-3 text-left text-[11.5px] text-dim transition-colors hover:border-line-strong md:flex lg:w-[420px]"
         aria-label="Search players, teams and leagues"
       >
-        <SearchIcon size={16} className="text-dim group-hover:text-muted" />
+        <span className="tl-acc" aria-hidden="true">&gt;</span>
         <span className="flex-1 truncate">Search players, teams, leagues</span>
-        <kbd className="rounded-md border border-white/10 bg-white/[0.05] px-1.5 py-0.5 font-mono text-[11px] text-dim">
+        <kbd className="border border-line bg-card px-1.5 py-0.5 font-mono text-[10.5px] text-dim">
           ⌘K
         </kbd>
       </button>
@@ -145,15 +146,15 @@ export function SearchDialog() {
       <button
         type="button"
         onClick={() => setOpen(true)}
-        className="flex h-10 w-10 items-center justify-center rounded-xl border border-line bg-white/[0.035] text-muted transition-colors hover:text-ink md:hidden"
+        className="flex h-9 w-9 items-center justify-center border border-line bg-card-2/60 text-muted transition-colors hover:border-line-strong hover:text-ink md:hidden"
         aria-label="Search"
       >
-        <SearchIcon size={18} />
+        <SearchIcon size={16} className="text-dim group-hover:text-muted" />
       </button>
 
       {open && (
         <div
-          className="overlay-in fixed inset-0 z-100 flex items-start justify-center bg-black/72 px-4 pt-[8vh] backdrop-blur-md sm:pt-[12vh]"
+          className="overlay-in fixed inset-0 z-100 flex items-start justify-center bg-[var(--tl-scrim)] px-4 pt-[8vh] sm:pt-[12vh]"
           onMouseDown={(event) => {
             if (event.target === event.currentTarget) close();
           }}
@@ -162,10 +163,17 @@ export function SearchDialog() {
             role="dialog"
             aria-modal="true"
             aria-label="Search"
-            className="dialog-in w-full max-w-[640px] overflow-hidden rounded-2xl border border-line bg-card shadow-[0_40px_120px_-20px_rgba(0,0,0,0.9)]"
+            className="tl-term-out dialog-in w-full max-w-[640px]"
           >
-            <div className="flex items-center gap-3 border-b border-line px-4">
-              <SearchIcon size={19} className="shrink-0 text-dim" />
+            <TermBar
+              path="/search"
+              dim={displayResults.length ? `${displayResults.length} hits` : "live index"}
+            />
+
+            <div className="tl-term-cmd">
+              <span className="tl-acc shrink-0" aria-hidden="true">
+                $
+              </span>
               <input
                 ref={inputRef}
                 value={query}
@@ -174,76 +182,82 @@ export function SearchDialog() {
                   setActive(0);
                 }}
                 onKeyDown={onKeyDown}
-                placeholder="Search for a team, player, league or match..."
-                className="h-14 flex-1 bg-transparent text-base text-ink outline-none placeholder:text-dim focus-visible:outline-none"
+                placeholder="team, player, league or match..."
+                className="h-9 min-w-0 flex-1 bg-transparent font-mono text-[13px] text-ink outline-none placeholder:text-dim"
                 aria-label="Search query"
                 autoComplete="off"
                 spellCheck={false}
               />
               {displayLoading ? (
-                <span className="h-4 w-4 animate-spin rounded-full border-2 border-white/15 border-t-accent" />
+                <Leds n={5} />
               ) : (
-                <button
-                  type="button"
-                  onClick={close}
-                  className="flex h-7 w-7 items-center justify-center rounded-md text-dim transition-colors hover:bg-white/5 hover:text-ink"
-                  aria-label="Close search"
-                >
-                  <CloseIcon size={16} />
-                </button>
+                <>
+                  {query.length === 0 && <span className="tl-caret shrink-0" aria-hidden="true" />}
+                  <button
+                    type="button"
+                    onClick={close}
+                    className="tl-btn tl-btn-sm shrink-0"
+                    aria-label="Close search"
+                  >
+                    <CloseIcon size={13} />
+                  </button>
+                </>
               )}
             </div>
 
-            <div className="max-h-[58vh] overflow-y-auto thin-scrollbar p-2">
+            <div className="thin-scrollbar max-h-[58vh] overflow-y-auto px-2 pb-2 pt-3">
               {query.trim().length < 2 ? (
-                <div className="p-2">
-                  <p className="eyebrow px-1 pb-2">Popular right now</p>
-                  <div className="flex flex-wrap gap-1.5">
+                <div className="p-1">
+                  <p className="tl-k tl-k-dim mb-2">Popular right now</p>
+                  <div className="tl-tags">
                     {QUICK_LINKS.map((link) => (
                       <Link
                         key={link.href}
                         href={link.href}
                         onClick={close}
-                        className="rounded-lg border border-line bg-white/[0.03] px-3 py-1.5 text-xs font-medium text-muted transition-colors hover:border-accent/30 hover:text-ink"
+                        className="tl-chip transition-colors hover:bg-hover"
                       >
                         {link.label}
                       </Link>
                     ))}
                   </div>
-                  <p className="mt-6 px-1 text-xs text-dim">
-                    Tip: press{" "}
-                    <kbd className="rounded border border-white/10 px-1 font-mono text-[11px]">⌘K</kbd>{" "}
-                    anywhere to search, or{" "}
-                    <kbd className="rounded border border-white/10 px-1 font-mono text-[11px]">/</kbd> to
+                  <p className="mt-6 text-[11.5px] leading-relaxed text-dim">
+                    Press{" "}
+                    <kbd className="border border-line px-1 font-mono text-[10.5px] text-ink">⌘K</kbd>{" "}
+                    anywhere to open this terminal, or{" "}
+                    <kbd className="border border-line px-1 font-mono text-[10.5px] text-ink">/</kbd> to
                     jump in.
                   </p>
                 </div>
               ) : displayResults.length === 0 && !displayLoading ? (
                 <div className="px-4 py-12 text-center">
-                  <p className="text-sm font-semibold text-ink">No results for “{query.trim()}”</p>
-                  <p className="mt-1 text-xs text-dim">Try a different spelling or a club name.</p>
+                  <p className="tl-k">No results for “{query.trim()}”</p>
+                  <p className="mt-2 text-[11.5px] text-dim">Try a different spelling or a club name.</p>
                 </div>
               ) : (
-                <ul className="space-y-0.5">
+                <ul>
                   {displayResults.map((result, index) => (
                     <li key={`${result.type}-${result.id}`}>
                       <button
                         type="button"
                         onMouseEnter={() => setActive(index)}
                         onClick={() => go(result)}
-                        className={`flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left transition-colors ${
-                          active === index ? "bg-accent/12 shadow-[inset_3px_0_0_var(--color-accent)]" : "hover:bg-white/[0.045]"
+                        className={`tl-tr relative w-full grid-cols-[40px_minmax(0,1fr)_auto] text-left ${
+                          active === index ? "bg-hover" : ""
                         }`}
                       >
+                        {active === index && (
+                          <span className="absolute inset-y-0 left-0 w-[3px] bg-accent" aria-hidden="true" />
+                        )}
                         {result.type === "match" ? (
-                          <span className="flex w-9 shrink-0 items-center">
+                          <span className="flex w-10 shrink-0 items-center">
                             {result.image && (
                               <Image
                                 src={result.image}
                                 alt=""
                                 width={26}
                                 height={26}
-                                className="drop-shadow"
+                                className="w-[26px]"
                               />
                             )}
                             {result.secondaryImage && (
@@ -252,41 +266,39 @@ export function SearchDialog() {
                                 alt=""
                                 width={26}
                                 height={26}
-                                className="-ml-2.5 drop-shadow"
+                                className="-ml-2 w-[26px]"
                               />
                             )}
                           </span>
                         ) : result.type === "player" ? (
-                          <span className="h-10 w-10 shrink-0 overflow-hidden rounded-full bg-card-2 ring-1 ring-inset ring-line">
-                            <PlayerPhoto playerId={result.id} alt="" width={40} height={40} className="h-full w-full object-cover object-top" />
+                          <span className="tl-frame h-9 w-9 shrink-0 overflow-hidden bg-card-2/60">
+                            <PlayerPhoto playerId={result.id} alt="" width={36} height={36} className="h-full w-full object-cover object-top" />
                           </span>
                         ) : result.image ? (
                           <SafeImage
                             src={result.image}
                             label={result.name}
                             alt=""
-                            width={40}
-                            height={40}
-                            className="h-10 w-10 shrink-0 rounded-lg object-contain"
+                            width={36}
+                            height={36}
+                            className="h-9 w-9 shrink-0 object-contain"
                           />
                         ) : (
-                          <Crest id={result.id} name={result.name} />
+                          <Crest id={result.id} name={result.name} size={36} />
                         )}
-                        <span className="min-w-0 flex-1">
-                          <span className="block truncate text-sm font-semibold text-ink">
+                        <span className="min-w-0">
+                          <span className="block truncate text-[12.5px] font-semibold text-ink">
                             {result.name}
                           </span>
-                          <span className="block truncate text-xs text-dim">
-                            {result.subtitle}
-                          </span>
+                          <span className="tl-k tl-k-dim block truncate">{result.subtitle}</span>
                         </span>
                         <span className="flex shrink-0 items-center gap-2">
                           {result.meta && (
-                            <span className="text-xs font-semibold text-muted num">
+                            <span className="text-[11.5px] font-semibold text-muted num">
                               {result.meta}
                             </span>
                           )}
-                          <span className="hidden rounded-md bg-white/[0.05] px-1.5 py-0.5 text-[11px] font-bold text-dim sm:inline">
+                          <span className="tl-tag hidden sm:inline-block">
                             {TYPE_LABEL[result.type]}
                           </span>
                           <ChevronRightIcon size={14} className="text-dim" />
@@ -298,21 +310,24 @@ export function SearchDialog() {
               )}
             </div>
 
-            <div className="flex items-center justify-between border-t border-line px-4 py-2.5">
-              <span className="hidden items-center gap-3 text-[11px] text-dim sm:flex">
+            <div className="flex items-center justify-between gap-3 border-t border-line px-4 py-2.5">
+              <span className="hidden items-center gap-3 text-[10.5px] uppercase tracking-[0.08em] text-dim sm:flex">
                 <span>
-                  <kbd className="rounded border border-white/10 px-1 font-mono">↑</kbd>{" "}
-                  <kbd className="rounded border border-white/10 px-1 font-mono">↓</kbd> navigate
+                  <kbd className="border border-line px-1 font-mono">↑</kbd>{" "}
+                  <kbd className="border border-line px-1 font-mono">↓</kbd> navigate
                 </span>
                 <span>
-                  <kbd className="rounded border border-white/10 px-1 font-mono">↵</kbd> select
+                  <kbd className="border border-line px-1 font-mono">↵</kbd> select
+                </span>
+                <span>
+                  <kbd className="border border-line px-1 font-mono">esc</kbd> close
                 </span>
               </span>
               {query.trim().length >= 2 && (
                 <Link
                   href={`/search?q=${encodeURIComponent(query.trim())}`}
                   onClick={close}
-                  className="ml-auto text-xs font-semibold text-accent hover:underline"
+                  className="tl-chip tl-chip-inv ml-auto"
                 >
                   See all results
                 </Link>

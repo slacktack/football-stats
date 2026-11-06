@@ -4,6 +4,7 @@ import Link from "next/link";
 import { parseRating, ratingTier } from "@/lib/format";
 import { ChevronRightIcon } from "../icons";
 import { Crest, RatingChip } from "../ui";
+import { AsciiBar, K, Panel } from "../tl";
 
 export type TopPlayer = {
   id: number;
@@ -75,7 +76,7 @@ export function asTopPlayers(value: unknown): TopPlayersData | null {
 function PlayerAvatar({ id, size = 40 }: { id: number; size?: number }) {
   return (
     <span
-      className="relative shrink-0 overflow-hidden rounded-full bg-card-2 ring-1 ring-inset ring-white/10"
+      className="relative shrink-0 overflow-hidden border border-line bg-card-2"
       style={{ width: size, height: size }}
     >
       <PlayerPhoto
@@ -113,23 +114,22 @@ export function TopPlayersBoard({
       {boards.map((board) => {
         const [leader, ...rest] = board.players;
         return (
-          <section key={board.key} className="card overflow-hidden">
-            <div className="flex items-center justify-between border-b border-line/60 px-4 py-2.5">
-              <h3 className="eyebrow">{board.title}</h3>
-              {board.key === "byRating" && (
-                <span className="text-[11px] font-medium text-dim">Season avg.</span>
-              )}
-            </div>
+          <Panel
+            key={board.key}
+            label={board.title}
+            aside={board.key === "byRating" ? "Season avg." : undefined}
+            className="overflow-hidden"
+          >
             <Link
               href={`/player/${leader.id}`}
-              className="press group flex items-center gap-3 px-4 py-3.5 transition-colors hover:bg-white/[0.03]"
+              className="press group flex items-center gap-3 py-2 transition-colors hover:bg-hover"
             >
               <PlayerAvatar id={leader.id} size={52} />
               <div className="min-w-0 flex-1">
-                <p className="truncate text-[15px] font-bold text-ink transition-colors group-hover:text-accent">
+                <p className="truncate text-[12.5px] font-semibold text-ink transition-colors group-hover:text-accent">
                   {leader.name}
                 </p>
-                <p className="mt-0.5 flex items-center gap-1.5 truncate text-xs text-dim">
+                <p className="mt-0.5 flex items-center gap-1.5 truncate text-[11.5px] text-dim">
                   {showTeam && leader.teamId ? (
                     <>
                       <Crest id={leader.teamId} name={leader.teamName ?? ""} size={14} />
@@ -142,15 +142,15 @@ export function TopPlayersBoard({
               </div>
               <BoardValue boardKey={board.key} value={leader.value} large />
             </Link>
-            <div className="divide-y divide-line/35 border-t border-line/40">
+            <div className="divide-y divide-line border-t border-line">
               {rest.map((player) => (
                 <Link
                   key={player.id}
                   href={`/player/${player.id}`}
-                  className="press flex items-center gap-2.5 px-4 py-2.5 transition-colors hover:bg-white/[0.03]"
+                  className="press group flex items-center gap-2.5 py-2 transition-colors hover:bg-hover"
                 >
                   <PlayerAvatar id={player.id} size={28} />
-                  <span className="min-w-0 flex-1 truncate text-[13px] font-semibold text-muted">
+                  <span className="min-w-0 flex-1 truncate text-[11.5px] font-semibold text-muted group-hover:text-ink">
                     {player.name}
                   </span>
                   {showTeam && player.teamId ? (
@@ -160,7 +160,7 @@ export function TopPlayersBoard({
                 </Link>
               ))}
             </div>
-          </section>
+          </Panel>
         );
       })}
     </div>
@@ -179,19 +179,24 @@ function BoardValue({
   if (boardKey === "byRating") return <RatingChip rating={value} size={large ? "lg" : "md"} />;
   return (
     <span
-      className={`font-display font-black text-ink num ${large ? "text-[26px] leading-none" : "text-[15px]"}`}
+      className={`tl-num text-ink ${large ? "text-[22px]" : "text-[13px]"}`}
     >
       {value ?? 0}
     </span>
   );
 }
 
-const DIFFICULTY = [
-  { label: "Easy", bg: "#39ff6b", fg: "#04130a" },
-  { label: "Fair", bg: "#b8ec5a", fg: "#121a04" },
-  { label: "Moderate", bg: "#f5c542", fg: "#1a1305" },
-  { label: "Hard", bg: "#ff8f4a", fg: "#1f0c02" },
-  { label: "Very hard", bg: "#c18cff", fg: "#140726" },
+/* Difficulty is an ordinal readout, not a crayon ramp: the lamp tone buckets
+   it (calm / caution / danger) and the block meter still shows 1–5. */
+const DIFFICULTY: {
+  label: string;
+  tone: "teal" | "amber" | "alert";
+}[] = [
+  { label: "Easy", tone: "teal" },
+  { label: "Fair", tone: "teal" },
+  { label: "Moderate", tone: "amber" },
+  { label: "Hard", tone: "alert" },
+  { label: "Very hard", tone: "alert" },
 ];
 
 export function FixtureDifficultyCard({ data }: { data?: FixtureDifficulty | null }) {
@@ -199,39 +204,38 @@ export function FixtureDifficultyCard({ data }: { data?: FixtureDifficulty | nul
   if (!fixtures.length) return null;
 
   return (
-    <div className="card p-4">
-      <div className="flex items-center justify-between gap-2">
-        <p className="eyebrow">Fixture difficulty</p>
-        {data?.difficulty && (
-          <span className="text-xs font-bold text-ink">{data.difficulty}</span>
-        )}
-      </div>
-      <p className="mt-0.5 text-[11px] text-dim">
+    <Panel label="Fixture difficulty" aside={data?.difficulty}>
+      <p className="tl-k tl-k-dim mb-2.5">
         {data?.subheader ?? "Next matches"}
         {data?.leagueName ? ` · ${data.leagueName}` : ""}
       </p>
-      <div className="mt-3 grid grid-cols-3 gap-2">
+      <div className="grid grid-cols-3 gap-2">
         {fixtures.slice(0, 3).map((fixture) => {
-          const level = DIFFICULTY[Math.min(4, Math.max(0, (fixture.difficulty ?? 3) - 1))];
+          const index = Math.min(4, Math.max(0, (fixture.difficulty ?? 3) - 1));
+          const level = DIFFICULTY[index];
           return (
             <Link
               key={fixture.matchId}
               href={`/match/${fixture.matchId}`}
-              className="press group flex flex-col items-center gap-1.5 rounded-xl border border-line/60 bg-white/[0.02] px-1.5 py-2.5 text-center transition-colors hover:border-line"
+              className="press group flex flex-col items-center gap-2 border border-line bg-card-2/60 p-2 text-center transition-colors hover:bg-hover"
             >
               <Crest id={fixture.opponentId} name={fixture.opponentName} size={28} />
-              <span className="text-xs font-bold text-ink">
+              <span className="text-[11.5px] font-semibold text-ink">
                 {fixture.opponentShortName ?? fixture.opponentName.slice(0, 3).toUpperCase()}
-                <span className="ml-1 font-semibold text-dim">{fixture.isHome ? "H" : "A"}</span>
+                <span className="ml-1 font-medium text-dim">{fixture.isHome ? "H" : "A"}</span>
               </span>
-              <span
-                className="w-full rounded-md py-0.5 text-[11px] font-extrabold"
-                style={{ backgroundColor: level.bg, color: level.fg }}
-              >
-                {level.label}
+              <span className="w-full">
+                <AsciiBar
+                  value={index + 1}
+                  total={5}
+                  blocks={5}
+                  tone={level.tone === "teal" ? "mint" : level.tone === "amber" ? "sky" : "alert"}
+                  className="text-[10px]"
+                />
+                <span className="tl-k tl-k-dim mt-1 block text-center">{level.label}</span>
               </span>
               {fixture.matchDateUtc && (
-                <span className="text-[11px] text-dim">
+                <span className="text-[10.5px] text-dim">
                   <LocalTime value={fixture.matchDateUtc} kind="monthDay" />
                 </span>
               )}
@@ -239,7 +243,7 @@ export function FixtureDifficultyCard({ data }: { data?: FixtureDifficulty | nul
           );
         })}
       </div>
-    </div>
+    </Panel>
   );
 }
 
@@ -273,11 +277,10 @@ export function LastLineupCard({ data }: { data?: LastLineup | null }) {
     : undefined;
 
   return (
-    <section className="card overflow-hidden">
-      <div className="flex flex-wrap items-center gap-3 border-b border-line/60 px-4 py-3">
+    <Panel label="Last lineup" aside={data?.formation}>
+      <div className="mb-3 flex flex-wrap items-center gap-3 border-b border-dashed border-line-strong pb-3">
         <div className="min-w-0 flex-1">
-          <p className="eyebrow">Last lineup</p>
-          <p className="mt-0.5 flex items-center gap-1.5 truncate text-[13px] font-semibold text-muted">
+          <p className="flex items-center gap-1.5 truncate text-[11.5px] font-semibold text-muted">
             {opponentId ? (
               <>
                 vs <Crest id={opponentId} name={opponentName ?? ""} size={16} />
@@ -286,18 +289,17 @@ export function LastLineupCard({ data }: { data?: LastLineup | null }) {
             ) : (
               data?.name
             )}
-            {data?.formation && <span className="text-dim">· {data.formation}</span>}
           </p>
         </div>
         {data?.rating ? (
           <div className="flex items-center gap-2">
-            <span className="text-[11px] font-semibold text-dim">Team</span>
+            <K dim>Team</K>
             <RatingChip rating={data.rating} size="lg" />
           </div>
         ) : null}
       </div>
 
-      <div className="grid grid-cols-3 divide-x divide-line/50 border-b border-line/50 text-center">
+      <div className="tl-kpis mb-3">
         <MiniStat label="Avg. age" value={data?.averageStarterAge?.toFixed(1) ?? "—"} />
         <MiniStat
           label="Distance"
@@ -322,25 +324,25 @@ export function LastLineupCard({ data }: { data?: LastLineup | null }) {
             <Link
               key={player.id}
               href={`/player/${player.id}`}
-              className="press group flex items-center gap-2.5 border-b border-line/30 px-4 py-2.5 transition-colors hover:bg-white/[0.03] sm:odd:border-r"
+              className="press group flex items-center gap-2.5 border-b border-line py-2.5 transition-colors hover:bg-hover sm:odd:border-r"
             >
               <PlayerAvatar id={player.id} size={30} />
               <div className="min-w-0 flex-1">
-                <p className="flex items-center gap-1.5 truncate text-[13px] font-semibold text-ink group-hover:text-accent">
+                <p className="flex items-center gap-1.5 truncate text-[11.5px] font-semibold text-ink group-hover:text-accent">
                   {player.name}
                   {rating !== null && rating === top && (
-                    <span className="text-[11px] text-accent" aria-label="Best rated">★</span>
+                    <span className="text-[10.5px] text-accent" aria-label="Best rated">★</span>
                   )}
                 </p>
-                <div className="mt-1 h-1 overflow-hidden rounded-full bg-white/[0.06]">
+                <span className="tl-meter mt-1 block">
                   {rating !== null && (
-                    <div
-                      className="rating-bar bar-grow h-full rounded-full"
+                    <span
+                      className="rating-bar bar-grow block h-full"
                       data-tier={ratingTier(rating)}
                       style={{ width: `${width}%` }}
                     />
                   )}
-                </div>
+                </span>
               </div>
               <RatingChip rating={player.performance?.rating} />
             </Link>
@@ -351,22 +353,22 @@ export function LastLineupCard({ data }: { data?: LastLineup | null }) {
       {match?.matchId && (
         <Link
           href={`/match/${match.matchId}?tab=lineups`}
-          className="flex items-center justify-center gap-1 py-3 text-xs font-bold text-accent transition-colors hover:bg-white/[0.03]"
+          className="mt-3 flex items-center justify-center gap-1 border border-line py-2 text-[11.5px] font-semibold uppercase tracking-[0.08em] text-accent transition-colors hover:bg-hover"
         >
           Open match lineups
           <ChevronRightIcon size={13} />
         </Link>
       )}
-    </section>
+    </Panel>
   );
 }
 
 function MiniStat({ label, value, hint }: { label: string; value: string; hint?: string }) {
   return (
-    <div className="px-2 py-3">
-      <p className="font-display text-[17px] font-extrabold leading-none text-ink num">{value}</p>
-      <p className="mt-1 text-[11px] font-semibold text-dim">{label}</p>
-      {hint && <p className="mt-0.5 truncate text-[11px] text-muted">{hint}</p>}
+    <div className="tl-kpi text-center">
+      <p className="tl-kpi-v tl-num mx-auto">{value}</p>
+      <p className="tl-kpi-src justify-center">{label}</p>
+      {hint && <p className="truncate text-[10.5px] text-muted">{hint}</p>}
     </div>
   );
 }

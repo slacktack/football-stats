@@ -1,37 +1,48 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useSearchParams } from "next/navigation";
+import { ActivityIcon, HomeIcon, SearchIcon, TrophyIcon } from "./icons";
 
 const ITEMS = [
-  { href: "/", label: "Matches", exact: true },
-  { href: "/leagues", label: "Competitions", prefix: "/league" },
-  { href: "/search", label: "Search", prefix: "/search" },
+  {
+    href: "/",
+    code: "00",
+    label: "Matches",
+    Icon: HomeIcon,
+    is: (p: string, live: boolean) => p === "/" && !live,
+  },
+  {
+    href: "/?filter=live",
+    code: "01",
+    label: "Live",
+    Icon: ActivityIcon,
+    is: (p: string, live: boolean) => p === "/" && live,
+  },
+  { href: "/leagues", code: "02", label: "Comps", Icon: TrophyIcon, is: (p: string) => p.startsWith("/league") },
+  { href: "/search", code: "03", label: "Search", Icon: SearchIcon, is: (p: string) => p.startsWith("/search") },
 ];
 
-export function TopNav() {
+export function MobileBar() {
   const pathname = usePathname();
+  const live = useSearchParams().get("filter") === "live";
 
   return (
-    <nav className="hidden items-center gap-0.5 md:flex" aria-label="Primary">
-      {ITEMS.map((item) => {
-        const active = item.exact
-          ? pathname === item.href
-          : pathname.startsWith(item.href) || pathname.startsWith(item.prefix ?? "");
+    <nav className="tl-mbar" aria-label="Primary">
+      {ITEMS.map(({ href, code, label, Icon, is }) => {
+        const active = is(pathname, live);
         return (
           <Link
-            key={item.href}
-            href={item.href}
-            className={`group relative px-3.5 py-2 text-[13px] font-semibold tracking-tight transition-colors ${
-              active ? "text-ink" : "text-muted hover:text-ink"
-            }`}
+            key={href}
+            href={href}
+            scroll={false}
+            aria-current={active ? "page" : undefined}
+            className="tl-mbar-i"
           >
-            {item.label}
-            <span
-              className={`absolute inset-x-3.5 -bottom-[15px] h-[2px] origin-left rounded-full bg-accent transition-transform duration-300 ${
-                active ? "scale-x-100" : "scale-x-0 group-hover:scale-x-50"
-              }`}
-            />
+            <i className="tl-mbar-led" aria-hidden="true" />
+            <Icon size={17} />
+            <span>{label}</span>
+            <small className="tl-mbar-c">{code}</small>
           </Link>
         );
       })}

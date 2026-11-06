@@ -2,6 +2,7 @@ import Link from "next/link";
 import { parseRating, ratingTier, type RatingTier } from "@/lib/format";
 import type { PlayerRecentMatch, PlayerResponse } from "@/lib/types";
 import { Crest, RatingChip } from "../ui";
+import { AsciiBar, K, Panel, Phos } from "../tl";
 
 type PitchPosition = {
   strPos?: { label?: string };
@@ -34,27 +35,21 @@ export function RatingForm({ matches, limit = 12 }: { matches?: PlayerRecentMatc
   const ceil = 10;
 
   return (
-    <div className="card p-4 sm:p-5">
-      <div className="flex flex-wrap items-end justify-between gap-3">
-        <div>
-          <p className="eyebrow">Rating form</p>
-          <p className="mt-1 text-sm font-semibold text-muted">Last {rated.length} appearances</p>
+    <Panel label="Rating form" aside={`last ${rated.length} appearances`}>
+      <div className="mb-4 flex flex-wrap items-end justify-end gap-4">
+        <div className="text-right">
+          <K dim>Average</K>
+          <RatingChip rating={avg} size="lg" className="mt-1" />
         </div>
-        <div className="flex items-center gap-4">
-          <div className="text-right">
-            <p className="text-[11px] font-semibold text-dim">Average</p>
-            <RatingChip rating={avg} size="lg" className="mt-1" />
-          </div>
-          <div className="text-right">
-            <p className="text-[11px] font-semibold text-dim">Best</p>
-            <RatingChip rating={best} size="lg" className="mt-1" />
-          </div>
+        <div className="text-right">
+          <K dim>Best</K>
+          <RatingChip rating={best} size="lg" className="mt-1" />
         </div>
       </div>
 
-      <div className="relative mt-5 h-44 sm:h-52">
+      <div className="tl-frame relative mt-5 h-44 sm:h-52">
         <div
-          className="pointer-events-none absolute inset-x-0 border-t border-dashed border-line"
+          className="pointer-events-none absolute inset-x-0 border-t border-dashed border-line-strong"
           style={{ bottom: `${((avg - floor) / (ceil - floor)) * 100}%` }}
           aria-hidden="true"
         >
@@ -73,14 +68,14 @@ export function RatingForm({ matches, limit = 12 }: { matches?: PlayerRecentMatc
                   className="press group flex h-full flex-col items-center justify-end gap-1"
                   title={`${match.opponentTeamName} · ${teamScore ?? 0}-${oppScore ?? 0} · ${value.toFixed(1)}`}
                 >
-                  <span className="text-[11px] font-extrabold text-ink num sm:text-xs">{value.toFixed(1)}</span>
+                  <span className="tl-num text-[11px] text-ink sm:text-[12.5px]">{value.toFixed(1)}</span>
                   <span
-                    className="rating-bar relative w-full origin-bottom rounded-t-[5px] opacity-85 transition-opacity group-hover:opacity-100"
+                    className="rating-bar relative w-full origin-bottom opacity-85 transition-opacity group-hover:opacity-100"
                     data-tier={tier}
                     style={{ height: `${height}%`, animation: `rise-in 520ms var(--ease-out) ${index * 35}ms both` }}
                   >
                     {match.playerOfTheMatch && (
-                      <span className="absolute left-1/2 top-1 -translate-x-1/2 text-[11px] leading-none text-[#04130a]" title="Player of the match">★</span>
+                      <span className="absolute left-1/2 top-1 -translate-x-1/2 text-[11px] leading-none text-on-accent" title="Player of the match">★</span>
                     )}
                   </span>
                 </Link>
@@ -97,7 +92,7 @@ export function RatingForm({ matches, limit = 12 }: { matches?: PlayerRecentMatc
           return (
             <li key={match.id} className={`min-w-0 flex-1 flex-col items-center gap-1 text-center ${index < rated.length - 7 ? "hidden sm:flex" : "flex"}`}>
               <Crest id={match.opponentTeamId} name={match.opponentTeamName} size={28} />
-              <span className="w-full truncate text-[11px] font-semibold leading-tight text-ink" title={match.opponentTeamName}>
+              <span className="w-full truncate text-[10.5px] font-semibold leading-tight text-ink" title={match.opponentTeamName}>
                 {shortTeam(match.opponentTeamName)}
               </span>
               <span className="text-[10px] font-semibold leading-none text-dim num">
@@ -113,7 +108,7 @@ export function RatingForm({ matches, limit = 12 }: { matches?: PlayerRecentMatc
           );
         })}
       </ol>
-      <div className="mt-4 flex flex-wrap gap-x-4 gap-y-1.5 text-[11px] text-dim">
+      <div className="mt-4 flex flex-wrap gap-x-4 gap-y-1.5 text-[10.5px] text-dim">
         {(
           [
             ["elite", "9+"],
@@ -124,12 +119,12 @@ export function RatingForm({ matches, limit = 12 }: { matches?: PlayerRecentMatc
           ] as const
         ).map(([tier, label]) => (
           <span key={tier} className="flex items-center gap-1.5">
-            <span className="rating-bar h-2 w-2 rounded-[2px]" data-tier={tier} />
+            <span className="rating-bar h-2 w-2" data-tier={tier} />
             {label}
           </span>
         ))}
       </div>
-    </div>
+    </Panel>
   );
 }
 
@@ -151,13 +146,14 @@ export function FormSummary({ matches }: { matches?: PlayerRecentMatch[] }) {
   ];
 
   return (
-    <div className="card p-4">
-      <p className="eyebrow">Last {list.length} games</p>
-      <div className="mt-3 grid grid-cols-3 gap-x-3 gap-y-4">
+    <div>
+      <Phos className="mb-2" />
+      <p className="tl-k mb-2">Last {list.length} games</p>
+      <div className="tl-kpis grid-cols-3">
         {items.map((item) => (
-          <div key={item.label}>
-            <p className="font-display text-xl font-extrabold leading-none text-ink num">{item.value}</p>
-            <p className="mt-1 text-[11px] font-semibold text-dim">{item.label}</p>
+          <div key={item.label} className="tl-kpi">
+            <p className="tl-kpi-v tl-num text-[22px]">{item.value}</p>
+            <p className="tl-kpi-src">{item.label}</p>
           </div>
         ))}
       </div>
@@ -182,37 +178,38 @@ export function TraitsRadar({ player }: { player: PlayerResponse }) {
     .join(" ");
 
   return (
-    <div className="card p-4 sm:p-5">
-      <div>
-        <p className="eyebrow">Playing style</p>
-        <p className="mt-1 text-sm font-semibold text-muted">{player.traits?.title}</p>
-      </div>
+    <Panel label="Playing style" aside={player.traits?.title}>
       <div className="mt-2 grid items-center gap-4 sm:grid-cols-[240px_minmax(0,1fr)]">
-        <svg viewBox={`0 0 ${size} ${size}`} className="mx-auto w-full max-w-[260px]" role="img" aria-label="Playing style radar">
+        <svg
+          viewBox={`0 0 ${size} ${size}`}
+          className="tl-frame mx-auto w-full max-w-[260px]"
+          role="img"
+          aria-label="Playing style radar"
+        >
           {[0.25, 0.5, 0.75, 1].map((ring) => (
             <polygon
               key={ring}
               points={items.map((_, index) => point(index, ring).join(",")).join(" ")}
               fill="none"
-              stroke="var(--color-line)"
+              stroke="var(--tl-hair-soft)"
               strokeWidth="1"
             />
           ))}
           {items.map((item, index) => {
             const [x, y] = point(index, 1);
-            return <line key={item.key} x1={center} y1={center} x2={x} y2={y} stroke="var(--color-line)" strokeWidth="1" />;
+            return <line key={item.key} x1={center} y1={center} x2={x} y2={y} stroke="var(--tl-hair-soft)" strokeWidth="1" />;
           })}
           <polygon
             points={shape}
             fill="color-mix(in srgb, var(--color-accent) 22%, transparent)"
-            stroke="var(--color-accent)"
+            stroke="var(--tl-led)"
             strokeWidth="2"
             strokeLinejoin="round"
             className="rise-in"
           />
           {items.map((item, index) => {
             const [x, y] = point(index, Math.max(0.04, Math.min(1, item.value)));
-            return <circle key={item.key} cx={x} cy={y} r="3" fill="var(--color-accent)" />;
+            return <circle key={item.key} cx={x} cy={y} r="3" fill="var(--tl-led)" />;
           })}
           {items.map((item, index) => {
             const [x, y] = point(index, 1.24);
@@ -238,18 +235,22 @@ export function TraitsRadar({ player }: { player: PlayerResponse }) {
             return (
               <div key={item.key}>
                 <div className="flex items-baseline justify-between gap-2">
-                  <span className="truncate text-[13px] font-semibold text-muted">{item.title}</span>
-                  <span className="shrink-0 font-display text-sm font-extrabold text-ink num">{pct}</span>
+                  <span className="truncate text-[11.5px] font-semibold text-muted">{item.title}</span>
+                  <span className="shrink-0 tl-num text-[13px] text-ink">{pct}</span>
                 </div>
-                <div className="mt-1.5 h-2 overflow-hidden rounded-full bg-white/[0.06]">
-                  <span className="rating-bar bar-grow block h-full rounded-full" data-tier={percentileTier(pct)} style={{ width: `${pct}%` }} />
-                </div>
+                <span className="tl-meter mt-1.5 block">
+                  <span
+                    className="rating-bar bar-grow block h-full"
+                    data-tier={percentileTier(pct)}
+                    style={{ width: `${pct}%` }}
+                  />
+                </span>
               </div>
             );
           })}
         </div>
       </div>
-    </div>
+    </Panel>
   );
 }
 
@@ -261,12 +262,12 @@ export function PositionMap({ player }: { player: PlayerResponse }) {
   const total = positions.reduce((sum, item) => sum + (item.occurences ?? 0), 0) || 1;
 
   return (
-    <div className="card p-4">
-      <p className="eyebrow mb-3">Positions</p>
+    <Panel label="Positions">
       <div className="flex items-center gap-4">
-        <div className="pitch-surface relative aspect-[68/105] w-24 shrink-0 overflow-hidden rounded-lg border border-line/60">
+        {/* Coordinate space: tl-frame (outline) only. No border, no padding. */}
+        <div className="pitch-surface tl-frame relative aspect-[68/105] w-24 shrink-0 overflow-hidden">
           <svg viewBox="0 0 68 105" className="absolute inset-0 h-full w-full" aria-hidden="true">
-            <g stroke="rgba(255,255,255,0.18)" strokeWidth="0.6" fill="none">
+            <g stroke="var(--tl-hair)" strokeWidth="0.6" fill="none">
               <rect x="1" y="1" width="66" height="103" />
               <line x1="1" y1="52.5" x2="67" y2="52.5" />
               <circle cx="34" cy="52.5" r="8" />
@@ -277,8 +278,8 @@ export function PositionMap({ player }: { player: PlayerResponse }) {
           {positions.map((item) => (
             <span
               key={item.strPos?.label}
-              className={`absolute flex -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full font-display text-[9px] font-extrabold ${
-                item.isMainPosition ? "h-7 w-7 bg-accent text-on-accent" : "h-6 w-6 bg-white/85 text-[#0b100d]"
+              className={`absolute flex -translate-x-1/2 -translate-y-1/2 items-center justify-center border border-line text-[9px] font-bold leading-none ${
+                item.isMainPosition ? "h-7 w-7 bg-accent text-on-accent" : "h-6 w-6 bg-base text-ink"
               }`}
               style={{
                 left: `${(1 - (item.pitchPositionData?.right ?? 0.5)) * 100}%`,
@@ -296,22 +297,23 @@ export function PositionMap({ player }: { player: PlayerResponse }) {
             .map((item) => (
               <li key={item.strPos?.label}>
                 <div className="flex items-baseline justify-between gap-2">
-                  <span className={`truncate text-[13px] font-semibold ${item.isMainPosition ? "text-ink" : "text-muted"}`}>
+                  <span className={`truncate text-[11.5px] font-semibold ${item.isMainPosition ? "text-ink" : "text-muted"}`}>
                     {item.strPos?.label}
                   </span>
-                  <span className="shrink-0 text-xs text-dim num">{item.occurences ?? 0} apps</span>
+                  <span className="shrink-0 text-[11.5px] text-dim num">{item.occurences ?? 0} apps</span>
                 </div>
-                <div className="mt-1 h-1.5 overflow-hidden rounded-full bg-white/[0.06]">
-                  <span
-                    className={`bar-grow block h-full rounded-full ${item.isMainPosition ? "bg-accent" : "bg-muted/60"}`}
-                    style={{ width: `${((item.occurences ?? 0) / total) * 100}%` }}
-                  />
-                </div>
+                <AsciiBar
+                  className="mt-1 text-[9.5px]"
+                  blocks={10}
+                  value={item.occurences ?? 0}
+                  total={total}
+                  tone={item.isMainPosition ? undefined : "ink"}
+                />
               </li>
             ))}
         </ul>
       </div>
-    </div>
+    </Panel>
   );
 }
 
@@ -319,11 +321,11 @@ export function InjuryNotice({ player }: { player: PlayerResponse }) {
   const injury = player.injuryInformation;
   if (!injury?.injury) return null;
   return (
-    <div className="card flex items-center gap-3 border-sky/30 p-3.5">
-      <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-sky/15 font-display text-base font-black text-sky">+</span>
+    <div className="card flex items-center gap-3 border-l-2 border-l-sky p-3.5">
+      <span className="tl-num flex h-9 w-9 shrink-0 items-center justify-center border border-sky text-[15px] text-sky">+</span>
       <div className="min-w-0">
-        <p className="text-[13px] font-bold text-ink">{injury.injury.type ?? "Injured"}</p>
-        <p className="text-xs text-dim">
+        <p className="text-[12.5px] font-semibold text-ink">{injury.injury.type ?? "Injured"}</p>
+        <p className="text-[11.5px] text-dim">
           {injury.injury.description ?? "Unavailable"}
           {injury.expectedReturn ? ` · back ${injury.expectedReturn}` : ""}
         </p>

@@ -4,8 +4,9 @@ import Image from "next/image";
 import Link from "next/link";
 import { useDeferredValue, useMemo, useState } from "react";
 import { leagueLogo } from "@/lib/assets";
-import { ChevronDownIcon, ChevronRightIcon, SearchIcon } from "./icons";
+import { ChevronDownIcon } from "./icons";
 import { EmptyState } from "./ui";
+import { K, TermBar } from "./tl";
 
 export type BrowserLeague = { id: number; name: string; ccode: string };
 export type BrowserGroup = { ccode: string; name: string; leagues: BrowserLeague[] };
@@ -60,37 +61,45 @@ export function LeagueBrowser({
 
   return (
     <div>
-      <div className="relative mt-6">
-        <SearchIcon size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-dim" />
-        <input
-          value={query}
-          onChange={(event) => setQuery(event.target.value)}
-          placeholder="Find a competition or country..."
-          className="h-12 w-full rounded-xl border border-line bg-card pl-11 pr-4 text-sm text-ink outline-none transition-colors placeholder:text-dim focus:border-accent/40"
-          aria-label="Search competitions"
-          autoComplete="off"
+      <div className="tl-term-out relative mt-6">
+        <TermBar
+          path="/leagues"
+          dim={`${allLeagues.length} competitions indexed`}
         />
-        {query && (
-          <button
-            type="button"
-            onClick={() => setQuery("")}
-            className="absolute right-3 top-1/2 -translate-y-1/2 rounded-md bg-white/[0.06] px-2 py-1 text-[11px] font-semibold text-muted transition-colors hover:text-ink"
-          >
-            Clear
-          </button>
-        )}
+        <div className="flex items-center gap-2.5 px-4 py-3">
+          <span className="tl-acc shrink-0" aria-hidden="true">
+            $
+          </span>
+          <input
+            value={query}
+            onChange={(event) => setQuery(event.target.value)}
+            placeholder="find a competition or country..."
+            className="h-9 min-w-0 flex-1 bg-transparent font-mono text-[12.5px] text-ink outline-none placeholder:text-dim"
+            aria-label="Search competitions"
+            autoComplete="off"
+          />
+          {query && (
+            <button
+              type="button"
+              onClick={() => setQuery("")}
+              className="tl-btn tl-btn-sm shrink-0"
+            >
+              Clear
+            </button>
+          )}
+        </div>
       </div>
 
       {search ? (
         <div className="mt-6">
-          <div className="flex items-center justify-between">
-            <h2 className="font-display text-lg font-bold text-ink">
+          <div className="flex items-baseline justify-between gap-3">
+            <h2 className="tl-head text-[12.5px]">
               {results.length} {results.length === 1 ? "competition" : "competitions"}
             </h2>
-            <span className="text-xs text-dim">for “{deferredQuery.trim()}”</span>
+            <span className="tl-k tl-k-dim">for “{deferredQuery.trim()}”</span>
           </div>
           {results.length > 0 ? (
-            <div className="mt-3 grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
+            <div className="mt-1 grid gap-x-8 sm:grid-cols-2">
               {results.map((league) => (
                 <LeagueLink key={league.id} league={league} subtitle={league.country} />
               ))}
@@ -107,54 +116,28 @@ export function LeagueBrowser({
       ) : (
         <>
           <section className="mt-8">
-            <div className="flex items-end justify-between">
-              <h2 className="font-display text-xl font-bold text-ink">Popular</h2>
-              <span className="text-xs text-dim">The competitions everyone follows</span>
+            <div className="flex items-baseline justify-between gap-3">
+              <h2 className="tl-head text-[12.5px]">Popular</h2>
+              <span className="tl-k tl-k-dim">The competitions everyone follows</span>
             </div>
-            <div className="mt-3 grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
+            <div className="mt-1 grid gap-x-8 sm:grid-cols-2">
               {popular.map((league) => (
-                <Link
-                  key={league.id}
-                  href={`/league/${league.id}`}
-                  className="card card-hover group flex items-center gap-3 p-3.5"
-                >
-                  <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-white/[0.045] ring-1 ring-inset ring-white/[0.06]">
-                    <Image
-                      src={leagueLogo(league.id)}
-                      alt=""
-                      width={30}
-                      height={30}
-                      className="h-7 w-7 object-contain"
-                    />
-                  </span>
-                  <span className="min-w-0 flex-1">
-                    <span className="block truncate text-sm font-bold text-ink transition-colors group-hover:text-accent">
-                      {league.name}
-                    </span>
-                    <span className="mt-0.5 block text-[11px] font-semibold text-dim">
-                      {league.ccode}
-                    </span>
-                  </span>
-                  <ChevronRightIcon
-                    size={16}
-                    className="text-dim transition-transform group-hover:translate-x-0.5 group-hover:text-accent"
-                  />
-                </Link>
+                <LeagueLink key={league.id} league={league} large />
               ))}
             </div>
           </section>
 
           {international.length > 0 && (
             <section className="mt-8">
-              <h2 className="font-display text-xl font-bold text-ink">International</h2>
-              <div className="mt-3 grid gap-3 md:grid-cols-2">
+              <h2 className="tl-head text-[12.5px]">International</h2>
+              <div className="mt-2 grid gap-3 md:grid-cols-2">
                 {international.map((group) => (
-                  <div key={group.ccode} className="card p-3.5">
-                    <div className="flex items-center justify-between px-1 pb-2">
-                      <h3 className="text-xs font-bold text-ink">{group.name}</h3>
-                      <span className="text-[11px] text-dim">{group.leagues.length}</span>
+                  <div key={group.ccode} className="card overflow-hidden">
+                    <div className="flex items-baseline justify-between border-b border-line px-3 py-2">
+                      <h3 className="tl-k">{group.name}</h3>
+                      <span className="tl-k tl-k-dim">{group.leagues.length}</span>
                     </div>
-                    <div className="grid gap-0.5">
+                    <div className="px-2 py-1">
                       {group.leagues.map((league) => (
                         <LeagueLink key={league.id} league={league} compact />
                       ))}
@@ -166,13 +149,13 @@ export function LeagueBrowser({
           )}
 
           <section className="mt-8">
-            <div className="flex items-end justify-between">
-              <h2 className="font-display text-xl font-bold text-ink">Browse by country</h2>
-              <span className="text-xs text-dim">
+            <div className="flex items-baseline justify-between gap-3">
+              <h2 className="tl-head text-[12.5px]">Browse by country</h2>
+              <span className="tl-k tl-k-dim">
                 {countries.length} countries · tap to expand
               </span>
             </div>
-            <div className="mt-3 grid items-start gap-2 sm:grid-cols-2 lg:grid-cols-3">
+            <div className="mt-2 grid items-start gap-2 sm:grid-cols-2 lg:grid-cols-3">
               {countries.map((country) => {
                 const expanded = open.has(country.ccode);
                 const visible = expanded ? country.leagues : country.leagues.slice(0, 3);
@@ -181,23 +164,21 @@ export function LeagueBrowser({
                     <button
                       type="button"
                       onClick={() => toggle(country.ccode)}
-                      className="flex w-full items-center gap-2.5 px-3.5 py-2.5 text-left transition-colors hover:bg-white/[0.025]"
+                      className="flex w-full items-center gap-2.5 px-3.5 py-2.5 text-left transition-colors hover:bg-hover"
                       aria-expanded={expanded}
                     >
-                      <span className="flex h-7 min-w-7 items-center justify-center rounded-md bg-white/[0.05] px-1 text-[11px] font-bold tracking-wider text-muted">
-                        {country.ccode}
-                      </span>
-                      <span className="flex-1 truncate text-xs font-bold text-ink">
+                      <span className="tl-tag shrink-0 font-bold">{country.ccode}</span>
+                      <span className="flex-1 truncate text-[12.5px] font-semibold text-ink">
                         {country.name}
                       </span>
-                      <span className="text-[11px] text-dim">{country.leagues.length}</span>
+                      <span className="tl-k tl-k-dim shrink-0">{country.leagues.length}</span>
                       <ChevronDownIcon
                         size={14}
-                        className={`text-dim transition-transform ${expanded ? "rotate-180" : ""}`}
+                        className={`shrink-0 text-dim transition-transform ${expanded ? "rotate-180" : ""}`}
                       />
                     </button>
                     {visible.length > 0 && (
-                      <div className="border-t border-line/50 px-2 py-1.5">
+                      <div className="border-t border-line px-2 py-1">
                         {visible.map((league) => (
                           <LeagueLink key={league.id} league={league} compact />
                         ))}
@@ -205,7 +186,7 @@ export function LeagueBrowser({
                           <button
                             type="button"
                             onClick={() => toggle(country.ccode)}
-                            className="w-full px-2 py-1.5 text-left text-[11px] font-semibold text-accent/80 transition-colors hover:text-accent"
+                            className="tl-k w-full px-2 py-1.5 text-left text-live transition-colors hover:text-accent"
                           >
                             +{country.leagues.length - 3} more
                           </button>
@@ -227,34 +208,38 @@ function LeagueLink({
   league,
   subtitle,
   compact = false,
+  large = false,
 }: {
   league: BrowserLeague;
   subtitle?: string;
   compact?: boolean;
+  large?: boolean;
 }) {
+  const px = compact ? 18 : large ? 26 : 22;
+  const frame = compact ? "grid-cols-[18px_minmax(0,1fr)_auto]" : large ? "grid-cols-[26px_minmax(0,1fr)_auto]" : "grid-cols-[22px_minmax(0,1fr)_auto]";
+  const logo = compact ? "h-[18px] w-[18px]" : large ? "h-[26px] w-[26px]" : "h-[22px] w-[22px]";
   return (
-    <Link
-      href={`/league/${league.id}`}
-      className={`group flex items-center gap-2.5 rounded-lg transition-colors hover:bg-white/[0.04] ${
-        compact ? "px-2 py-1.5" : "card card-hover px-3.5 py-3"
-      }`}
-    >
+    <Link href={`/league/${league.id}`} className={`tl-tr group ${frame}`}>
       <Image
         src={leagueLogo(league.id)}
         alt=""
-        width={compact ? 18 : 24}
-        height={compact ? 18 : 24}
-        className={`${compact ? "h-[18px] w-[18px]" : "h-6 w-6"} shrink-0 object-contain`}
+        width={px}
+        height={px}
+        className={`${logo} shrink-0 object-contain`}
       />
-      <span className="min-w-0 flex-1">
-        <span className="block truncate text-xs font-semibold text-muted transition-colors group-hover:text-ink">
+      <span className="min-w-0">
+        <span
+          className={`block truncate text-[12px] font-semibold transition-colors ${
+            compact ? "text-muted group-hover:text-ink" : "text-ink group-hover:text-accent"
+          }`}
+        >
           {league.name}
         </span>
-        {subtitle && <span className="block truncate text-[11px] text-dim">{subtitle}</span>}
+        {subtitle && <span className="tl-k tl-k-dim block truncate">{subtitle}</span>}
       </span>
-      {!compact && (
-        <span className="text-[11px] font-bold text-dim">{league.ccode}</span>
-      )}
+      <K dim className="shrink-0">
+        {league.ccode}
+      </K>
     </Link>
   );
 }

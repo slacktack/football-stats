@@ -28,20 +28,20 @@ export function FixtureRow({
   return (
     <Link
       href={`/match/${fixture.id}`}
-      className={`press group grid grid-cols-[52px_minmax(0,1fr)_auto] items-center gap-x-2.5 gap-y-1.5 px-3 py-2.5 transition-colors hover:bg-white/[0.032] sm:grid-cols-[64px_minmax(0,1fr)_auto] sm:gap-x-3 sm:px-4`}
+      className={`press group grid grid-cols-[52px_minmax(0,1fr)_auto] items-center gap-x-2.5 gap-y-1.5 px-3 py-2.5 transition-colors hover:bg-hover sm:grid-cols-[64px_minmax(0,1fr)_auto] sm:gap-x-3 sm:px-4`}
     >
       <div className="row-span-2 flex flex-col items-start gap-0.5">
-        <span className="text-[11px] font-medium text-dim">
+        <span className="tl-k tl-k-dim">
           <LocalTime value={fixture.status.utcTime} kind="monthDay" />
         </span>
         {tone === "live" ? (
-          <span className="flex items-center gap-1 text-xs font-bold uppercase text-live">
+          <span className="tl-k flex items-center gap-1.5 font-semibold text-live">
             <LiveDot />
             {statusLabel(fixture.status)}
           </span>
         ) : (
           <span
-            className={`text-xs font-semibold num ${
+            className={`text-[11.5px] font-semibold num ${
               tone === "scheduled" ? "text-muted" : "text-dim"
             }`}
           >
@@ -49,7 +49,7 @@ export function FixtureRow({
           </span>
         )}
         {showTournament && fixture.tournament?.name && (
-          <span className="hidden max-w-[64px] truncate text-[11px] text-dim lg:block">
+          <span className="hidden max-w-[64px] truncate text-[10.5px] text-dim lg:block">
             {fixture.tournament.name}
           </span>
         )}
@@ -58,7 +58,7 @@ export function FixtureRow({
       <div className="flex min-w-0 items-center gap-2">
         <Crest id={fixture.home.id} name={fixture.home.name} size={20} />
         <span
-          className={`min-w-0 flex-1 truncate text-[13px] leading-none ${
+          className={`min-w-0 flex-1 truncate text-[11.5px] leading-none ${
             highlighted(homeId)
               ? "font-bold text-accent"
               : homeWinner
@@ -70,8 +70,8 @@ export function FixtureRow({
         </span>
       </div>
       <span
-        className={`text-right font-display text-[16px] leading-none num ${
-          score ? (homeWinner ? "font-black text-ink" : "font-bold text-muted") : "text-transparent"
+        className={`tl-num text-right text-[16px] leading-none num ${
+          score ? (homeWinner ? "text-ink" : "text-muted") : "text-transparent"
         }`}
       >
         {score ? score[0] : "0"}
@@ -80,7 +80,7 @@ export function FixtureRow({
       <div className="flex min-w-0 items-center gap-2">
         <Crest id={fixture.away.id} name={fixture.away.name} size={20} />
         <span
-          className={`min-w-0 flex-1 truncate text-[13px] leading-none ${
+          className={`min-w-0 flex-1 truncate text-[11.5px] leading-none ${
             highlighted(awayId)
               ? "font-bold text-accent"
               : awayWinner
@@ -92,8 +92,8 @@ export function FixtureRow({
         </span>
       </div>
       <span
-        className={`text-right font-display text-[16px] leading-none num ${
-          score ? (awayWinner ? "font-black text-ink" : "font-bold text-muted") : "text-transparent"
+        className={`tl-num text-right text-[16px] leading-none num ${
+          score ? (awayWinner ? "text-ink" : "text-muted") : "text-transparent"
         }`}
       >
         {score ? score[1] : "0"}
@@ -111,7 +111,7 @@ export function FixtureList({
 }) {
   if (!fixtures?.length) {
     return (
-      <div className="card px-4 py-10 text-center text-sm text-dim">
+      <div className="card px-4 py-10 text-center text-[12.5px] text-dim">
         No fixtures available for this competition.
       </div>
     );
@@ -132,15 +132,15 @@ export function FixtureList({
     <div className="space-y-4">
       {Array.from(groups.entries()).map(([round, list]) => (
         <section key={round} className="card overflow-hidden">
-          <div className="flex items-center justify-between border-b border-line/60 bg-white/[0.014] px-3.5 py-2.5 sm:px-4">
-            <h3 className="text-xs font-bold text-ink">
+          <header className="flex items-center justify-between border-b border-line px-3.5 py-2 sm:px-4">
+            <h3 className="tl-k">
               {/^\d+$/.test(round) ? `Matchday ${round}` : round}
             </h3>
-            <span className="text-[11px] text-dim">
+            <span className="tl-k tl-k-dim">
               {list.length} {list.length === 1 ? "match" : "matches"}
             </span>
-          </div>
-          <div className="divide-y divide-line/45">
+          </header>
+          <div className="divide-y divide-line">
             {list.map((fixture) => (
               <FixtureRow key={fixture.id} fixture={fixture} highlightTeamId={highlightTeamId} />
             ))}
@@ -160,7 +160,7 @@ export function TeamFixtureList({
 }) {
   if (!fixtures?.length) {
     return (
-      <div className="card px-4 py-10 text-center text-sm text-dim">No fixtures available.</div>
+      <div className="card px-4 py-10 text-center text-[12.5px] text-dim">No fixtures available.</div>
     );
   }
 
@@ -176,7 +176,7 @@ export function TeamFixtureList({
     <div className="space-y-4">
       {Array.from(groups.entries()).map(([name, group]) => (
         <section key={name} className="card overflow-hidden">
-          <div className="flex items-center gap-2 border-b border-line/60 bg-white/[0.014] px-3.5 py-2.5 sm:px-4">
+          <header className="flex items-center gap-2 border-b border-line px-3.5 py-2 sm:px-4">
             {group.leagueId && (
               <Image
                 src={leagueLogo(group.leagueId)}
@@ -186,15 +186,15 @@ export function TeamFixtureList({
                 className="h-[18px] w-[18px] object-contain"
               />
             )}
-            <h3 className="text-xs font-bold text-ink">{name}</h3>
+            <h3 className="tl-k">{name}</h3>
             <Link
               href={group.leagueId ? `/league/${group.leagueId}` : "/leagues"}
-              className="ml-auto text-[11px] font-semibold text-dim transition-colors hover:text-accent"
+              className="tl-k tl-k-dim ml-auto transition-colors hover:text-accent"
             >
               Table
             </Link>
-          </div>
-          <div className="divide-y divide-line/45">
+          </header>
+          <div className="divide-y divide-line">
             {group.fixtures.map((fixture) => (
               <FixtureRow
                 key={fixture.id}

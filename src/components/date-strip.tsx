@@ -41,47 +41,55 @@ export function DateStrip({
   const suffix = filter && filter !== "all" ? `&filter=${filter}` : "";
 
   return (
-    <div className="flex items-center gap-1.5 sm:gap-2">
+    <div className="flex items-stretch gap-1.5 sm:gap-2">
       <Link
         href={`/?date=${prevParam}${suffix}`}
-        className="hidden h-[58px] w-9 shrink-0 items-center justify-center rounded-xl border border-line/70 bg-card text-dim transition-colors hover:border-accent/30 hover:text-ink sm:flex"
+        className="hidden h-[62px] w-9 shrink-0 items-center justify-center border border-line bg-card text-dim transition-colors hover:border-ink hover:text-ink sm:flex"
         aria-label="Previous day"
       >
-        <ChevronLeftIcon size={17} />
+        <ChevronLeftIcon size={16} />
       </Link>
 
-      <div ref={trackRef} className="no-scrollbar relative flex flex-1 gap-1.5 overflow-x-auto py-0.5">
+      <div
+        ref={trackRef}
+        className="no-scrollbar relative flex flex-1 gap-1.5 overflow-x-auto py-0.5"
+        role="group"
+        aria-label="Choose a date"
+      >
         {days.map((day) => {
           const active = day.param === selected;
+          const past = day.param < selected;
+          const hue = active ? "led" : past ? "teal" : "amber";
           return (
             <Link
               key={day.param}
               ref={active ? activeRef : undefined}
               href={`/?date=${day.param}${suffix}`}
               aria-current={active ? "date" : undefined}
-              className={`group relative flex h-[58px] min-w-[58px] flex-1 flex-col items-center justify-center rounded-xl border px-2 transition-all duration-200 ${
+              className={`tl-hue-${hue} group relative flex h-[62px] min-w-[56px] flex-1 flex-col items-center justify-center gap-0.5 border px-2 transition-colors ${
                 active
-                  ? "border-accent bg-accent text-on-accent shadow-lg shadow-accent/25"
-                  : "border-line/60 bg-card text-muted hover:-translate-y-0.5 hover:border-accent/25 hover:text-ink"
+                  ? "border-ink bg-ink text-canvas"
+                  : "border-line bg-card text-muted hover:border-[var(--tl-hue)] hover:text-ink"
               }`}
             >
               <span
-                className={`text-[11px] font-bold ${
-                  active ? "text-on-accent/55" : "text-dim"
-                }`}
+                className="absolute inset-x-0 top-0 h-[3px] origin-left scale-x-0 bg-[var(--tl-hue)] transition-transform duration-300 group-hover:scale-x-100"
+                style={{ transform: active ? "scaleX(1)" : undefined }}
+                aria-hidden="true"
+              />
+              <span
+                className={`tl-k ${active ? "opacity-55" : "text-[var(--tl-hue-ink)]"}`}
               >
                 {day.weekday}
               </span>
-              <span className="font-display text-[19px] font-extrabold leading-tight num">{day.day}</span>
+              <span className="tl-num text-[19px] font-bold leading-none">{day.day}</span>
               <span
-                className={`text-[11px] font-semibold ${
-                  active ? "text-on-accent/55" : "text-dim"
-                }`}
+                className={`tl-k ${active ? "opacity-55" : "tl-k-dim"}`}
               >
                 {day.month}
               </span>
               {day.isToday && !active && (
-                <span className="absolute bottom-1 h-[3px] w-[3px] rounded-full bg-accent" />
+                <span className="tl-led absolute bottom-1.5 h-[5px] w-[5px]" aria-hidden="true" />
               )}
             </Link>
           );
@@ -90,14 +98,14 @@ export function DateStrip({
 
       <Link
         href={`/?date=${nextParam}${suffix}`}
-        className="hidden h-[58px] w-9 shrink-0 items-center justify-center rounded-xl border border-line/70 bg-card text-dim transition-colors hover:border-accent/30 hover:text-ink sm:flex"
+        className="hidden h-[62px] w-9 shrink-0 items-center justify-center border border-line bg-card text-dim transition-colors hover:border-ink hover:text-ink sm:flex"
         aria-label="Next day"
       >
-        <ChevronRightIcon size={17} />
+        <ChevronRightIcon size={16} />
       </Link>
 
-      <label className="relative flex h-[58px] w-[52px] shrink-0 cursor-pointer items-center justify-center rounded-xl border border-line/70 bg-card text-muted transition-colors hover:border-accent/30 hover:text-ink sm:w-[58px]">
-        <CalendarIcon size={17} />
+      <label className="relative flex h-[62px] w-[52px] shrink-0 cursor-pointer items-center justify-center border border-line bg-card text-muted transition-colors hover:border-ink hover:text-ink sm:w-[56px]">
+        <CalendarIcon size={16} />
         <input
           type="date"
           value={days.find((day) => day.param === selected)?.iso ?? ""}

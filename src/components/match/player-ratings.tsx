@@ -1,15 +1,16 @@
 "use client";
 
-import Image from "next/image";
 import Link from "next/link";
 import { Fragment, useMemo, useState } from "react";
-import { teamCrest } from "@/lib/assets";
 import { ratingTier } from "@/lib/format";
 import type { MatchPlayerRow } from "@/lib/match-players";
 import { PlayerPhoto } from "../player-photo";
-import { RatingChip } from "../ui";
+import { SortHeader, nextSort, type Sort } from "../sortable";
+import { Crest, EmptyState, RatingChip } from "../ui";
+import { Panel } from "../tl";
 
 type SortKey =
+  | "player"
   | "rating"
   | "minutes"
   | "goals"
@@ -24,7 +25,7 @@ type SortKey =
   | "duelsWon"
   | "distance";
 
-const COLUMNS: { key: SortKey; label: string; title: string; format?: (row: MatchPlayerRow) => string }[] = [
+const COLUMNS: { key: Exclude<SortKey, "player">; label: string; title: string; format?: (row: MatchPlayerRow) => string }[] = [
   { key: "minutes", label: "Min", title: "Minutes played" },
   { key: "goals", label: "G", title: "Goals" },
   { key: "assists", label: "A", title: "Assists" },
@@ -49,12 +50,26 @@ export function PlayerRatingsBoard({
   away: { id: number; name: string };
 }) {
   const [side, setSide] = useState<"all" | "home" | "away">("all");
-  const [sort, setSort] = useState<SortKey>("rating");
+  const [sort, setSort] = useState<Sort<SortKey>>({ key: "rating", dir: "desc" });
   const [open, setOpen] = useState<number | null>(null);
+
+  const toggleSort = (key: SortKey) => setSort((current) => nextSort(current, key, ["player"]));
 
   const rows = useMemo(() => {
     const filtered = side === "all" ? players : players.filter((p) => p.side === side);
-    return [...filtered].sort((a, b) => (Number(b[sort]) || 0) - (Number(a[sort]) || 0));
+    const sign = sort.dir === "asc" ? 1 : -1;
+    const byRating = (a: MatchPlayerRow, b: MatchPlayerRow) => (Number(b.rating) || 0) - (Number(a.rating) || 0);
+    return [...filtered].sort((a, b) => {
+      if (sort.key === "player") return sign * a.name.localeCompare(b.name, "en");
+      const x = Number((a as Record<string, unknown>)[sort.key]);
+      const y = Number((b as Record<string, unknown>)[sort.key]);
+      const xMissing = !Number.isFinite(x) || x === 0;
+      const yMissing = !Number.isFinite(y) || y === 0;
+      if (xMissing && yMissing) return byRating(a, b);
+      if (xMissing) return 1;
+      if (yMissing) return -1;
+      return sign * (x - y) || byRating(a, b);
+    });
   }, [players, side, sort]);
 
   const avg = (s: "home" | "away") => {
@@ -63,7 +78,12 @@ export function PlayerRatingsBoard({
   };
 
   if (!players.length) {
-    return <div className="card px-4 py-10 text-center text-sm text-dim">Player ratings appear once the match kicks off.</div>;
+    return (
+      <EmptyState
+        title="Player ratings"
+        description="Player ratings appear once the match kicks off."
+      />
+    );
   }
 
   return (
@@ -75,16 +95,16 @@ export function PlayerRatingsBoard({
         ].map(({ team, s }) => {
           const best = players.find((p) => p.side === s);
           return (
-            <div key={s} className="card flex items-center gap-2 p-3 sm:gap-3 sm:p-4">
-              <Image src={teamCrest(team.id)} alt="" width={36} height={36} className="hidden h-9 w-9 object-contain sm:block" />
+            <div key={s} className="card flex items-center gap-2.5 p-3 sm:gap-3">
+              <Crest id={team.id} name={team.name} size={40} className="hidden sm:inline-flex" />
               <div className="min-w-0 flex-1">
-                <p className="truncate text-xs font-bold text-ink sm:text-sm">{team.name}</p>
-                <p className="hidden truncate text-[11px] text-dim sm:block">
-                  Best: <span className="font-semibold text-muted">{best ? best.name.split(" ").slice(1).join(" ") || best.name : "—"}</span>
+                <p className="truncate text-[12.5px] font-semibold text-ink">{team.name}</p>
+                <p className="tl-k tl-k-dim hidden truncate sm:block">
+                  Best <span className="text-muted">{best ? best.name.split(" ").slice(1).join(" ") || best.name : "—"}</span>
                 </p>
               </div>
-              <div className="text-right">
-                <p className="hidden text-[10px] font-bold text-dim sm:block">Avg</p>
+              <div className="shrink-0 text-right">
+                <p className="tl-k tl-k-dim hidden sm:block">Avg</p>
                 <RatingChip rating={avg(s)} size="lg" />
               </div>
             </div>
@@ -92,35 +112,41 @@ export function PlayerRatingsBoard({
         })}
       </div>
 
-      <div className="card overflow-hidden">
-        <div className="flex flex-wrap items-center justify-between gap-2 border-b border-line/60 px-3 py-2.5 sm:px-4">
-          <div className="flex rounded-lg bg-white/[0.04] p-0.5" role="tablist" aria-label="Filter team">
-            {(["all", "home", "away"] as const).map((value) => (
-              <button
-                key={value}
-                type="button"
-                role="tab"
-                aria-selected={side === value}
-                onClick={() => setSide(value)}
-                className={`press rounded-md px-3 py-1.5 text-xs font-bold transition-colors ${
-                  side === value ? "bg-accent text-on-accent" : "text-muted hover:text-ink"
-                }`}
-              >
-                {value === "all" ? "Both" : value === "home" ? home.name : away.name}
-              </button>
-            ))}
-          </div>
-          <p className="text-[11px] text-dim">Tap a header to sort · tap a player for full stats</p>
+      <Panel
+        label="Ratings board"
+        aside={`${rows.length} players · sort by header, open row for full sheet`}
+        leds
+      >
+        <div className="mb-3 flex gap-1" role="tablist" aria-label="Filter team">
+          {(["all", "home", "away"] as const).map((value) => (
+            <button
+              key={value}
+              type="button"
+              role="tab"
+              aria-selected={side === value}
+              onClick={() => setSide(value)}
+              className={`tl-btn tl-btn-sm ${side === value ? "tl-btn-inv" : ""}`}
+            >
+              {value === "all" ? "Both" : value === "home" ? home.name : away.name}
+            </button>
+          ))}
         </div>
 
         <div className="thin-scrollbar overflow-x-auto">
-          <table className="w-full min-w-[760px] border-collapse text-left text-xs">
+          <table className="w-full min-w-[760px] border-collapse text-left text-[11.5px]">
             <thead>
-              <tr className="border-b border-line/60 text-[11px] text-dim">
-                <th className="sticky left-0 z-10 bg-card px-3 py-2.5 font-bold sm:px-4">Player</th>
-                <SortHeader label="Rating" title="FotMob rating" active={sort === "rating"} onClick={() => setSort("rating")} />
+              <tr>
+                <SortHeader
+                  label="Player"
+                  title="Player name"
+                  className="tl-sticky-cell sticky left-0 z-10 pl-2.5 text-left"
+                  col="player"
+                  sort={sort}
+                  onSort={toggleSort}
+                />
+                <SortHeader label="Rating" title="FotMob rating" col="rating" sort={sort} onSort={toggleSort} />
                 {COLUMNS.map((col) => (
-                  <SortHeader key={col.key} label={col.label} title={col.title} active={sort === col.key} onClick={() => setSort(col.key)} />
+                  <SortHeader key={col.key} label={col.label} title={col.title} col={col.key} sort={sort} onSort={toggleSort} />
                 ))}
               </tr>
             </thead>
@@ -130,28 +156,38 @@ export function PlayerRatingsBoard({
                 return (
                   <Fragment key={row.id}>
                     <tr
+                      tabIndex={0}
+                      role="button"
+                      aria-expanded={expanded}
                       onClick={() => setOpen(expanded ? null : row.id)}
-                      className={`cursor-pointer border-b border-line/30 transition-colors hover:bg-white/[0.03] ${expanded ? "bg-white/[0.035]" : ""}`}
+                      onKeyDown={(event) => {
+                        if (event.key !== "Enter" && event.key !== " ") return;
+                        event.preventDefault();
+                        setOpen(expanded ? null : row.id);
+                      }}
+                      className={`cursor-pointer border-b border-line/30 outline-none transition-colors hover:bg-hover focus-visible:bg-hover ${
+                        expanded ? "bg-card-2/60" : ""
+                      }`}
                     >
-                      <td className="sticky left-0 z-10 bg-card px-3 py-2 sm:px-4">
+                      <td className="tl-sticky-cell sticky left-0 z-10 px-2.5 py-2 sm:px-3">
                         <div className="flex items-center gap-2.5">
-                          <span className="relative h-8 w-8 shrink-0 overflow-hidden rounded-full bg-white/[0.05] ring-2 ring-inset ring-white/5">
-                            <PlayerPhoto playerId={row.id} alt="" width={32} height={32} className="h-full w-full object-cover object-top" />
+                          <span className="tl-frame relative h-9 w-9 shrink-0 overflow-hidden bg-card-2">
+                            <PlayerPhoto playerId={row.id} alt="" width={36} height={36} className="h-full w-full object-cover object-top" />
                           </span>
                           <div className="min-w-0 max-w-[132px] sm:max-w-[200px]">
-                            <p className="flex items-center gap-1 truncate text-[13px] font-bold text-ink">
+                            <p className="flex items-center gap-1 truncate text-[12px] font-semibold text-ink">
                               <span className="truncate">{row.name}</span>
                               {row.isPotm && <span className="text-accent" title="Player of the match">★</span>}
                             </p>
-                            <p className="flex items-center gap-1 text-[11px] text-dim">
-                              <Image src={teamCrest(row.teamId)} alt="" width={12} height={12} className="h-3 w-3 object-contain" />
+                            <p className="flex items-center gap-1.5 text-[10.5px] text-dim">
+                              <Crest id={row.teamId} name="" size={16} />
                               {row.position ?? "—"}
-                              {!row.starter && <span className="rounded bg-white/[0.06] px-1 text-[10px] font-semibold">SUB</span>}
+                              {!row.starter && <span className="tl-tag">SUB</span>}
                             </p>
                           </div>
                         </div>
                       </td>
-                      <td className="px-2 py-2 text-center">
+                      <td className="px-1.5 py-2 text-center">
                         <RatingChip rating={row.rating} />
                       </td>
                       {COLUMNS.map((col) => {
@@ -161,8 +197,8 @@ export function PlayerRatingsBoard({
                         return (
                           <td
                             key={col.key}
-                            className={`whitespace-nowrap px-2 py-2 text-center num ${
-                              sort === col.key ? "font-bold text-ink" : strong ? "font-bold text-accent" : "text-muted"
+                            className={`whitespace-nowrap px-1.5 py-2 text-center num ${
+                              sort.key === col.key ? "font-semibold text-ink" : strong ? "font-semibold text-accent" : "text-muted"
                             }`}
                           >
                             {text}
@@ -171,7 +207,7 @@ export function PlayerRatingsBoard({
                       })}
                     </tr>
                     {expanded && (
-                      <tr className="border-b border-line/40 bg-white/[0.02]">
+                      <tr className="border-b border-line/40 bg-card-2/60">
                         <td colSpan={COLUMNS.length + 2} className="p-0">
                           <PlayerSheet row={row} />
                         </td>
@@ -183,24 +219,9 @@ export function PlayerRatingsBoard({
             </tbody>
           </table>
         </div>
-      </div>
+      </Panel>
       <RatingLegend />
     </div>
-  );
-}
-
-function SortHeader({ label, title, active, onClick }: { label: string; title: string; active: boolean; onClick: () => void }) {
-  return (
-    <th className="px-2 py-2.5 text-center font-bold" title={title} aria-sort={active ? "descending" : "none"}>
-      <button
-        type="button"
-        onClick={onClick}
-        className={`inline-flex items-center gap-0.5 rounded px-1 py-0.5 transition-colors ${active ? "text-accent" : "hover:text-ink"}`}
-      >
-        {label}
-        {active && <span aria-hidden="true">↓</span>}
-      </button>
-    </th>
   );
 }
 
@@ -208,33 +229,33 @@ function PlayerSheet({ row }: { row: MatchPlayerRow }) {
   return (
     <div className="rise-in sticky left-0 max-w-[calc(100vw-2rem)] p-3 sm:p-4 md:max-w-none">
       <div className="mb-3 flex items-center justify-between gap-3">
-        <div className="flex items-center gap-3">
+        <div className="flex min-w-0 items-center gap-3">
           <RatingChip rating={row.rating} size="xl" />
-          <div>
-            <p className="font-display text-base font-extrabold text-ink">{row.name}</p>
-            <p className="text-xs text-dim">
+          <div className="min-w-0">
+            <p className="truncate text-[15px] font-bold text-ink">{row.name}</p>
+            <p className="tl-k tl-k-dim">
               {row.minutes}&apos; played{row.topSpeed ? ` · top speed ${row.topSpeed.toFixed(1)} km/h` : ""}
             </p>
           </div>
         </div>
-        <Link href={`/player/${row.id}`} className="btn-ghost press shrink-0 px-3 py-1.5 text-xs">
+        <Link href={`/player/${row.id}`} className="tl-btn shrink-0">
           Profile →
         </Link>
       </div>
       {row.rating && (
-        <div className="mb-4 h-1.5 overflow-hidden rounded-full bg-white/[0.06]">
-          <div className="rating-bar bar-grow h-full rounded-full" data-tier={ratingTier(row.rating)} style={{ width: `${(row.rating / 10) * 100}%` }} />
+        <div className="tl-frame mb-4 h-1.5 bg-card-2/60">
+          <div className="rating-bar bar-grow h-full" data-tier={ratingTier(row.rating)} style={{ width: `${(row.rating / 10) * 100}%` }} />
         </div>
       )}
       <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
         {row.groups.map((group) => (
           <div key={group.title} className="surface p-3">
-            <p className="eyebrow mb-1.5">{group.title}</p>
+            <p className="tl-k mb-1.5">{group.title}</p>
             <dl className="divide-y divide-line/30">
               {group.stats.map((stat) => (
                 <div key={stat.label} className="flex items-center justify-between gap-3 py-1.5">
-                  <dt className="text-xs text-muted">{stat.label}</dt>
-                  <dd className="text-xs font-bold text-ink num">{stat.display}</dd>
+                  <dt className="text-[11.5px] text-muted">{stat.label}</dt>
+                  <dd className="text-[12px] font-semibold text-ink num">{stat.display}</dd>
                 </div>
               ))}
             </dl>
@@ -248,7 +269,7 @@ function PlayerSheet({ row }: { row: MatchPlayerRow }) {
 export function RatingLegend() {
   return (
     <div className="flex flex-wrap items-center gap-x-3 gap-y-1.5 px-1 text-[11px] text-dim">
-      <span className="font-semibold">Rating scale</span>
+      <span className="tl-k">Rating scale</span>
       {[
         [9.2, "9+ elite"],
         [8.2, "8–9 great"],
@@ -257,7 +278,7 @@ export function RatingLegend() {
         [5.5, "<6 poor"],
       ].map(([value, label]) => (
         <span key={label} className="flex items-center gap-1.5">
-          <span className="rating-chip h-2.5 w-2.5 rounded-full" data-tier={ratingTier(value as number)} />
+          <span className="rating-chip h-2.5 w-2.5" data-tier={ratingTier(value as number)} />
           {label}
         </span>
       ))}

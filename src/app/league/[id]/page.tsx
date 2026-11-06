@@ -19,9 +19,11 @@ import {
   SkeletonBlock,
   SkeletonRows,
 } from "@/components/ui";
+import { K, Panel, Phos, Spark } from "@/components/tl";
+import { PixelField } from "@/components/pixel-field";
 import { leagueLogo } from "@/lib/assets";
 import { getLeague } from "@/lib/fotmob";
-import { countryName, hexAlpha } from "@/lib/format";
+import { countryName } from "@/lib/format";
 import { computeForm } from "@/lib/stats";
 import type { LeagueTableWrapper } from "@/lib/types";
 
@@ -101,7 +103,6 @@ async function LeagueContent({
   const league = await getLeague(id, season).catch(() => null);
   if (!league?.details) notFound();
 
-  const color = league.details.leagueColor ?? "#39ff6b";
   const table = league.table?.[0];
   const fixtures = league.fixtures?.allMatches ?? [];
   const form = computeForm(fixtures);
@@ -128,74 +129,92 @@ async function LeagueContent({
   const topScorer = playerGroups.find((group) => group.header === "Top scorer")?.topThree?.[0];
   const basePath = `/league/${id}`;
   const preservedSeason = season ? { season } : {};
+  const seasonLabel = league.details.selectedSeason ?? league.details.latestSeason ?? "—";
+
+  const facts: { label: string; value: number }[] = [];
+  if (table?.data?.table?.all?.length) facts.push({ label: "Teams", value: table.data.table.all.length });
+  if (fixtures.length > 0)
+    facts.push({ label: "Fixtures", value: fixtures.length });
+
+  // Total goals per matchday, first round first — the competition's scoring arc.
+  const rounds = new Map<string, number>();
+  for (const fixture of overviewFixtures) {
+    if (!fixture.status?.finished) continue;
+    const key = String(fixture.roundName ?? fixture.round ?? "");
+    if (!key) continue;
+    const goals = Number(fixture.home?.score ?? 0) + Number(fixture.away?.score ?? 0);
+    rounds.set(key, (rounds.get(key) ?? 0) + goals);
+  }
+  const roundTrace = [...rounds.values()].slice(-14);
 
   return (
-    <div className="shell py-6 md:py-8">
-      <section
-        className="card relative overflow-hidden rounded-[28px] p-4 sm:p-6"
-        style={{
-          backgroundImage: `radial-gradient(760px 300px at -5% -30%, ${hexAlpha(color, 0.26)}, transparent 66%), radial-gradient(500px 220px at 105% -20%, ${hexAlpha("#67c7ff", 0.08)}, transparent 70%)`,
-        }}
-      >
+    <div className="tl-view shell py-6 md:py-8">
+      <section className="card relative overflow-hidden p-4 sm:p-5">
+        <PixelField className="tl-field-right" step={22} />
         <Image
           src={leagueLogo(league.details.id)}
           alt=""
-          width={220}
-          height={220}
-          className="logo-watermark pointer-events-none absolute -right-10 -top-12 h-56 w-56 rotate-6 object-contain opacity-[0.055]"
+          width={200}
+          height={200}
+          className="logo-watermark pointer-events-none absolute -right-8 -top-10 h-48 w-48 rotate-6 object-contain opacity-[0.05]"
           aria-hidden="true"
         />
-        <div className="relative flex flex-col gap-5 sm:flex-row sm:items-center">
-          <span className="flex h-16 w-16 shrink-0 items-center justify-center rounded-[20px] border border-white/10 bg-white/[0.05] p-2 shadow-[0_18px_44px_-22px_rgba(0,0,0,0.9)] sm:h-[76px] sm:w-[76px] sm:rounded-[22px]">
+        <div className="relative flex flex-col gap-4 sm:flex-row sm:items-center">
+          <span className="flex h-14 w-14 shrink-0 items-center justify-center border border-line bg-card-2/60 p-1.5 sm:h-[64px] sm:w-[64px]">
             <Image
               src={leagueLogo(league.details.id)}
               alt={league.details.name}
-              width={56}
-              height={56}
+              width={52}
+              height={52}
               priority
-              className="h-12 w-12 object-contain sm:h-14 sm:w-14"
+              className="h-11 w-11 object-contain sm:h-12 sm:w-12"
             />
           </span>
           <div className="min-w-0 flex-1">
             <div className="flex flex-wrap items-center gap-2">
-              <span className="text-[11px] font-bold text-muted">
-                {countryName(league.details.country)}
-              </span>
-              <span className="h-1 w-1 rounded-full bg-white/20" />
-              <span className="text-[11px] font-bold text-dim">
-                {league.details.selectedSeason ?? league.details.latestSeason}
-              </span>
+              <K>{countryName(league.details.country)}</K>
+              <span className="h-3 w-px bg-line" aria-hidden="true" />
+              <K dim>{seasonLabel}</K>
               {league.details.gender === "female" && <Pill tone="info">Women&apos;s</Pill>}
             </div>
-            <h1 className="mt-2 font-display text-[30px] font-black leading-[0.92] tracking-[-0.01em] text-ink sm:text-[48px]">
+            <h1 className="font-display mt-1.5 text-[26px] font-bold leading-[1.05] text-ink sm:text-[38px]">
               {league.details.name}
             </h1>
-            <div className="mt-4 flex flex-wrap items-center gap-2">
-              {table?.data?.table?.all?.length ? (
-                <span className="hero-stat">
-                  <b>{table.data.table.all.length}</b> teams
-                </span>
-              ) : null}
-              {fixtures.length > 0 && (
-                <span className="hero-stat">
-                  <b>{fixtures.length}</b> {fixtures.length === 1 ? "fixture" : "fixtures"}
-                </span>
-              )}
-            </div>
+
+            {facts.length > 0 && (
+              <div className="mt-4 max-w-md">
+                <Phos />
+                <div className="tl-kpis mt-px">
+                  {facts.map((fact) => (
+                    <div key={fact.label} className="tl-kpi">
+                      <span className="tl-k tl-k-dim">{fact.label}</span>
+                      <b className="tl-kpi-v tl-num">{fact.value}</b>
+                    </div>
+                  ))}
+                </div>
+                {roundTrace.length > 3 && (
+                  <div className="mt-3">
+                    <div className="flex items-baseline justify-between gap-2">
+                      <K dim>Goals / matchday</K>
+                      <span className="tl-k tl-k-dim num">{roundTrace.length} rounds</span>
+                    </div>
+                    <Spark values={roundTrace} className="mt-2" />
+                  </div>
+                )}
+              </div>
+            )}
           </div>
           <div className="flex shrink-0 items-center gap-3 sm:flex-col sm:items-end">
             <div className="hidden text-right sm:block">
-              <p className="text-[11px] font-bold text-dim">Season</p>
-              <p className="font-display text-xl font-extrabold text-ink num">
-                {league.details.selectedSeason ?? league.details.latestSeason ?? "—"}
-              </p>
+              <K dim>Season</K>
+              <p className="tl-num text-[22px] text-ink">{seasonLabel}</p>
             </div>
             <Link
               href={`${basePath}?tab=table`}
-              className="btn-primary ml-auto items-center gap-1.5 px-4 py-2.5 text-xs sm:ml-0"
+              className="tl-btn tl-btn-inv ml-auto sm:ml-0"
             >
               View table
-              <ChevronRightIcon size={14} />
+              <ChevronRightIcon size={13} />
             </Link>
           </div>
         </div>
@@ -215,7 +234,7 @@ async function LeagueContent({
             <section>
               <SectionHeading
                 title="Table snapshot"
-                subtitle={`${league.details.name} · ${league.details.selectedSeason ?? ""}`}
+                subtitle={`${league.details.name} · ${seasonLabel}`}
                 action="Full table"
                 actionHref={`${basePath}?tab=table${season ? `&season=${encodeURIComponent(season)}` : ""}`}
                 icon={<TrophyIcon size={17} />}
@@ -234,34 +253,24 @@ async function LeagueContent({
                   actionHref={`${basePath}?tab=fixtures${season ? `&season=${encodeURIComponent(season)}` : ""}`}
                 />
                 <div className="mt-3 grid gap-3 sm:grid-cols-2">
-                  <div className="card overflow-hidden">
-                    <div className="border-b border-line/60 bg-white/[0.014] px-3.5 py-2.5">
-                      <h3 className="text-xs font-bold text-muted">
-                        Latest results
-                      </h3>
-                    </div>
-                    <div className="divide-y divide-line/40">
+                  <Panel label="Latest results" aside={`${latest.length}`}>
+                    <div className="divide-y divide-line">
                       {latest.length > 0 ? (
                         latest.map((fixture) => <FixtureRow key={fixture.id} fixture={fixture} />)
                       ) : (
-                        <p className="px-4 py-6 text-center text-xs text-dim">No results yet.</p>
+                        <p className="py-3 text-center text-[11.5px] text-dim">No results yet.</p>
                       )}
                     </div>
-                  </div>
-                  <div className="card overflow-hidden">
-                    <div className="border-b border-line/60 bg-white/[0.014] px-3.5 py-2.5">
-                      <h3 className="text-xs font-bold text-muted">
-                        Upcoming
-                      </h3>
-                    </div>
-                    <div className="divide-y divide-line/40">
+                  </Panel>
+                  <Panel label="Upcoming" aside={`${upcoming.length}`}>
+                    <div className="divide-y divide-line">
                       {upcoming.length > 0 ? (
                         upcoming.map((fixture) => <FixtureRow key={fixture.id} fixture={fixture} />)
                       ) : (
-                        <p className="px-4 py-6 text-center text-xs text-dim">Season complete.</p>
+                        <p className="py-3 text-center text-[11.5px] text-dim">Season complete.</p>
                       )}
                     </div>
-                  </div>
+                  </Panel>
                 </div>
               </section>
             )}
@@ -302,55 +311,45 @@ async function LeagueContent({
 
           <aside className="space-y-4 lg:sticky lg:top-24">
             {topScorer && (
-              <div className="card relative overflow-hidden p-4">
-                <div className="pointer-events-none absolute -right-10 -top-12 h-36 w-36 rounded-full bg-accent/10 blur-2xl" />
-                <div className="flex items-center justify-between">
-                  <p className="eyebrow flex items-center gap-1.5">
+              <Panel
+                label={
+                  <>
                     <TrophyIcon size={12} /> Golden boot
-                  </p>
-                  <span className="text-[11px] font-semibold text-dim">Top scorer</span>
-                </div>
+                  </>
+                }
+                aside="Top scorer"
+              >
                 <Link
                   href={`/player/${topScorer.id}`}
-                  className="group relative mt-3 flex items-center gap-3"
+                  className="group flex items-center gap-3"
                 >
-                  <span className="flex h-16 w-16 shrink-0 items-center justify-center overflow-hidden rounded-2xl bg-white/[0.05] ring-1 ring-inset ring-white/[0.07]">
+                  <span className="tl-frame flex h-14 w-14 shrink-0 items-center justify-center overflow-hidden bg-card-2/60">
                     <PlayerPhoto
                       playerId={topScorer.id}
                       alt={topScorer.name}
-                      width={64}
-                      height={64}
+                      width={56}
+                      height={56}
                       className="h-full w-full scale-110 object-cover object-top"
                     />
                   </span>
                   <span className="min-w-0">
-                    <span className="block truncate font-display text-[15px] font-bold text-ink transition-colors group-hover:text-accent">
+                    <span className="block truncate text-[12.5px] font-bold text-ink transition-colors group-hover:text-accent">
                       {topScorer.name}
                     </span>
-                    <span className="mt-0.5 block truncate text-xs text-dim">
-                      {topScorer.teamName}
-                    </span>
-                    <span className="mt-2 flex items-baseline gap-1">
-                      <span className="font-display text-2xl font-extrabold text-accent num">
-                        {topScorer.value}
-                      </span>
-                      <span className="text-[11px] font-semibold text-dim">
-                        goals
-                      </span>
+                    <span className="tl-k tl-k-dim block truncate">{topScorer.teamName}</span>
+                    <span className="mt-2 flex items-baseline gap-1.5">
+                      <span className="tl-num text-[26px] text-accent">{topScorer.value}</span>
+                      <K dim>goals</K>
                     </span>
                   </span>
                 </Link>
-              </div>
+              </Panel>
             )}
 
-            <div className="card p-4">
-              <p className="eyebrow mb-1">Competition facts</p>
-              <div className="divide-y divide-line/40">
+            <Panel label="Competition facts">
+              <div className="divide-y divide-line">
                 <DataRow label="Country" value={countryName(league.details.country)} />
-                <DataRow
-                  label="Season"
-                  value={league.details.selectedSeason ?? league.details.latestSeason ?? "—"}
-                />
+                <DataRow label="Season" value={seasonLabel} />
                 <DataRow label="Teams" value={table?.data?.table?.all?.length ?? "—"} />
                 <DataRow label="Matches" value={fixtures.length || "—"} />
                 <DataRow
@@ -358,7 +357,7 @@ async function LeagueContent({
                   value={league.details.gender === "female" ? "Women's" : "Men's"}
                 />
               </div>
-            </div>
+            </Panel>
 
             {teamGroups.length > 0 && (
               <div>
@@ -372,11 +371,11 @@ async function LeagueContent({
 
       {tab === "table" && (
         <div className="mt-6">
-          <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
+          <div className="mb-3 flex flex-wrap items-end justify-between gap-2">
             <div>
-              <h2 className="font-display text-xl font-bold text-ink">League table</h2>
-              <p className="text-xs text-dim">
-                {league.details.selectedSeason} · {league.details.name}
+              <h2 className="tl-head text-[13px]">League table</h2>
+              <p className="tl-k tl-k-dim mt-1">
+                {seasonLabel} · {league.details.name}
               </p>
             </div>
             <ViewToggle
@@ -403,7 +402,7 @@ async function LeagueContent({
         <div className="mt-6">
           <SectionHeading
             title="Fixtures & results"
-            subtitle={`${fixtures.length} matches · ${league.details.selectedSeason ?? ""}`}
+            subtitle={`${fixtures.length} matches · ${seasonLabel}`}
           />
           <div className="mt-3">
             <FixtureList fixtures={fixtures} />
@@ -418,7 +417,7 @@ async function LeagueContent({
               <section>
                 <SectionHeading
                   title="Player leaders"
-                  subtitle={`${playerGroups.length} stat categories · ${league.details.selectedSeason ?? ""}`}
+                  subtitle={`${playerGroups.length} stat categories · ${seasonLabel}`}
                   icon={<DataIcon size={17} />}
                 />
                 <div className="mt-3">
@@ -451,7 +450,7 @@ async function LeagueContent({
         <div className="mt-6">
           <SectionHeading
             title="Transfers"
-            subtitle={`${transferList.length} moves recorded · ${league.details.selectedSeason ?? ""}`}
+            subtitle={`${transferList.length} moves recorded · ${seasonLabel}`}
           />
           <div className="mt-3">
             <TransfersList transfers={transferList} />
@@ -474,15 +473,15 @@ async function LeagueContent({
                 <Link
                   key={seasonName}
                   href={href}
-                  className={`card card-hover flex items-center justify-between px-4 py-3 text-sm font-semibold ${
-                    active ? "border-accent/30 text-accent" : "text-muted"
+                  className={`tl-chip w-full justify-between transition-colors ${
+                    active ? "tl-chip-inv" : "text-muted hover:bg-hover"
                   }`}
                 >
                   {seasonName}
                   {active ? (
-                    <span className="h-1.5 w-1.5 rounded-full bg-accent" />
+                    <span className="h-1.5 w-1.5 shrink-0 bg-accent" aria-hidden="true" />
                   ) : (
-                    <ChevronRightIcon size={14} className="text-dim" />
+                    <ChevronRightIcon size={13} className="shrink-0 text-dim" />
                   )}
                 </Link>
               );
@@ -523,7 +522,7 @@ function ViewToggle({
     { value: "xg", label: "xG" },
   ];
   return (
-    <div className="flex gap-1 rounded-lg border border-line bg-black/25 p-1">
+    <div className="tl-tags">
       {items.map((item) => {
         const active = view === item.value;
         const params = new URLSearchParams({ tab: "table", view: item.value });
@@ -533,8 +532,8 @@ function ViewToggle({
             key={item.value}
             href={`${basePath}?${params.toString()}`}
             scroll={false}
-            className={`press rounded-md px-2.5 py-1 text-xs font-semibold transition-colors ${
-              active ? "bg-accent text-on-accent" : "text-dim hover:text-ink"
+            className={`tl-chip transition-colors ${
+              active ? "tl-chip-inv" : "text-muted hover:bg-hover"
             }`}
           >
             {item.label}
@@ -548,8 +547,8 @@ function ViewToggle({
 function LeagueSkeleton() {
   return (
     <div className="shell py-6 md:py-8">
-      <SkeletonBlock className="h-36 rounded-2xl" />
-      <SkeletonBlock className="mt-4 h-11 rounded-xl" />
+      <SkeletonBlock className="h-36" />
+      <SkeletonBlock className="mt-4 h-10" />
       <div className="mt-6 grid gap-7 lg:grid-cols-[minmax(0,1fr)_320px]">
         <div className="space-y-6">
           <SkeletonRows rows={6} />

@@ -4,7 +4,8 @@ import { leagueLogo } from "@/lib/assets";
 import { scorePair, statusLabel } from "@/lib/format";
 import { ChevronRightIcon } from "./icons";
 import type { MatchRowData } from "./match-row";
-import { Crest, LiveDot } from "./ui";
+import { Leds, Phos, Wave } from "./tl";
+import { Crest } from "./ui";
 
 export type LiveRailMatch = MatchRowData & { leagueId: number; leagueName: string };
 
@@ -18,18 +19,16 @@ function TeamScore({
   leading: boolean;
 }) {
   return (
-    <div className="flex items-center gap-2">
-      <Crest id={team.id} name={team.name} size={20} />
+    <div className="flex min-w-0 items-center gap-2.5">
+      <Crest id={team.id} name={team.name} size={26} />
       <span
-        className={`min-w-0 flex-1 truncate text-[13px] leading-tight ${leading ? "font-bold text-ink" : "font-medium text-muted"}`}
+        className={`min-w-0 flex-1 truncate text-[13px] leading-tight ${
+          leading ? "font-semibold text-ink" : "text-muted"
+        }`}
       >
         {team.shortName ?? team.name}
       </span>
-      <span
-        className={`font-display text-[18px] leading-none num ${leading ? "font-black text-ink" : "font-bold text-muted"}`}
-      >
-        {score}
-      </span>
+      <span className={`tl-num text-[22px] ${leading ? "text-ink" : "text-muted"}`}>{score}</span>
     </div>
   );
 }
@@ -39,54 +38,59 @@ export function LiveRail({ matches, total }: { matches: LiveRailMatch[]; total: 
 
   return (
     <section aria-label="Live now" className="mt-4">
-      <div className="mb-2 flex items-center justify-between">
-        <h2 className="flex items-center gap-2 text-[13px] font-bold text-ink">
-          <LiveDot />
-          Live now
-          <span className="text-dim num">{total}</span>
+      <div className="flex items-center justify-between gap-3 pb-2">
+        <h2 className="tl-k flex items-center gap-2 text-[11.5px] font-semibold">
+          <Leds n={5} />
+          <Wave text="Live now" />
+          <span className="tl-num text-[15px] text-live">{total}</span>
         </h2>
         <Link
           href="/?filter=live"
-          className="flex items-center gap-0.5 text-xs font-semibold text-muted transition-colors hover:text-accent"
+          className="tl-k flex items-center gap-1 text-dim transition-colors hover:text-accent"
         >
           See all
-          <ChevronRightIcon size={12} />
+          <ChevronRightIcon size={11} />
         </Link>
       </div>
-      <ul className="no-scrollbar -mx-4 flex snap-x snap-mandatory scroll-pl-4 gap-2.5 overflow-x-auto px-4 pb-1 sm:-mx-6 sm:scroll-pl-6 sm:px-6 lg:mx-0 lg:scroll-pl-0 lg:px-0">
+
+      <Phos className="mb-2" />
+
+      <ul className="no-scrollbar -mx-4 flex snap-x snap-mandatory gap-px overflow-x-auto px-4 sm:-mx-6 sm:px-6 lg:mx-0 lg:px-0">
         {matches.map((match) => {
           const [home, away] = scorePair(match);
           const minute = Number.parseInt(match.status.liveTime?.short ?? "", 10);
           const progress = Number.isFinite(minute) ? Math.min(100, (minute / 90) * 100) : 50;
           return (
-            <li key={match.id} className="w-[184px] shrink-0 snap-start sm:w-[208px]">
+            <li key={match.id} className="w-[214px] shrink-0 snap-start sm:w-[240px]">
               <Link
                 href={`/match/${match.id}`}
                 aria-label={`${match.home.name} ${home}, ${match.away.name} ${away}`}
-                className="press card card-hover relative block overflow-hidden px-3 pb-3 pt-2.5"
+                className="press tl-panel flex h-full flex-col gap-2 p-0"
               >
-                <div className="mb-2 flex items-center gap-1.5">
+                <span className="flex items-center gap-2 border-b border-line px-2.5 py-2">
                   <Image
                     src={leagueLogo(match.leagueId)}
                     alt=""
-                    width={14}
-                    height={14}
-                    className="h-3.5 w-3.5 shrink-0 object-contain"
+                    width={18}
+                    height={18}
+                    className="h-[18px] w-[18px] shrink-0 object-contain"
                   />
-                  <span className="min-w-0 flex-1 truncate text-xs text-dim">
+                  <span className="min-w-0 flex-1 truncate text-[10.5px] uppercase tracking-[0.06em] text-dim">
                     {match.leagueName}
                   </span>
-                  <span className="shrink-0 text-xs font-bold text-live num">
+                  <span className="tl-num shrink-0 text-[12px] text-live">
                     {statusLabel(match.status)}
                   </span>
-                </div>
-                <div className="space-y-1.5">
+                </span>
+
+                <span className="grid gap-2 px-2.5 py-2">
                   <TeamScore team={match.home} score={home} leading={Number(home) >= Number(away)} />
                   <TeamScore team={match.away} score={away} leading={Number(away) >= Number(home)} />
-                </div>
-                <span className="absolute inset-x-0 bottom-0 h-[3px] bg-white/[0.05]" aria-hidden="true">
+                </span>
+
+                <span className="mt-auto block h-[3px] bg-line" aria-hidden="true">
                   <span
-                    className="bar-grow block h-full bg-live shadow-[0_0_10px_var(--color-live)]"
+                    className="bar-grow block h-full bg-live"
                     style={{ width: `${progress}%` }}
                   />
                 </span>

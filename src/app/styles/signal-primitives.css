@@ -1,0 +1,1160 @@
+/* Signal layer — primitives.
+   Flat instruments: hairlines, brackets, uppercase micro-labels, LED lamps.
+   Nothing here rounds, floats or blurs. */
+
+@layer components {
+  /* ---------- panel ---------- */
+
+  .tl-panel {
+    position: relative;
+    padding: 16px 18px 18px;
+    background: var(--tl-panel);
+    border: 1px solid var(--tl-hair-soft);
+    border-radius: 0;
+    min-width: 0;
+    transition: border-color 350ms var(--tl-ease), box-shadow 350ms var(--tl-ease);
+  }
+
+  .tl-panel:hover {
+    border-color: color-mix(in srgb, var(--tl-teal) 55%, transparent);
+  }
+
+  .tl-br {
+    position: absolute;
+    width: 10px;
+    height: 10px;
+    border: 0 solid var(--tl-hair);
+    pointer-events: none;
+    z-index: 2;
+  }
+
+  .tl-br.tl { top: -1px; left: -1px; border-top-width: 2px; border-left-width: 2px; }
+  .tl-br.tr { top: -1px; right: -1px; border-top-width: 2px; border-right-width: 2px; }
+  .tl-br.bl { bottom: -1px; left: -1px; border-bottom-width: 2px; border-left-width: 2px; }
+  .tl-br.br { bottom: -1px; right: -1px; border-bottom-width: 2px; border-right-width: 2px; }
+
+  .tl-panel:hover > .tl-br { border-color: var(--tl-teal); }
+
+  .tl-panel-h {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 12px;
+    margin-bottom: 12px;
+    padding-bottom: 12px;
+  }
+
+  /* Every panel header closes on a tick rule rather than a plain line.
+     The ticks stay hairline; a spectrum wash under them carries the colour. */
+  .tl-panel-h::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    height: 8px;
+    background-color: transparent;
+    background-image:
+      repeating-linear-gradient(
+        90deg,
+        var(--tl-hair-strong) 0 1px,
+        transparent 1px 7px
+      ),
+      linear-gradient(
+        90deg,
+        color-mix(in srgb, var(--tl-led) 22%, transparent),
+        color-mix(in srgb, var(--tl-teal) 18%, transparent) 38%,
+        color-mix(in srgb, var(--tl-amber) 16%, transparent) 70%,
+        transparent
+      );
+    -webkit-mask-image: linear-gradient(90deg, #000 0 42%, transparent 92%);
+    mask-image: linear-gradient(90deg, #000 0 42%, transparent 92%);
+  }
+
+  /* ---------- type roles ---------- */
+
+  .tl-k {
+    font-size: 10.5px;
+    font-weight: 500;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--color-ink);
+  }
+
+  .tl-k-dim {
+    color: var(--color-dim);
+  }
+
+  .tl-acc {
+    color: var(--color-accent);
+    font-weight: 600;
+  }
+
+  .tl-head {
+    font-weight: 700;
+    letter-spacing: 0.02em;
+    text-transform: uppercase;
+    color: var(--color-ink);
+  }
+
+  /* ---------- chips & tags ---------- */
+
+  .tl-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    padding: 3px 8px;
+    border: 1px solid var(--tl-hair);
+    border-radius: 0;
+    font-size: 10.5px;
+    font-weight: 500;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    line-height: 1.4;
+    white-space: nowrap;
+    color: var(--color-ink);
+    background: transparent;
+  }
+
+  .tl-chip-inv {
+    background: var(--color-ink);
+    color: var(--tl-on-ink);
+  }
+
+  .tl-chip-live {
+    background: var(--tl-led);
+    border-color: var(--tl-hair);
+    color: #06140b;
+  }
+
+  .tl-chip-alert {
+    background: var(--tl-alert);
+    border-color: var(--tl-alert);
+    color: #fff;
+  }
+
+  .tl-chip-warn {
+    background: color-mix(in srgb, var(--tl-amber) 22%, transparent);
+    border-color: var(--tl-amber);
+    color: var(--color-ink);
+  }
+
+  .tl-chip-mint {
+    background: color-mix(in srgb, var(--tl-teal) 18%, transparent);
+    border-color: color-mix(in srgb, var(--tl-teal) 60%, transparent);
+    color: var(--color-ink);
+  }
+
+  a.tl-chip-inv:hover {
+    background: var(--tl-led);
+    color: #0b0b0b;
+  }
+
+  .tl-tag {
+    display: inline-block;
+    padding: 2px 7px;
+    border-radius: 0;
+    font-size: 10.5px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    background: var(--tl-tint);
+    border: 1px solid var(--tl-hair-soft);
+    white-space: nowrap;
+  }
+
+  .tl-tag.on {
+    background: var(--color-ink);
+    color: var(--tl-led);
+    border-color: var(--color-ink);
+  }
+
+  .tl-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+
+  /* ---------- buttons ---------- */
+
+  .tl-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 9px;
+    padding: 9px 13px;
+    border: 1px solid var(--tl-hair);
+    border-radius: 0;
+    background: transparent;
+    color: var(--color-ink);
+    font: inherit;
+    font-size: 11.5px;
+    font-weight: 500;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: background 0.2s, color 0.2s, transform 0.2s var(--tl-ease);
+  }
+
+  .tl-btn:hover {
+    background: var(--tl-led);
+    color: #0b0b0b;
+  }
+
+  .tl-btn:active {
+    transform: translateY(1px);
+  }
+
+  .tl-btn-inv {
+    background: var(--color-ink);
+    color: var(--tl-on-ink);
+  }
+
+  .tl-btn-inv:hover {
+    background: var(--tl-led);
+    color: #0b0b0b;
+    border-color: var(--tl-hair);
+  }
+
+  .tl-btn-sm {
+    padding: 5px 9px;
+    font-size: 10.5px;
+  }
+
+  /* ---------- two-position switch ---------- */
+
+  .tl-switch {
+    position: relative;
+    display: inline-grid;
+    grid-auto-flow: column;
+    grid-auto-columns: 1fr;
+    border: 1px solid var(--tl-hair);
+    background: var(--tl-panel);
+    user-select: none;
+  }
+
+  .tl-switch-knob {
+    position: absolute;
+    z-index: 0;
+    top: 1px;
+    bottom: 1px;
+    left: 1px;
+    width: calc(50% - 1px);
+    background: var(--color-ink);
+    transition: transform 0.26s var(--tl-ease), background 0.2s;
+  }
+
+  .tl-switch[data-on="true"] .tl-switch-knob {
+    transform: translateX(100%);
+  }
+
+  .tl-switch button {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    height: 27px;
+    padding: 0 10px;
+    border: 0;
+    background: transparent;
+    color: var(--color-dim);
+    cursor: pointer;
+    font: inherit;
+    font-size: 10.5px;
+    font-weight: 500;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    white-space: nowrap;
+    transition: color 0.2s var(--tl-ease);
+  }
+
+  .tl-switch button:hover {
+    color: var(--color-ink);
+  }
+
+  .tl-switch button[aria-pressed="true"] {
+    color: var(--tl-on-ink);
+  }
+
+  .tl-switch button[aria-pressed="true"] .tl-led {
+    opacity: 1;
+  }
+
+  .tl-switch:active .tl-switch-knob {
+    background: var(--tl-led);
+  }
+
+  /* Phones: the switch becomes a two-cell icon toggle and every header
+     control clears a thumb-sized target. */
+  @media (max-width: 639px) {
+    .tl-switch-t {
+      display: none;
+    }
+
+    .tl-switch button {
+      height: 34px;
+      min-width: 42px;
+      padding: 0;
+    }
+
+    .tl-btn,
+    .tl-chip,
+    .tl-tag {
+      min-height: 38px;
+    }
+  }
+
+  .tl-switch:focus-within {
+    outline: 1px solid var(--tl-led);
+    outline-offset: 2px;
+  }
+
+  /* ---------- lamps ---------- */
+
+  .tl-led {
+    display: inline-block;
+    width: 7px;
+    height: 7px;
+    flex: none;
+    border-radius: 0;
+    background: var(--tl-led);
+    box-shadow: 0 0 0 1px var(--tl-hair), 0 0 8px color-mix(in srgb, var(--tl-led) 85%, transparent);
+    animation: tl-blink 1.6s steps(2, jump-none) infinite;
+  }
+
+  .tl-led[data-tone="teal"] {
+    background: var(--tl-teal);
+    box-shadow: 0 0 0 1px var(--tl-hair), 0 0 8px color-mix(in srgb, var(--tl-teal) 85%, transparent);
+    animation-duration: 2.4s;
+  }
+
+  .tl-led[data-tone="amber"] {
+    background: var(--tl-amber);
+    box-shadow: 0 0 0 1px var(--tl-hair), 0 0 8px color-mix(in srgb, var(--tl-amber) 80%, transparent);
+    animation-duration: 3.1s;
+  }
+
+  .tl-led[data-tone="alert"] {
+    background: var(--tl-alert);
+    box-shadow: 0 0 0 1px var(--tl-hair), 0 0 8px color-mix(in srgb, var(--tl-alert) 80%, transparent);
+    animation-duration: 1.1s;
+  }
+
+  .tl-led.steady {
+    animation: none;
+  }
+
+  .tl-leds {
+    display: inline-flex;
+    gap: 3px;
+    vertical-align: middle;
+  }
+
+  .tl-leds .tl-led {
+    width: 6px;
+    height: 6px;
+    box-shadow: 0 0 6px color-mix(in srgb, var(--tl-led) 90%, transparent);
+    animation: tl-blink 1.5s steps(2, jump-none) infinite;
+    animation-delay: calc(var(--d, 0) * -0.37s);
+  }
+
+  .tl-leds .tl-led:nth-child(3n + 2) {
+    background: var(--tl-teal);
+    box-shadow: 0 0 6px color-mix(in srgb, var(--tl-teal) 90%, transparent);
+    animation-duration: 2.3s;
+  }
+
+  .tl-leds .tl-led:nth-child(3n + 3) {
+    background: var(--tl-amber);
+    box-shadow: 0 0 6px color-mix(in srgb, var(--tl-amber) 80%, transparent);
+    animation-duration: 3.1s;
+  }
+
+  /* ---------- dotted-leader register rows ---------- */
+
+  .tl-leader {
+    display: flex;
+    align-items: baseline;
+    gap: 8px;
+    padding: 5px 0;
+    font-size: 12px;
+  }
+
+  .tl-leader > i {
+    flex: 1;
+    min-width: 12px;
+    height: 1px;
+    border-bottom: 1px dotted var(--tl-hair-strong);
+  }
+
+  .tl-leader > b {
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+  }
+
+  /* ---------- tabs: console keys ----------
+     Section switches are keys, not underline links: framed, filled on press,
+     and the live one carries its own glow. */
+
+  .tl-tab {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    padding: 9px 11px 8px;
+    overflow: hidden;
+    border: 1px solid var(--tl-hair-soft);
+    background: var(--tl-panel);
+    color: var(--color-muted);
+    white-space: nowrap;
+    transition:
+      color 0.18s var(--tl-ease),
+      border-color 0.18s var(--tl-ease),
+      background 0.18s var(--tl-ease),
+      transform 0.1s var(--tl-ease);
+  }
+
+  .tl-tab:hover {
+    color: var(--color-ink);
+    border-color: color-mix(in srgb, var(--tl-led) 55%, var(--tl-hair-soft));
+    background: color-mix(in srgb, var(--tl-led) 11%, var(--tl-panel));
+  }
+
+  .tl-tab:active {
+    transform: translateY(1px) scale(0.982);
+  }
+
+  .tl-tab-c {
+    font-family: var(--font-doto), var(--font-face-mono);
+    font-size: 10px;
+    font-weight: 700;
+    opacity: 0.38;
+  }
+
+  .tl-tab-i {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background: linear-gradient(
+      90deg,
+      transparent,
+      color-mix(in srgb, var(--tl-led) 32%, transparent),
+      transparent
+    );
+    transform: translateX(-115%);
+  }
+
+  .tl-tab-on {
+    border-color: var(--color-ink);
+    background: var(--color-ink);
+    color: var(--tl-on-ink);
+    box-shadow:
+      0 0 0 1px color-mix(in srgb, var(--tl-led) 55%, transparent),
+      0 0 22px -6px rgba(43, 217, 74, 0.6);
+  }
+
+  .tl-tab-on:hover {
+    background: var(--color-ink);
+    color: var(--tl-on-ink);
+  }
+
+  .tl-tab-on .tl-tab-c {
+    color: var(--tl-led);
+    opacity: 0.7;
+  }
+
+  /* ---------- goal / assist ticks ----------
+     The feed puts neither on the lineup payload, so these are counted off
+     the event log and pinned to the corner of a marker. */
+
+  .tl-glyph {
+    display: inline-flex;
+    align-items: center;
+    gap: 2px;
+    height: 14px;
+    padding: 0 3px;
+    border: 1px solid var(--tl-led);
+    background: var(--tl-led);
+    color: #0b0b0b;
+    font-size: 9.5px;
+    font-weight: 700;
+    line-height: 1;
+  }
+
+  .tl-glyph-assist {
+    border-color: var(--tl-teal);
+    background: var(--tl-teal);
+  }
+
+  /* ---------- ASCII + meter bars ---------- */
+
+  .tl-ascii {
+    font-family: var(--font-doto), var(--font-face-mono), ui-monospace, monospace;
+    font-weight: 700;
+    font-variant-ligatures: none;
+    letter-spacing: -0.02em;
+    color: var(--color-dim);
+    white-space: pre;
+  }
+
+  .tl-ascii b {
+    color: var(--tl-led);
+    font-weight: 700;
+  }
+
+  .tl-ascii[data-tone="mint"] b { color: var(--tl-teal); }
+  .tl-ascii[data-tone="sky"] b { color: var(--tl-amber); }
+  .tl-ascii[data-tone="alert"] b { color: var(--tl-alert); }
+  .tl-ascii[data-tone="ink"] b { color: var(--color-muted); }
+
+  /* .tl-meter is a real width-based bar for data that must be measurable.
+     It never uses radius, and its track is a hairline box. */
+  .tl-meter {
+    position: relative;
+    height: 6px;
+    border: 1px solid var(--tl-hair-soft);
+    background: var(--tl-tint);
+    overflow: hidden;
+  }
+
+  .tl-meter > span {
+    display: block;
+    height: 100%;
+    background: var(--tl-led);
+  }
+
+  .tl-meter[data-tone="teal"] > span { background: var(--tl-teal); }
+  .tl-meter[data-tone="amber"] > span { background: var(--tl-amber); }
+  .tl-meter[data-tone="alert"] > span { background: var(--tl-alert); }
+  .tl-meter[data-tone="ink"] > span { background: var(--color-ink); }
+
+  /* ---------- register (tables, fixture lists, squads) ---------- */
+
+  .tl-tr {
+    display: grid;
+    align-items: baseline;
+    gap: 14px;
+    padding: 10px 8px;
+    border-bottom: 1px solid var(--tl-hair-soft);
+    font-size: 12px;
+    transition: background 0.15s, color 0.15s;
+  }
+
+  .tl-tr:last-child {
+    border-bottom: 0;
+  }
+
+  .tl-th {
+    padding-top: 0;
+    font-size: 10px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--color-dim);
+    border-bottom: 1px solid var(--tl-hair);
+  }
+
+  a.tl-tr:hover,
+  button.tl-tr:hover {
+    background: var(--tl-wash-strong);
+  }
+
+  a.tl-tr[aria-current] {
+    background: var(--color-ink);
+    color: var(--tl-on-ink);
+  }
+
+  a.tl-tr[aria-current] .tl-k-dim {
+    color: color-mix(in srgb, var(--tl-on-ink) 62%, transparent);
+  }
+
+  /* ---------- terminal ---------- */
+
+  .tl-term-out {
+    border: 1px solid var(--tl-hair);
+    background: var(--tl-panel);
+    min-width: 0;
+  }
+
+  /* A field canvas is positioned, so it would paint over static siblings. */
+  .tl-term-out > :not(.tl-field) {
+    position: relative;
+  }
+
+  .tl-term-bar {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 9px 14px;
+    background: #111;
+    color: #e9e5e1;
+    font-size: 10.5px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+
+  .tl-term-bar .tl-k-dim {
+    margin-left: auto;
+    color: rgba(233, 229, 225, 0.55);
+  }
+
+  .tl-term-dots {
+    display: flex;
+    gap: 5px;
+  }
+
+  .tl-term-dots i {
+    width: 9px;
+    height: 9px;
+    border: 1px solid rgba(233, 229, 225, 0.5);
+  }
+
+  .tl-term-dots i:first-child {
+    background: var(--tl-led);
+    border-color: var(--tl-led);
+  }
+
+  .tl-term-cmd {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 14px 16px 0;
+    font-size: 13px;
+    white-space: nowrap;
+    overflow: hidden;
+    animation: tl-type 0.6s steps(18) both;
+  }
+
+  .tl-caret {
+    display: inline-block;
+    width: 8px;
+    height: 15px;
+    background: var(--tl-led);
+    animation: tl-blink 1s steps(2, jump-none) infinite;
+  }
+
+  /* ---------- log feed (timeline, events) ---------- */
+
+  .tl-log-row {
+    display: grid;
+    grid-template-columns: 44px 22px minmax(0, 1fr);
+    gap: 10px;
+    align-items: start;
+    padding: 9px 8px;
+    border-bottom: 1px solid var(--tl-hair-soft);
+    font-size: 12px;
+  }
+
+  .tl-log-row:last-child {
+    border-bottom: 0;
+  }
+
+  .tl-log-min {
+    font-family: var(--font-doto), var(--font-face-mono);
+    font-weight: 700;
+    font-size: 13px;
+    color: var(--tl-led);
+    font-variant-numeric: tabular-nums;
+  }
+
+  .tl-log-glyph {
+    display: grid;
+    place-items: center;
+    width: 22px;
+    height: 22px;
+    border: 1px solid var(--tl-hair);
+    font-size: 11px;
+    line-height: 1;
+  }
+
+  .tl-log-row[data-kind="goal"] { background: color-mix(in srgb, var(--tl-led) 10%, transparent); }
+  .tl-log-row[data-kind="goal"] .tl-log-glyph { border-color: var(--tl-led); color: var(--color-accent); }
+  .tl-log-row[data-kind="card"] .tl-log-glyph { border-color: var(--tl-amber); background: var(--tl-amber); color: #1a1305; }
+  .tl-log-row[data-kind="sub"] .tl-log-glyph { border-color: var(--tl-teal); color: var(--tl-teal); }
+  .tl-log-row[data-kind="miss"] .tl-log-glyph { border-color: var(--tl-alert); color: var(--tl-alert); }
+
+  /* ---------- KPI tiles ---------- */
+
+  .tl-kpis {
+    position: relative;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(126px, 1fr));
+    gap: 1px;
+    background: var(--tl-hair-soft);
+    border: 1px solid var(--tl-hair-soft);
+    overflow: hidden;
+  }
+
+  .tl-kpi {
+    display: grid;
+    gap: 6px;
+    align-content: start;
+    padding: 12px 13px;
+    background: var(--tl-panel);
+    min-width: 0;
+    transition: background 0.2s;
+  }
+
+  a.tl-kpi:hover {
+    background: var(--tl-wash-strong);
+  }
+
+  /* The lead tile is the live channel: it carries the phosphor wash. */
+  .tl-kpi:first-child {
+    background: linear-gradient(
+      165deg,
+      color-mix(in srgb, var(--tl-led) 15%, var(--tl-panel)),
+      color-mix(in srgb, var(--tl-teal) 7%, var(--tl-panel)) 62%,
+      var(--tl-panel)
+    );
+  }
+
+  .tl-kpi-v {
+    font-size: clamp(26px, 3.4vw, 38px);
+    color: var(--color-ink);
+  }
+
+  .tl-kpi-src {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 10px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--color-dim);
+  }
+
+  .tl-spark {
+    display: block;
+    width: 100%;
+    height: 30px;
+  }
+
+  /* ---------- brand mark ---------- */
+
+  .tl-mark {
+    display: grid;
+    grid-template-columns: repeat(2, 8px);
+    gap: 3px;
+    flex: none;
+    padding: 6px;
+    border: 1px solid currentColor;
+  }
+
+  .tl-mark i {
+    width: 8px;
+    height: 8px;
+    border: 1.5px solid var(--tl-teal);
+  }
+
+  .tl-mark i:nth-child(1),
+  .tl-mark i:nth-child(4) {
+    background: var(--tl-led);
+    border-color: var(--tl-led);
+  }
+
+  /* ---------- ruler ---------- */
+
+  .tl-ruler {
+    display: flex;
+    align-items: flex-end;
+    gap: 4px;
+    height: 14px;
+    overflow: hidden;
+  }
+
+  .tl-ruler i {
+    width: 1px;
+    height: 5px;
+    background: var(--tl-hair-strong);
+  }
+
+  .tl-ruler i.m { height: 9px; }
+  .tl-ruler i.l { height: 14px; background: var(--color-ink); }
+
+  .tl-ruler.fill {
+    gap: 0;
+  }
+
+  .tl-ruler.fill i {
+    flex: 1 1 0;
+    min-width: 1px;
+  }
+
+  /* ---------- scroll scrub (sticky header) ---------- */
+
+  .tl-scrub {
+    position: absolute;
+    inset-inline: 0;
+    bottom: -1px;
+    z-index: 2;
+    height: 13px;
+    overflow: hidden;
+    pointer-events: none;
+    background: var(--color-base);
+    border-top: 1px solid var(--tl-hair-soft);
+  }
+
+  .tl-scrub .tl-ruler {
+    gap: 0;
+    height: 100%;
+    align-items: flex-end;
+  }
+
+  .tl-scrub .tl-ruler i {
+    flex: 1 1 0;
+    min-width: 1px;
+    height: 4px;
+    background: var(--tl-hair-soft);
+  }
+
+  .tl-scrub .tl-ruler i.m { height: 8px; background: var(--tl-hair-strong); }
+  .tl-scrub .tl-ruler i.l { height: 13px; background: var(--tl-hair); }
+
+  .tl-scrub-fill {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 0%;
+    height: 2px;
+    background: var(--tl-led);
+  }
+
+  .tl-scrub-head {
+    position: absolute;
+    bottom: 0;
+    left: 0%;
+    width: 2px;
+    height: 13px;
+    background: var(--tl-led);
+    box-shadow: 0 0 9px color-mix(in srgb, var(--tl-led) 70%, transparent);
+  }
+
+  /* ---------- sortable register header ---------- */
+
+  button.tl-th {
+    cursor: pointer;
+    user-select: none;
+    transition: color 0.15s, background 0.15s;
+  }
+
+  button.tl-th:hover {
+    color: var(--color-ink);
+    background: color-mix(in srgb, var(--color-ink) 5%, var(--tl-panel-solid));
+  }
+
+  /* Sticky first column needs an OPAQUE plate — the panel fill is translucent,
+     so columns scrolling underneath would bleed through. */
+  .tl-sticky-cell {
+    background-color: var(--tl-panel-solid);
+  }
+
+  tbody tr:hover > .tl-sticky-cell,
+  tbody tr:focus-visible > .tl-sticky-cell {
+    background-color: color-mix(in srgb, var(--color-ink) 5%, var(--tl-panel-solid));
+  }
+
+  tbody tr[aria-expanded="true"] > .tl-sticky-cell {
+    background-color: var(--tl-panel-2-solid);
+  }
+
+  button.tl-th[aria-sort] {
+    color: var(--tl-led);
+    text-shadow: 0 0 9px color-mix(in srgb, var(--tl-led) 35%, transparent);
+  }
+
+  button.tl-th .tl-caret-dir {
+    display: inline-block;
+    width: 7px;
+    font-size: 9px;
+    line-height: 1;
+  }
+
+  /* ---------- competition hue ----------
+
+     A league's colour is derived from its id, so the same competition reads
+     the same in the rail, the index, the group header and its own page.
+     --tl-hue is the block colour (rules, chips, bars); --tl-hue-ink is the
+     same hue pulled towards ink so small type keeps contrast on paper. */
+  .tl-h0,
+  .tl-hue-led {
+    --tl-hue: var(--tl-led);
+    --tl-hue-ink: color-mix(in srgb, var(--tl-led) 62%, var(--color-ink));
+  }
+
+  .tl-h1,
+  .tl-hue-teal {
+    --tl-hue: var(--tl-teal);
+    --tl-hue-ink: color-mix(in srgb, var(--tl-teal) 74%, var(--color-ink));
+  }
+
+  .tl-h2,
+  .tl-hue-amber {
+    --tl-hue: var(--tl-amber);
+    --tl-hue-ink: color-mix(in srgb, var(--tl-amber) 78%, var(--color-ink));
+  }
+
+  .tl-h3,
+  .tl-hue-alert {
+    --tl-hue: var(--tl-alert);
+    --tl-hue-ink: color-mix(in srgb, var(--tl-alert) 82%, var(--color-ink));
+  }
+
+  .tl-hue-ink {
+    --tl-hue: var(--color-ink);
+    --tl-hue-ink: var(--color-ink);
+  }
+
+  [data-theme="dark"] .tl-h0,
+  [data-theme="dark"] .tl-hue-led {
+    --tl-hue-ink: color-mix(in srgb, var(--tl-led) 86%, white);
+  }
+
+  [data-theme="dark"] .tl-h1,
+  [data-theme="dark"] .tl-h2,
+  [data-theme="dark"] .tl-h3,
+  [data-theme="dark"] .tl-hue-teal,
+  [data-theme="dark"] .tl-hue-amber,
+  [data-theme="dark"] .tl-hue-alert {
+    --tl-hue-ink: color-mix(in srgb, var(--tl-hue) 82%, white);
+  }
+
+  [data-theme="dark"] .tl-hue-ink {
+    --tl-hue: var(--tl-led);
+    --tl-hue-ink: var(--color-ink);
+  }
+
+  .tl-hue-t {
+    color: var(--tl-hue-ink);
+  }
+
+  .tl-hue-rule {
+    position: relative;
+  }
+
+  .tl-hue-rule::before {
+    content: "";
+    position: absolute;
+    inset: 0 auto 0 0;
+    width: 3px;
+    background: var(--tl-hue);
+  }
+
+  .tl-hue-chip {
+    color: var(--tl-hue-ink);
+    border-color: color-mix(in srgb, var(--tl-hue) 55%, var(--tl-hair-soft));
+    background: color-mix(in srgb, var(--tl-hue) 12%, transparent);
+  }
+
+  /* Register row carrying its competition's colour: a hair rule that widens
+     on hover, so the index reads as a coded list instead of grey rows. */
+  .tl-tr-hue {
+    position: relative;
+  }
+
+  .tl-tr-hue::after {
+    content: "";
+    position: absolute;
+    inset: 4px auto 4px 0;
+    width: 2px;
+    background: var(--tl-hue);
+    opacity: 0.45;
+    transition: opacity 0.2s var(--tl-ease), inset 0.2s var(--tl-ease);
+  }
+
+  .tl-tr-hue:hover::after {
+    inset: 0 auto 0 0;
+    opacity: 1;
+  }
+
+  /* ---------- geometry-safe frame ----------
+
+     Outlines, not borders: a 1px border shrinks the padding box of an
+     aspect-ratio coordinate space and every percentage-positioned marker
+     inside it shifts. Never put border/padding on a pitch, shot map or video. */
+  .tl-frame {
+    outline: 1px solid var(--tl-hair);
+    outline-offset: -1px;
+  }
+
+  /* ---------- pixel field ----------
+
+     Absolutely positioned inside a relative host and pointer-transparent, so
+     it never takes part in layout. The host supplies the pointer events. */
+  .tl-field {
+    position: absolute;
+    inset: 0;
+    display: block;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+  }
+
+  .tl-field-right {
+    inset: 0 0 0 auto;
+    width: 56%;
+    -webkit-mask-image: linear-gradient(to right, transparent, #000 38%);
+    mask-image: linear-gradient(to right, transparent, #000 38%);
+  }
+
+  @media (max-width: 639px) {
+    .tl-field-right {
+      inset: 0;
+      width: 100%;
+      opacity: 0.5;
+    }
+  }
+
+  /* ---------- sparkline ----------
+
+     The trace stretches with preserveAspectRatio=none, so the endpoint lamp is
+     a real square in HTML rather than a rect inside the stretched viewBox. */
+  .tl-spark {
+    position: relative;
+    display: block;
+  }
+
+  .tl-spark-svg {
+    display: block;
+    width: 100%;
+    height: 34px;
+    overflow: visible;
+  }
+
+  .tl-spark-l {
+    fill: none;
+    stroke: var(--tl-spark, var(--tl-led));
+    stroke-width: 1.5;
+    stroke-linejoin: round;
+  }
+
+  .tl-spark-a {
+    fill: var(--tl-spark, var(--tl-led));
+    stroke: none;
+  }
+
+  .tl-spark-dot {
+    position: absolute;
+    width: 5px;
+    height: 5px;
+    margin: -2.5px 0 0 -2.5px;
+    background: var(--tl-spark, var(--tl-led));
+    box-shadow: 0 0 10px color-mix(in srgb, var(--tl-spark, var(--tl-led)) 70%, transparent);
+  }
+
+  .tl-spark-mint { --tl-spark: var(--tl-teal); }
+  .tl-spark-sky { --tl-spark: var(--tl-amber); }
+  .tl-spark-alert { --tl-spark: var(--tl-alert); }
+
+  /* ---------- fixture row ----------
+     The centre cell is a readout, not a label: dashed frame, four corner ticks,
+     and dot-matrix leaders that take the colour of whatever is being scored. */
+
+  .tl-row::before {
+    content: "";
+    position: absolute;
+    inset: 22% auto 22% 0;
+    width: 2px;
+    background: var(--tl-hue, var(--tl-led));
+    opacity: 0;
+    transition: opacity 0.22s var(--tl-ease), inset 0.22s var(--tl-ease);
+  }
+
+  .tl-row:hover::before {
+    opacity: 0.9;
+    inset: 8% auto 8% 0;
+  }
+
+  .tl-row-live::before {
+    inset: 0 auto 0 0;
+    width: 3px;
+    background: var(--color-live);
+    opacity: 1;
+  }
+
+  .tl-vs {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
+    height: 34px;
+    padding: 0 9px;
+    overflow: hidden;
+    border: 1px dashed var(--tl-hair-soft);
+    background: var(--tl-panel);
+    transition: border-color 0.2s var(--tl-ease), background 0.2s var(--tl-ease),
+                box-shadow 0.2s var(--tl-ease);
+  }
+
+  .tl-vs::after {
+    content: "";
+    position: absolute;
+    inset: 2px;
+    pointer-events: none;
+    opacity: 0.45;
+    background:
+      linear-gradient(var(--tl-hair), var(--tl-hair)) 0 0 / 6px 1px no-repeat,
+      linear-gradient(var(--tl-hair), var(--tl-hair)) 0 0 / 1px 6px no-repeat,
+      linear-gradient(var(--tl-hair), var(--tl-hair)) 100% 0 / 6px 1px no-repeat,
+      linear-gradient(var(--tl-hair), var(--tl-hair)) 100% 0 / 1px 6px no-repeat,
+      linear-gradient(var(--tl-hair), var(--tl-hair)) 0 100% / 6px 1px no-repeat,
+      linear-gradient(var(--tl-hair), var(--tl-hair)) 0 100% / 1px 6px no-repeat,
+      linear-gradient(var(--tl-hair), var(--tl-hair)) 100% 100% / 6px 1px no-repeat,
+      linear-gradient(var(--tl-hair), var(--tl-hair)) 100% 100% / 1px 6px no-repeat;
+  }
+
+  .tl-row:hover .tl-vs {
+    border-color: color-mix(in srgb, var(--tl-led) 55%, transparent);
+    border-style: solid;
+    background: color-mix(in srgb, var(--tl-led) 9%, var(--tl-panel));
+  }
+
+  .tl-vs-live {
+    border-style: solid;
+    border-color: color-mix(in srgb, var(--color-live) 62%, transparent);
+    background: color-mix(in srgb, var(--color-live) 13%, var(--tl-panel));
+    box-shadow: inset 0 0 18px -8px color-mix(in srgb, var(--color-live) 70%, transparent);
+  }
+
+  .tl-vs-ft {
+    border-style: solid;
+    border-color: color-mix(in srgb, var(--tl-teal) 42%, transparent);
+  }
+
+  .tl-vs-v {
+    font-family: var(--font-doto), var(--font-face-mono);
+    font-weight: 700;
+    font-size: 19px;
+    line-height: 1;
+    letter-spacing: 0.02em;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .tl-lead {
+    height: 3px;
+    min-width: 10px;
+    background-image: radial-gradient(currentColor 1px, transparent 1.2px);
+    background-size: 5px 3px;
+    background-position: 0 1px;
+    background-repeat: repeat-x;
+    color: color-mix(in srgb, var(--color-dim) 45%, transparent);
+    transition: color 0.22s var(--tl-ease);
+  }
+
+  .tl-row:hover .tl-lead { color: color-mix(in srgb, var(--tl-led) 75%, transparent); }
+  .tl-row-live .tl-lead { color: color-mix(in srgb, var(--color-live) 55%, transparent); }
+
+  .tl-row-min {
+    position: relative;
+    height: 3px;
+    background: var(--tl-tint);
+    outline: 1px solid var(--tl-hair-soft);
+    outline-offset: -1px;
+  }
+
+  .tl-row-min > span { background: var(--color-live); }
+}

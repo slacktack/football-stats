@@ -1,0 +1,705 @@
+/* Signal layer — motion.
+   The instrument is never perfectly still, but nothing here moves data.
+   Every theatrical layer is removed outright under prefers-reduced-motion. */
+
+@keyframes tl-blink {
+  50% {
+    opacity: 0.25;
+  }
+}
+
+@keyframes tl-type {
+  from {
+    clip-path: inset(0 100% 0 0);
+  }
+  to {
+    clip-path: inset(0 0 0 0);
+  }
+}
+
+@layer components {
+  /* ---------- phosphor strip ---------- */
+
+  .tl-phos {
+    position: relative;
+    display: block;
+    height: 3px;
+    overflow: hidden;
+    flex: none;
+    background: var(--tl-hair-soft);
+  }
+
+  .tl-phos > i {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    width: 26%;
+    background: linear-gradient(
+      90deg,
+      transparent,
+      var(--tl-teal) 30%,
+      var(--tl-led) 52%,
+      #b9f56a 60%,
+      var(--tl-led) 70%,
+      transparent
+    );
+    animation: tl-phos 6s linear infinite;
+  }
+
+  @keyframes tl-phos {
+    from {
+      transform: translateX(-105%);
+    }
+    to {
+      transform: translateX(395%);
+    }
+  }
+
+  .tl-rail > .tl-phos {
+    margin: -14px -12px 12px;
+  }
+
+  /* ---------- rail motion ---------- */
+
+  @keyframes tl-rail-sweep {
+    from {
+      transform: translateX(-100%);
+    }
+    to {
+      transform: translateX(100%);
+    }
+  }
+
+  @keyframes tl-rail-bar {
+    from {
+      transform: scaleY(0);
+    }
+    to {
+      transform: scaleY(1);
+    }
+  }
+
+  @keyframes tl-mark-pop {
+    0% {
+      border-color: var(--tl-teal);
+      background: transparent;
+    }
+    40% {
+      border-color: var(--tl-led);
+      background: var(--tl-led);
+      box-shadow: 0 0 10px color-mix(in srgb, var(--tl-led) 70%, transparent);
+    }
+    100% {
+      border-color: var(--tl-led);
+      background: transparent;
+      box-shadow: none;
+    }
+  }
+
+  @keyframes tl-seam {
+    to {
+      background-position: 0 6px;
+    }
+  }
+
+  /* ---------- scan bar ---------- */
+  .tl-scanbar {
+    position: fixed;
+    z-index: 30;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 140px;
+    pointer-events: none;
+    background: linear-gradient(
+      to bottom,
+      transparent,
+      rgba(43, 217, 74, 0.04) 70%,
+      rgba(43, 217, 74, 0.12) 99%,
+      transparent
+    );
+    animation: tl-scan 9s linear infinite;
+  }
+
+  @media (min-width: 1024px) {
+    .tl-scanbar {
+      left: var(--tl-rail);
+      transition: left 0.35s var(--tl-ease);
+    }
+  }
+
+  @keyframes tl-scan {
+    from {
+      transform: translateY(-140px);
+    }
+    to {
+      transform: translateY(100vh);
+    }
+  }
+
+  /* ---------- boot readout ---------- */
+
+  .tl-boot {
+    position: fixed;
+    z-index: 90;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    display: grid;
+    place-items: center;
+    background: #0d0f0d;
+    color: #e9e5e1;
+    pointer-events: none;
+    animation: tl-boot-out 0.7s cubic-bezier(0.77, 0, 0.18, 1) 1.35s both;
+  }
+
+  @media (min-width: 1024px) {
+    .tl-boot {
+      left: var(--tl-rail);
+    }
+  }
+
+  .tl-boot-log {
+    position: relative;
+    display: grid;
+    gap: 8px;
+    min-width: min(420px, 86vw);
+    font-size: 13px;
+  }
+
+  .tl-boot-log b {
+    display: block;
+    font-family: var(--font-doto), var(--font-face-mono);
+    font-size: 54px;
+    font-weight: 700;
+    color: var(--tl-led);
+    text-shadow: 0 0 24px rgba(43, 217, 74, 0.6);
+    letter-spacing: 0.02em;
+    margin-bottom: 10px;
+  }
+
+  .tl-boot-log span {
+    opacity: 0;
+    animation: tl-line 0.25s steps(3) both;
+    animation-delay: calc(var(--d) * 0.18s + 0.12s);
+  }
+
+  .tl-boot-log em {
+    font-style: normal;
+    color: rgba(233, 229, 225, 0.45);
+  }
+
+  .tl-boot-log i {
+    font-style: normal;
+    color: rgba(233, 229, 225, 0.3);
+  }
+
+  .tl-boot-log strong {
+    color: var(--tl-led);
+    font-weight: 500;
+  }
+
+  @keyframes tl-line {
+    to {
+      opacity: 1;
+    }
+  }
+
+  @keyframes tl-boot-out {
+    to {
+      opacity: 0;
+      transform: translateY(-14px);
+      visibility: hidden;
+    }
+  }
+
+  /* ---------- dot-matrix text wave ---------- */
+
+  .tl-wave .tl-word {
+    display: inline-block;
+    white-space: nowrap;
+  }
+
+  .tl-wave .tl-word > span {
+    display: inline-block;
+    white-space: pre;
+    animation: tl-wave-in 0.9s var(--tl-ease) both;
+    animation-delay: calc(var(--d) * 55ms + 200ms);
+  }
+
+  .tl-wave:hover .tl-word > span {
+    animation: tl-wave 0.75s ease-out both;
+    animation-delay: calc(var(--d) * 45ms);
+  }
+
+  @keyframes tl-wave-in {
+    0% {
+      opacity: 0;
+      transform: translateY(6px);
+      color: var(--tl-led);
+    }
+    45% {
+      opacity: 1;
+      color: var(--tl-led);
+    }
+  }
+
+  @keyframes tl-wave {
+    40% {
+      color: var(--tl-led);
+      transform: translateY(-4px);
+      text-shadow: 0 0 12px rgba(43, 217, 74, 0.9);
+    }
+    100% {
+      color: var(--tl-led);
+      text-shadow: 0 0 10px rgba(43, 217, 74, 0.45);
+    }
+  }
+
+  /* Wave over an ink-filled plate: invert the lamp so it still reads. */
+  .tl-wave.on-ink:hover .tl-word > span {
+    animation-name: tl-wave-dark;
+  }
+
+  @keyframes tl-wave-dark {
+    40% {
+      color: #f4fff0;
+      transform: translateY(-4px);
+    }
+  }
+
+  /* ---------- hover glitch ----------
+     RGB-split flash for anything interactive that isn't character-split.
+     Ends parked on the lamp green so a hovered row reads as "selected". */
+
+  @keyframes tl-glitch {
+    0% {
+      color: var(--tl-led);
+      text-shadow: -2px 0 var(--tl-alert), 2px 0 var(--tl-teal);
+    }
+    30% {
+      color: var(--tl-teal);
+      transform: translateX(1px);
+      text-shadow: 2px 0 var(--tl-alert), -2px 0 var(--tl-led);
+    }
+    60% {
+      color: var(--tl-led);
+      transform: translateX(-1px);
+      text-shadow: -1px 0 var(--tl-teal), 1px 0 var(--tl-alert);
+    }
+    100% {
+      color: var(--tl-led);
+      text-shadow: 0 0 10px color-mix(in srgb, var(--tl-led) 50%, transparent);
+      transform: none;
+    }
+  }
+
+  a.tl-chip:hover,
+  .tl-btn:hover,
+  a:hover > .tl-k,
+  a:hover > span,
+  a:hover > b,
+  a:hover > .tl-num,
+  a.tl-tr:hover > *,
+  a.tl-kpi:hover .tl-kpi-v,
+  .tl-brand:hover .tl-brand-t,
+  .tl-panel-h:hover > .tl-k {
+    animation: tl-glitch 0.42s steps(3, jump-none) 1 both;
+  }
+
+  /* ---------- scroll-linked instruments ----------
+     The header ruler is a real scroll position; panels scan in as they enter.
+     Both degrade to a static ruler and static panels where the timeline
+     functions don't exist. */
+
+  @supports (animation-timeline: scroll()) {
+    @media (prefers-reduced-motion: no-preference) {
+      .tl-scrub-fill {
+        animation: tl-scrub linear both;
+        animation-timeline: scroll(root block);
+      }
+
+      .tl-scrub-head {
+        animation: tl-scrub-head linear both;
+        animation-timeline: scroll(root block);
+      }
+    }
+  }
+
+  @keyframes tl-scrub {
+    from {
+      width: 0%;
+    }
+    to {
+      width: 100%;
+    }
+  }
+
+  @keyframes tl-scrub-head {
+    from {
+      left: 0%;
+    }
+    to {
+      left: 100%;
+    }
+  }
+
+  @supports (animation-timeline: view()) {
+    @media (prefers-reduced-motion: no-preference) {
+      /* Sticky columns are excluded: a stuck element stops moving relative to
+         the scroll box, so its view() progress freezes mid-reveal and the
+         panel stays half-faded. */
+      .tl-panel:not(.tl-rail .tl-panel, aside .tl-panel),
+      .card:not(.tl-rail .card, aside .card),
+      .tl-reveal {
+        animation: tl-reveal linear both;
+        animation-timeline: view();
+        /* entry→entry is unreachable for anything taller than the viewport,
+           which would leave a long table stuck half-faded forever. cover
+           spans the whole journey, so 22% of it always lands. */
+        animation-range: entry 0% cover 22%;
+      }
+    }
+  }
+
+  @keyframes tl-reveal {
+    from {
+      opacity: 0;
+      transform: translateY(14px);
+      border-color: var(--tl-led);
+    }
+    to {
+      opacity: 1;
+      transform: none;
+    }
+  }
+
+  /* ---------- tactile press ---------- */
+
+  a.tl-panel:active,
+  a.tl-chip:active,
+  a.tl-tr:active,
+  a.tl-kpi:active {
+    transform: translateY(1px);
+    border-color: var(--tl-led);
+  }
+
+  /* ---------- row announce ----------
+     A lamp rule grows down the left edge before you commit, then retracts
+     from the bottom on leave, so the gesture always reads as a sweep. */
+  a.tl-tr,
+  a.tl-kpi,
+  .stagger > a {
+    position: relative;
+  }
+
+  a.tl-tr::before,
+  a.tl-kpi::before,
+  .stagger > a::before {
+    content: "";
+    position: absolute;
+    inset: 0 auto 0 0;
+    width: 3px;
+    background: var(--tl-led);
+    box-shadow: 0 0 10px color-mix(in srgb, var(--tl-led) 55%, transparent);
+    transform: scaleY(0);
+    transform-origin: top;
+    transition: transform 0.26s var(--tl-ease);
+  }
+
+  /* Hue-coded rows already carry a coloured rule — the generic lamp would
+     sit on top of it. */
+  a.tl-tr-hue::before {
+    content: none;
+  }
+
+  a.tl-tr:hover::before,
+  a.tl-kpi:hover::before,
+  .stagger > a:hover::before {
+    transform: scaleY(1);
+    transform-origin: bottom;
+  }
+
+  /* ---------- global link affordance ---------- */
+  a {
+    transition:
+      color 0.18s var(--tl-ease),
+      background-color 0.18s var(--tl-ease),
+      border-color 0.18s var(--tl-ease);
+  }
+
+  ::selection {
+    background: var(--tl-led);
+    color: #0b0b0b;
+  }
+
+  /* ---------- view entry ---------- */
+
+  .tl-view {
+    animation: tl-boot-in 0.6s var(--tl-ease) both;
+  }
+
+  @keyframes tl-boot-in {
+    from {
+      opacity: 0;
+      transform: translateY(10px);
+    }
+    to {
+      opacity: 1;
+      transform: none;
+    }
+  }
+
+  /* ---------- ticker ---------- */
+
+  .tl-tele {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    overflow: hidden;
+    border: 1px solid var(--tl-hair-soft);
+    background: var(--tl-panel);
+    padding: 8px 0;
+  }
+
+  .tl-tele-track {
+    display: inline-flex;
+    gap: 34px;
+    white-space: nowrap;
+    padding-left: 14px;
+    animation: tl-ticker 42s linear infinite;
+  }
+
+  .tl-tele:hover .tl-tele-track {
+    animation-play-state: paused;
+  }
+
+  @keyframes tl-ticker {
+    to {
+      transform: translateX(-50%);
+    }
+  }
+
+  /* ---------- console keys ---------- */
+
+  .tl-tab:hover .tl-tab-i {
+    animation: tl-tab-sweep 0.5s var(--tl-ease);
+  }
+
+  @keyframes tl-tab-sweep {
+    to {
+      transform: translateX(115%);
+    }
+  }
+
+  /* The live key's code breathes like a lamp that is not quite steady. */
+  .tl-tab-on .tl-tab-c {
+    animation: tl-lamp 2.4s steps(1, end) infinite;
+  }
+
+  @keyframes tl-lamp {
+    0%,
+    86%,
+    100% {
+      opacity: 0.7;
+    }
+    87% {
+      opacity: 0.16;
+    }
+    90% {
+      opacity: 0.82;
+    }
+    93% {
+      opacity: 0.28;
+    }
+    96% {
+      opacity: 0.68;
+    }
+  }
+
+  /* ---------- sparkline trace ----------
+     pathLength is normalised to 100, so one dash value works at any width. */
+
+  .tl-spark-l {
+    stroke-dasharray: 100;
+    stroke-dashoffset: 100;
+    animation: tl-draw 1.15s var(--tl-ease) forwards;
+    animation-delay: calc(var(--d, 0) * 130ms);
+  }
+
+  .tl-spark-a {
+    opacity: 0;
+    animation: tl-spark-fill 0.5s var(--tl-ease) forwards;
+    animation-delay: calc(var(--d, 0) * 130ms + 520ms);
+  }
+
+  .tl-spark-dot {
+    opacity: 0;
+    animation:
+      tl-spark-pop 0.2s steps(1, end) forwards,
+      tl-lamp 2.6s steps(1, end) infinite;
+    animation-delay: calc(var(--d, 0) * 130ms + 1080ms), calc(var(--d, 0) * 130ms + 1280ms);
+  }
+
+  @keyframes tl-draw {
+    to {
+      stroke-dashoffset: 0;
+    }
+  }
+
+  @keyframes tl-spark-fill {
+    to {
+      opacity: 0.14;
+    }
+  }
+
+  @keyframes tl-spark-pop {
+    to {
+      opacity: 1;
+    }
+  }
+
+  /* ---------- fixture row ---------- */
+
+  .tl-row-sweep {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background: linear-gradient(
+      90deg,
+      transparent,
+      color-mix(in srgb, var(--tl-led) 13%, transparent),
+      transparent
+    );
+    transform: translateX(-100%);
+  }
+
+  .tl-row:hover .tl-row-sweep {
+    animation: tl-row-sweep 0.62s var(--tl-ease);
+  }
+
+  @keyframes tl-row-sweep {
+    to {
+      transform: translateX(100%);
+    }
+  }
+
+  .tl-vs-live-dot {
+    animation: tl-lamp 1.6s steps(1, end) infinite;
+  }
+}
+
+/* ---------- reduced motion ----------
+   Theatrical layers are removed, not slowed: a 0.01ms scan bar still
+   repaints the whole viewport forever. */
+@media (prefers-reduced-motion: reduce) {
+  .tl-scanbar,
+  .tl-boot {
+    display: none;
+  }
+
+  .tl-phos > i {
+    animation: none;
+    transform: translateX(142%);
+  }
+
+  .tl-tele-track {
+    animation: none;
+  }
+
+  .tl-rail::after {
+    animation: none;
+  }
+
+  .tl-nav a[aria-current="page"]::before {
+    animation: none;
+  }
+
+  .tl-nav a:hover .tl-nav-sweep {
+    animation: none;
+    opacity: 1;
+    transform: none;
+  }
+
+  .tl-brand:hover .tl-mark i {
+    animation: none;
+  }
+
+  .tl-nav a:hover .tl-nav-l {
+    letter-spacing: 0.08em;
+  }
+
+  .tl-wave .tl-word > span {
+    animation: none;
+    opacity: 1;
+    transform: none;
+  }
+
+  .tl-tab-on .tl-tab-c {
+    animation: none;
+  }
+
+  .tl-tab:hover .tl-tab-i {
+    animation: none;
+    transform: none;
+    opacity: 0.5;
+  }
+
+  .tl-spark-l {
+    stroke-dashoffset: 0;
+    animation: none;
+  }
+
+  .tl-spark-a {
+    opacity: 0.14;
+    animation: none;
+  }
+
+  .tl-spark-dot {
+    opacity: 1;
+    animation: none;
+  }
+
+  .tl-row:hover .tl-row-sweep {
+    animation: none;
+    transform: none;
+    opacity: 0.3;
+  }
+
+  .tl-vs-live-dot {
+    animation: none;
+  }
+
+  a.tl-chip:hover,
+  .tl-btn:hover,
+  a:hover > .tl-k,
+  a:hover > span,
+  a:hover > b,
+  a:hover > .tl-num,
+  a.tl-tr:hover > *,
+  a.tl-kpi:hover .tl-kpi-v,
+  .tl-brand:hover .tl-brand-t,
+  .tl-panel-h:hover > .tl-k {
+    animation: none;
+    color: var(--tl-led);
+  }
+
+  .tl-view {
+    animation: none;
+  }
+
+  a.tl-tr::before,
+  a.tl-kpi::before,
+  .stagger > a::before {
+    transition: none;
+  }
+
+  .tl-led,
+  .tl-leds .tl-led,
+  .live-dot,
+  .tl-caret {
+    animation: none;
+  }
+}

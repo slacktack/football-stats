@@ -10,9 +10,9 @@ function Icon({ size = 20, children, ...props }: IconProps) {
       viewBox="0 0 24 24"
       fill="none"
       stroke="currentColor"
-      strokeWidth={1.8}
-      strokeLinecap="round"
-      strokeLinejoin="round"
+      strokeWidth={1.5}
+      strokeLinecap="butt"
+      strokeLinejoin="miter"
       aria-hidden="true"
       {...props}
     >

@@ -1,0 +1,67 @@
+/* Signal layer — derived variables.
+   These reference the Tailwind colour tokens, so they flip with
+   [data-theme="dark"] on <html> without needing their own override block.
+   Anything that must change independently lives in the block below. */
+
+:root {
+  /* Hairline: the outline colour of the whole instrument. Ink on paper,
+     light on phosphor. Never use a literal #111 in a component. */
+  --tl-hair: var(--color-ink);
+  --tl-hair-soft: var(--color-line);
+  --tl-hair-strong: var(--color-line-strong);
+
+  /* The LED is the same electric green in both modes. It is a lamp, not an ink. */
+  --tl-led: #2bd94a;
+  --tl-teal: #26b69a;
+  --tl-amber: #e0a526;
+  --tl-alert: #e2462b;
+
+  --tl-ease: cubic-bezier(0.22, 1, 0.36, 1);
+  --tl-rail: 248px;
+  --tl-rail-sm: 68px;
+
+  --tl-panel: color-mix(in srgb, var(--color-card) 78%, transparent);
+  --tl-panel-2: color-mix(in srgb, var(--color-card-2) 70%, transparent);
+  --tl-panel-solid: color-mix(in srgb, var(--color-card) 78%, var(--color-base));
+  --tl-panel-2-solid: color-mix(in srgb, var(--color-card-2) 70%, var(--color-base));
+  --tl-surface-solid: var(--color-base);
+
+  --tl-wash: color-mix(in srgb, var(--color-ink) 4%, transparent);
+  --tl-wash-strong: color-mix(in srgb, var(--color-ink) 7%, transparent);
+  --tl-tint: color-mix(in srgb, var(--color-ink) 6%, transparent);
+
+  --tl-crest-bg: #f8f6f3;
+  --tl-pitch: color-mix(in srgb, var(--color-ink) 6%, transparent);
+  --tl-pitch-vignette: rgba(17, 17, 17, 0.1);
+  --tl-pitch-field: var(--color-card-2);
+
+  /* Dialog scrim. Never derived from ink — in night mode ink is the light
+     hairline, and a light scrim over a dark console washes the panel out. */
+  --tl-scrim: rgba(20, 18, 16, 0.55);
+  --tl-on-ink: var(--color-base);
+}
+
+/* Rail collapse. Deliberately unlayered: a declaration inside
+   @layer components can never beat the unlayered :root above, and the
+   width is read by both .tl-rail and .tl-stage via the same variable. */
+html[data-rail="compact"] {
+  --tl-rail: var(--tl-rail-sm);
+}
+
+/* Values that cannot be derived, because paper and night want different
+   materials rather than inverted ones. */
+[data-theme="dark"] {
+  --tl-hair: rgba(233, 229, 225, 0.34);
+  --tl-panel: rgba(20, 26, 22, 0.62);
+  --tl-panel-2: rgba(26, 33, 28, 0.6);
+  --tl-panel-solid: #111612;
+  --tl-wash: rgba(233, 229, 225, 0.05);
+  --tl-wash-strong: rgba(233, 229, 225, 0.08);
+  --tl-tint: rgba(233, 229, 225, 0.07);
+  --tl-crest-bg: rgba(255, 255, 255, 0.92);
+  --tl-pitch: rgba(233, 229, 225, 0.1);
+  --tl-pitch-vignette: rgba(0, 0, 0, 0.5);
+  --tl-pitch-field: #0f1310;
+  --tl-scrim: rgba(3, 5, 4, 0.74);
+  --tl-on-ink: #0d0f0d;
+}

@@ -37,13 +37,13 @@ import {
 } from "@/components/team/team-cards";
 import { TransfersList } from "@/components/transfers-list";
 import {
-  DataRow,
   EmptyState,
   SectionHeading,
   SkeletonBlock,
   SkeletonRows,
   FormPill,
 } from "@/components/ui";
+import { Leader, Panel } from "@/components/tl";
 import { teamCrest } from "@/lib/assets";
 import { getTeam } from "@/lib/fotmob";
 import { countryName, inkFor, ordinal } from "@/lib/format";
@@ -129,7 +129,7 @@ async function TeamContent({
   if (!team?.details) notFound();
 
   const details = team.details;
-  const color = details.teamColor ?? "#39ff6b";
+  const kit = details.teamColor;
   const basePath = `/team/${id}`;
   const tableCandidates = team.overview?.table ?? team.table ?? [];
   const primaryTable =
@@ -165,17 +165,25 @@ async function TeamContent({
   const topPlayers = asTopPlayers(overviewExtra?.topPlayers);
 
   return (
-    <div className="shell py-6 md:py-8">
-      <section className="kit-hero" style={{ "--kit": color, "--kit-ink": inkFor(color) } as React.CSSProperties}>
+    <div className="tl-view shell py-6 md:py-8">
+      <section
+        className="kit-hero"
+        style={
+          {
+            "--kit": kit ?? "var(--color-ink)",
+            "--kit-ink": kit ? inkFor(kit) : "var(--color-base)",
+          } as React.CSSProperties
+        }
+      >
         <div className="kit-hero-slab">
           <div className="relative z-[1] min-w-0 flex-1 self-center py-5 pl-4 sm:py-8 sm:pl-7">
             {details.primaryLeagueId && (
-              <Link href={`/league/${details.primaryLeagueId}`} className="text-[13px] font-semibold opacity-85 hover:underline hover:opacity-100">
+              <Link href={`/league/${details.primaryLeagueId}`} className="text-[12.5px] font-semibold opacity-85 hover:underline hover:opacity-100">
                 {details.primaryLeagueName} {details.latestSeason}
               </Link>
             )}
             <h1 className="kit-hero-name">{details.name}</h1>
-            <p className="mt-3 flex flex-wrap items-baseline gap-x-4 gap-y-1 text-sm font-semibold">
+            <p className="mt-3 flex flex-wrap items-baseline gap-x-4 gap-y-1 text-[12.5px] font-semibold">
               {teamRow && (
                 <span>
                   <span className="kit-hero-number">{ordinal(teamRow.idx)}</span> with {teamRow.pts} pts
@@ -222,7 +230,7 @@ async function TeamContent({
               </dd>
             </div>
           )}
-          <Link href={`${basePath}?tab=fixtures`} className="btn-primary press ml-auto px-4 py-2 text-sm">
+          <Link href={`${basePath}?tab=fixtures`} className="btn-primary press ml-auto px-4 py-2">
             Fixtures
           </Link>
         </dl>
@@ -317,13 +325,13 @@ async function TeamContent({
                   icon={<GlobeIcon size={17} />}
                 />
                 <article className="card mt-3 p-4">
-                  <p className="text-sm leading-relaxed text-muted">{news.summary}</p>
+                  <p className="text-[12.5px] leading-relaxed text-muted">{news.summary}</p>
                   {news.source?.uri && (
                     <a
                       href={news.source.uri}
                       target="_blank"
                       rel="noreferrer noopener"
-                      className="mt-3 inline-flex items-center gap-1 text-xs font-bold text-accent hover:underline"
+                      className="mt-3 inline-flex items-center gap-1 text-[11.5px] font-semibold text-accent hover:underline"
                     >
                       Read the full story
                       <ChevronRightIcon size={12} />
@@ -351,67 +359,66 @@ async function TeamContent({
 
           <aside className="space-y-4 lg:sticky lg:top-24">
             <FixtureDifficultyCard data={overviewExtra?.fixtureDifficulty} />
-            <div className="card p-4">
-              <p className="eyebrow mb-1">Club profile</p>
-              <div className="divide-y divide-line/40">
-                <DataRow label="Country" value={countryName(details.country)} />
-                {details.primaryLeagueName && (
-                  <DataRow
-                    label="League"
-                    value={
-                      <Link
-                        href={`/league/${details.primaryLeagueId}`}
-                        className="text-accent hover:underline"
-                      >
-                        {details.primaryLeagueName}
-                      </Link>
-                    }
-                  />
-                )}
-                {coach && <DataRow label="Head coach" value={coach.name} />}
-                {venue?.widget?.name && (
-                  <DataRow
-                    label="Stadium"
-                    value={
-                      <span className="flex items-center justify-end gap-1">
-                        <MapPinIcon size={12} className="text-dim" />
-                        {venue.widget.name}
-                      </span>
-                    }
-                  />
-                )}
-                {venuePairs.get("Capacity") && (
-                  <DataRow label="Capacity" value={Number(venuePairs.get("Capacity")).toLocaleString("en-GB")} />
-                )}
-                {venuePairs.get("Opened") && <DataRow label="Opened" value={venuePairs.get("Opened")} />}
-                <DataRow label="Squad" value={roster.length || "—"} />
-                {averageAge && <DataRow label="Avg. age" value={averageAge.toFixed(1)} />}
-              </div>
-            </div>
+            <Panel label="Club profile">
+              <Leader k="Country" v={countryName(details.country)} />
+              {details.primaryLeagueName && (
+                <Leader
+                  k="League"
+                  v={
+                    <Link href={`/league/${details.primaryLeagueId}`} className="hover:underline">
+                      {details.primaryLeagueName}
+                    </Link>
+                  }
+                />
+              )}
+              {coach && <Leader k="Head coach" v={coach.name} />}
+              {venue?.widget?.name && (
+                <Leader
+                  k="Stadium"
+                  v={
+                    <span className="inline-flex items-center justify-end gap-1">
+                      <MapPinIcon size={12} className="text-dim" />
+                      {venue.widget.name}
+                    </span>
+                  }
+                />
+              )}
+              {venuePairs.get("Capacity") && (
+                <Leader k="Capacity" v={Number(venuePairs.get("Capacity")).toLocaleString("en-GB")} />
+              )}
+              {venuePairs.get("Opened") && <Leader k="Opened" v={venuePairs.get("Opened")} />}
+              <Leader k="Squad" v={roster.length || "—"} />
+              {averageAge && <Leader k="Avg. age" v={averageAge.toFixed(1)} />}
+            </Panel>
 
             {trophies.length > 0 && (
-              <div className="card p-4">
-                <div className="flex items-center justify-between">
-                  <p className="eyebrow">Honours</p>
+              <Panel
+                label="Honours"
+                aside={
                   <Link
                     href={`${basePath}?tab=history`}
-                    className="text-[11px] font-semibold text-dim transition-colors hover:text-accent"
+                    className="text-[10.5px] font-semibold uppercase tracking-[0.08em] text-dim transition-colors hover:text-accent"
                   >
                     All trophies
                   </Link>
-                </div>
-                <div className="mt-2 divide-y divide-line/40">
-                  {trophies.filter((trophy) => (trophy.won ?? 0) > 0).slice(0, 5).map((trophy) => (
-                    <div key={trophy.name} className="flex items-center gap-2 py-2.5">
-                      <TrophyIcon size={13} className="shrink-0 text-accent/80" />
-                      <span className="min-w-0 flex-1 truncate text-xs font-semibold text-muted">
-                        {trophy.name}
-                      </span>
-                      <span className="text-xs font-bold text-ink num">{trophy.won ?? 0}</span>
-                    </div>
+                }
+              >
+                {trophies
+                  .filter((trophy) => (trophy.won ?? 0) > 0)
+                  .slice(0, 5)
+                  .map((trophy) => (
+                    <Leader
+                      key={trophy.name}
+                      k={
+                        <span className="inline-flex items-center gap-2">
+                          <TrophyIcon size={13} className="shrink-0 text-accent" />
+                          {trophy.name}
+                        </span>
+                      }
+                      v={trophy.won ?? 0}
+                    />
                   ))}
-                </div>
-              </div>
+              </Panel>
             )}
 
           </aside>
@@ -577,10 +584,10 @@ function ManagerHistory({ team }: { team: TeamResponse }) {
     <section>
       <SectionHeading title="Manager history" subtitle="Recent head coaches and records" />
       <div className="card mt-3 overflow-hidden">
-        <div className="divide-y divide-line/40">
+        <div className="divide-y divide-line">
           {managers.map((manager) => (
-            <div key={manager.name} className="flex items-center gap-3 px-4 py-3">
-              <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-white/[0.06] text-[11px] font-bold text-accent">
+            <div key={manager.name} className="flex items-center gap-3 px-3 py-3 sm:px-4">
+              <span className="flex h-8 w-8 shrink-0 items-center justify-center border border-line bg-card-2 text-[10.5px] font-semibold text-ink">
                 {manager.name
                   .split(" ")
                   .map((part) => part[0])
@@ -588,12 +595,12 @@ function ManagerHistory({ team }: { team: TeamResponse }) {
                   .join("")}
               </span>
               <div className="min-w-0 flex-1">
-                <p className="truncate text-xs font-bold text-ink">{manager.name}</p>
-                <p className="text-[11px] text-dim">
+                <p className="truncate text-[11.5px] font-semibold text-ink">{manager.name}</p>
+                <p className="tl-k tl-k-dim mt-0.5">
                   {manager.first} – {manager.last} · {manager.seasons} seasons
                 </p>
               </div>
-              <div className="text-right text-[11px] text-dim">
+              <div className="text-right text-[10.5px] text-dim">
                 <p className="font-semibold text-muted num">
                   {manager.win}W {manager.draw}D {manager.loss}L
                 </p>
@@ -615,9 +622,9 @@ function ManagerHistory({ team }: { team: TeamResponse }) {
 
 function TeamSkeleton() {
   return (
-    <div className="shell py-6 md:py-8">
-      <SkeletonBlock className="h-44 rounded-2xl" />
-      <SkeletonBlock className="mt-4 h-11 rounded-xl" />
+    <div className="tl-view shell py-6 md:py-8">
+      <SkeletonBlock className="h-44" />
+      <SkeletonBlock className="mt-4 h-11" />
       <div className="mt-6 grid gap-7 lg:grid-cols-[minmax(0,1fr)_320px]">
         <div className="space-y-4">
           <div className="grid gap-3 sm:grid-cols-2">

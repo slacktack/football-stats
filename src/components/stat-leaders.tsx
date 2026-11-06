@@ -2,6 +2,10 @@ import { PlayerPhoto } from "@/components/player-photo";
 import Link from "next/link";
 import type { StatEntry, StatLeaderGroup } from "@/lib/types";
 import { Crest, RatingChip } from "./ui";
+import { AsciiBar } from "./tl";
+
+/* Register of season leaders. The row's padding is a coordinate: the share bar
+   behind the text is pinned to inset-y-0 left-0, so px-3 py-2.5 stays put. */
 
 function StatRow({
   entry,
@@ -26,19 +30,19 @@ function StatRow({
 
   return (
     <div
-      className={`relative flex items-center gap-2.5 px-3 py-2.5 ${
-        isHighlighted ? "bg-accent/[0.055]" : ""
+      className={`relative flex items-center gap-2.5 px-3 py-2.5 transition-colors hover:bg-hover ${
+        isHighlighted ? "bg-accent/10" : ""
       }`}
     >
       {!isRating && share > 0 && (
         <span
-          className={`bar-grow absolute inset-y-0 left-0 ${index === 0 ? "bg-accent/[0.07]" : "bg-white/[0.025]"}`}
+          className={`bar-grow absolute inset-y-0 left-0 ${index === 0 ? "bg-accent/10" : "bg-card-2/60"}`}
           style={{ width: `${share}%` }}
           aria-hidden="true"
         />
       )}
       <span
-        className={`relative w-5 shrink-0 text-center text-xs font-bold num ${
+        className={`relative w-5 shrink-0 text-center tl-num text-[13px] ${
           index === 0 ? "text-accent" : "text-dim"
         }`}
       >
@@ -47,7 +51,7 @@ function StatRow({
       {isTeamStat && entry.teamId ? (
         <Crest id={entry.teamId} name={entry.name} size={26} className="relative" />
       ) : (
-        <span className="relative flex h-[26px] w-[26px] shrink-0 items-center justify-center overflow-hidden rounded-full bg-white/[0.045] ring-1 ring-inset ring-white/[0.06]">
+        <span className="tl-frame relative flex h-[26px] w-[26px] shrink-0 items-center justify-center overflow-hidden bg-card-2/60">
           <PlayerPhoto
             playerId={entry.id}
             alt=""
@@ -61,31 +65,34 @@ function StatRow({
         {isTeamStat ? (
           <Link
             href={`/team/${entry.teamId}`}
-            className="block truncate text-[13px] font-semibold text-ink transition-colors hover:text-accent"
+            className="block truncate text-[11.5px] font-semibold text-ink transition-colors hover:text-accent"
           >
             {entry.name}
           </Link>
         ) : (
           <Link
             href={`/player/${entry.id}`}
-            className="block truncate text-[13px] font-semibold text-ink transition-colors hover:text-accent"
+            className="block truncate text-[11.5px] font-semibold text-ink transition-colors hover:text-accent"
           >
             {entry.name}
           </Link>
         )}
         {entry.teamName && !isTeamStat && (
-          <span className="block truncate text-[11px] text-dim">{entry.teamName}</span>
+          <span className="tl-k tl-k-dim block truncate">{entry.teamName}</span>
         )}
       </div>
       {isRating ? (
         <RatingChip rating={entry.value} className="relative" />
       ) : (
-        <span
-          className={`relative shrink-0 font-display font-extrabold num ${
-            index === 0 ? "text-[17px] text-accent" : "text-[15px] text-ink"
-          }`}
-        >
-          {entry.value}
+        <span className="relative flex shrink-0 items-baseline gap-2">
+          {!isTeamStat && share > 0 ? (
+            <AsciiBar value={numeric} total={max} blocks={8} className="text-[9.5px]" />
+          ) : null}
+          <span
+            className={`num tl-num ${index === 0 ? "text-[17px] text-accent" : "text-[15px] text-ink"}`}
+          >
+            {entry.value}
+          </span>
         </span>
       )}
     </div>
@@ -106,7 +113,7 @@ export function StatLeaders({
   const visible = (groups ?? []).slice(0, limit).filter((group) => (group.topThree?.length ?? 0) > 0);
   if (visible.length === 0) {
     return (
-      <div className="card px-4 py-8 text-center text-sm text-dim">Stat leaders not available.</div>
+      <div className="card px-4 py-8 text-center text-[12.5px] text-dim">Stat leaders not available.</div>
     );
   }
 
@@ -117,12 +124,10 @@ export function StatLeaders({
         const max = Math.max(0, ...(group.topThree ?? []).map((entry) => Number(entry.value) || 0));
         return (
         <section key={group.header} className="card overflow-hidden">
-          <div className="border-b border-line/60 bg-white/[0.014] px-3 py-2.5">
-            <h3 className="text-xs font-bold text-muted">
-              {group.header}
-            </h3>
+          <div className="border-b border-line px-3 py-2">
+            <h3 className="tl-k">{group.header}</h3>
           </div>
-          <div className="divide-y divide-line/35">
+          <div className="divide-y divide-line">
             {(group.topThree ?? []).map((entry, index) => (
               <StatRow
                 key={`${entry.id}-${entry.teamId}-${index}`}

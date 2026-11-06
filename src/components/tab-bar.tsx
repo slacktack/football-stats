@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
+import { pad } from "@/lib/format";
 import { ChevronLeftIcon, ChevronRightIcon } from "./icons";
 
 export function TabBar({
@@ -45,10 +46,10 @@ export function TabBar({
     <div className={`relative ${className}`}>
       <nav
         ref={navRef}
-        className="no-scrollbar -mb-px flex snap-x gap-5 overflow-x-auto border-b border-line/80 sm:gap-7"
+        className="no-scrollbar -mb-px flex snap-x gap-1.5 overflow-x-auto pb-1 sm:gap-2"
         aria-label="Page sections"
       >
-        {tabs.map((tab) => {
+        {tabs.map((tab, index) => {
           const params = new URLSearchParams();
           params.set("tab", tab.value);
           for (const [key, value] of Object.entries(preserve)) {
@@ -62,16 +63,11 @@ export function TabBar({
               href={href}
               scroll={false}
               aria-current={isActive ? "page" : undefined}
-              className={`group relative shrink-0 snap-start border-b-2 pb-3 pt-3.5 text-[14px] font-semibold transition-colors sm:text-[15px] ${
-                isActive
-                  ? "border-accent text-ink"
-                  : "border-transparent text-muted hover:border-line hover:text-ink"
-              }`}
+              className={`tl-tab tl-k shrink-0 snap-start ${isActive ? "tl-tab-on" : ""}`}
             >
+              <i className="tl-tab-i" aria-hidden="true" />
               {tab.label}
-              {isActive && (
-                <span className="absolute -bottom-[2px] left-0 h-[2px] w-full rounded-full bg-accent shadow-[0_0_12px_var(--color-accent)]" />
-              )}
+              <b className="tl-tab-c">{pad(index)}</b>
             </Link>
           );
         })}
@@ -82,26 +78,20 @@ export function TabBar({
           type="button"
           onClick={() => scroll(-1)}
           aria-label="Scroll tabs left"
-          className="glass absolute left-0 top-1/2 flex h-7 w-7 -translate-y-1/2 items-center justify-center rounded-full border border-line text-muted shadow-md sm:hidden"
+          className="absolute left-0 top-1/2 flex h-7 w-7 -translate-y-1/2 items-center justify-center border border-line bg-card text-muted transition-colors hover:border-ink hover:text-ink sm:hidden"
         >
           <ChevronLeftIcon size={13} />
         </button>
       )}
       {canRight && (
-        <>
-          <span
-            className="pointer-events-none absolute inset-y-0 right-0 w-12 bg-gradient-to-l from-base to-transparent sm:hidden"
-            aria-hidden="true"
-          />
-          <button
-            type="button"
-            onClick={() => scroll(1)}
-            aria-label="Scroll tabs right"
-            className="glass absolute right-0 top-1/2 flex h-7 w-7 -translate-y-1/2 items-center justify-center rounded-full border border-line text-ink shadow-md sm:hidden"
-          >
-            <ChevronRightIcon size={13} />
-          </button>
-        </>
+        <button
+          type="button"
+          onClick={() => scroll(1)}
+          aria-label="Scroll tabs right"
+          className="absolute right-0 top-1/2 flex h-7 w-7 -translate-y-1/2 items-center justify-center border border-line bg-card text-ink transition-colors hover:border-ink hover:text-canvas sm:hidden"
+        >
+          <ChevronRightIcon size={13} />
+        </button>
       )}
     </div>
   );

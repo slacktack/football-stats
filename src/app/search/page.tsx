@@ -5,6 +5,7 @@ import Link from "next/link";
 import { Suspense } from "react";
 import { ChevronRightIcon, SearchIcon, SparkIcon } from "@/components/icons";
 import { EmptyState, SkeletonRows } from "@/components/ui";
+import { Chip, K, Panel, TermBar } from "@/components/tl";
 import { leagueLogo, playerImage, teamCrest } from "@/lib/assets";
 import { isLive } from "@/lib/format";
 import { searchGrouped } from "@/lib/fotmob";
@@ -56,80 +57,80 @@ async function SearchContent({ searchParams }: { searchParams: SearchParams }) {
   const total = sections.reduce((count, group) => count + group.suggestions.length, 0);
 
   return (
-    <div className="shell py-6 md:py-9">
+    <div className="tl-view shell py-6 md:py-9">
       <div className="mx-auto max-w-4xl">
-        <form action="/search" className="relative">
-          <SearchIcon
-            size={18}
-            className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-dim"
-          />
-          <input
-            type="search"
-            name="q"
-            defaultValue={query}
-            autoFocus
-            placeholder="Search players, teams, leagues or matches"
-            className="h-12 w-full rounded-xl border border-line bg-card pl-11 pr-24 text-sm text-ink outline-none transition-colors placeholder:text-dim focus:border-accent/50 focus:ring-2 focus:ring-accent/10"
-            aria-label="Search Touchline"
-          />
-          <button
-            type="submit"
-            className="absolute right-1.5 top-1/2 -translate-y-1/2 rounded-lg bg-accent px-3 py-1.5 text-xs font-bold text-on-accent transition-opacity hover:opacity-90"
-          >
-            Search
-          </button>
-        </form>
+        <div className="tl-term-out">
+          <TermBar path="/search" dim={query ? `${total} hits` : "index"} />
+          <form action="/search" className="flex items-center gap-2.5 px-4 py-3">
+            <span className="tl-acc shrink-0" aria-hidden="true">
+              $
+            </span>
+            <input
+              type="search"
+              name="q"
+              defaultValue={query}
+              autoFocus
+              placeholder="players, teams, leagues or matches"
+              className="h-9 min-w-0 flex-1 bg-transparent font-mono text-[13px] text-ink outline-none placeholder:text-dim"
+              aria-label="Search Touchline"
+            />
+            <button type="submit" className="tl-btn tl-btn-inv shrink-0">
+              <SearchIcon size={13} />
+              Search
+            </button>
+          </form>
+        </div>
 
         {!query ? (
-          <div className="mt-8 space-y-7">
+          <div className="mt-7 space-y-7">
             <section>
-              <p className="eyebrow mb-3">Popular right now</p>
-              <div className="flex flex-wrap gap-2">
+              <p className="tl-k tl-k-dim mb-2">Popular right now</p>
+              <div className="tl-tags">
                 {POPULAR.map((item) => (
                   <Link
                     key={item.href}
                     href={item.href}
-                    className="rounded-full border border-line bg-card px-3.5 py-1.5 text-xs font-semibold text-muted transition-colors hover:border-accent/40 hover:text-ink"
+                    className="tl-chip transition-colors hover:bg-hover"
                   >
                     {item.label}
                   </Link>
                 ))}
               </div>
             </section>
-            <section>
-              <p className="eyebrow mb-3">Browse competitions</p>
-              <div className="grid gap-2 sm:grid-cols-2">
+            <Panel label="Browse competitions">
+              <div className="grid gap-x-8 sm:grid-cols-2">
                 {LEAGUES.map((league) => (
                   <Link
                     key={league.id}
                     href={`/league/${league.id}`}
-                    className="card card-hover flex items-center gap-3 p-3"
+                    className="tl-tr group grid-cols-[24px_minmax(0,1fr)_auto]"
                   >
-                    <span className="flex h-9 w-9 items-center justify-center rounded-lg border border-line bg-white/[0.03]">
-                      <Image
-                        src={leagueLogo(league.id)}
-                        alt=""
-                        width={24}
-                        height={24}
-                        className="h-6 w-6 object-contain"
-                      />
+                    <Image
+                      src={leagueLogo(league.id)}
+                      alt=""
+                      width={24}
+                      height={24}
+                      className="h-6 w-6 shrink-0 object-contain"
+                    />
+                    <span className="min-w-0 truncate text-[12px] font-semibold text-ink transition-colors group-hover:text-accent">
+                      {league.name}
                     </span>
-                    <span className="flex-1 text-sm font-semibold text-ink">{league.name}</span>
-                    <ChevronRightIcon size={14} className="text-dim" />
+                    <ChevronRightIcon size={14} className="shrink-0 text-dim" />
                   </Link>
                 ))}
               </div>
-            </section>
-            <div className="flex items-start gap-3 rounded-xl border border-accent/15 bg-accent/[0.045] p-4">
+            </Panel>
+            <div className="card flex items-start gap-3 p-4">
               <SparkIcon size={16} className="mt-0.5 shrink-0 text-accent" />
-              <p className="text-xs leading-relaxed text-muted">
-                Tip: press <kbd className="rounded border border-line bg-white/[0.06] px-1 py-0.5 text-[11px] text-ink">⌘ K</kbd>{" "}
+              <p className="text-[11.5px] leading-relaxed text-muted">
+                Tip: press{" "}
+                <kbd className="border border-line bg-card-2/60 px-1 py-0.5 font-mono text-[10.5px] text-ink">⌘ K</kbd>{" "}
                 anywhere to search without leaving the page.
               </p>
             </div>
           </div>
         ) : total === 0 ? (
-          <div className="mt-8">
+          <div className="mt-7">
             <EmptyState
               icon={<SearchIcon size={20} />}
               title={`No results for “${query}”`}
@@ -137,29 +138,24 @@ async function SearchContent({ searchParams }: { searchParams: SearchParams }) {
             />
           </div>
         ) : (
-          <div className="mt-7 space-y-7">
-            <p className="text-xs text-dim">
-              {total} result{total === 1 ? "" : "s"} for{" "}
-              <span className="font-semibold text-muted">“{query}”</span>
+          <div className="mt-6 space-y-7">
+            <p className="tl-k tl-k-dim">
+              {total} result{total === 1 ? "" : "s"} for “{query}”
             </p>
             {sections.map((group) => (
               <section key={group.title.key}>
-                <div className="mb-2 flex items-center gap-2">
-                  <h2 className="font-display text-sm font-bold text-ink">
-                    {group.title.value}
-                  </h2>
-                  <span className="rounded-full bg-white/[0.05] px-1.5 py-0.5 text-[11px] font-bold text-dim num">
-                    {group.suggestions.length}
-                  </span>
+                <div className="flex items-baseline justify-between gap-3 border-b border-line pb-2">
+                  <h2 className="tl-head text-[12.5px]">{group.title.value}</h2>
+                  <K dim>{group.suggestions.length}</K>
                 </div>
                 {group.title.key === "teams" ? (
-                  <div className="grid gap-2 sm:grid-cols-2">
+                  <div className="grid gap-x-8 sm:grid-cols-2">
                     {group.suggestions.map((suggestion) => (
                       <TeamResult key={`${suggestion.type}-${suggestion.id}`} suggestion={suggestion} />
                     ))}
                   </div>
                 ) : (
-                  <div className="card divide-y divide-line/40 overflow-hidden">
+                  <div className="card divide-y divide-line overflow-hidden">
                     {group.suggestions.map((suggestion) => (
                       <SearchRow key={`${suggestion.type}-${suggestion.id}`} suggestion={suggestion} />
                     ))}
@@ -176,24 +172,21 @@ async function SearchContent({ searchParams }: { searchParams: SearchParams }) {
 
 function TeamResult({ suggestion }: { suggestion: SearchSuggestion }) {
   return (
-    <Link
-      href={`/team/${suggestion.id}`}
-      className="card card-hover flex items-center gap-3 p-3"
-    >
-      <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full border border-line bg-white/[0.03]">
-        <Image
-          src={teamCrest(suggestion.id)}
-          alt=""
-          width={30}
-          height={30}
-          className="h-[30px] w-[30px] object-contain"
-        />
+    <Link href={`/team/${suggestion.id}`} className="tl-tr group grid-cols-[26px_minmax(0,1fr)_auto]">
+      <Image
+        src={teamCrest(suggestion.id)}
+        alt=""
+        width={26}
+        height={26}
+        className="h-[26px] w-[26px] shrink-0 object-contain"
+      />
+      <span className="min-w-0">
+        <span className="block truncate text-[12px] font-semibold text-ink transition-colors group-hover:text-accent">
+          {suggestion.name}
+        </span>
+        <span className="tl-k tl-k-dim block truncate">{suggestion.leagueName ?? "Team"}</span>
       </span>
-      <div className="min-w-0 flex-1">
-        <p className="truncate text-sm font-bold text-ink">{suggestion.name}</p>
-        <p className="truncate text-[11px] text-dim">{suggestion.leagueName ?? "Team"}</p>
-      </div>
-      <ChevronRightIcon size={15} className="text-dim" />
+      <ChevronRightIcon size={14} className="shrink-0 text-dim" />
     </Link>
   );
 }
@@ -217,29 +210,25 @@ function SearchRow({ suggestion }: { suggestion: SearchSuggestion }) {
       : `/team/${suggestion.id}`;
 
   return (
-    <Link href={href} className="flex items-center gap-3 px-3.5 py-3 transition-colors hover:bg-white/[0.025]">
-      <span
-        className={`flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden border border-line bg-white/[0.03] ${
-          isPlayer ? "rounded-full" : "rounded-lg"
-        }`}
-      >
+    <Link href={href} className="flex items-center gap-3 px-3.5 py-2.5 transition-colors hover:bg-hover">
+      <span className="tl-frame flex h-9 w-9 shrink-0 items-center justify-center overflow-hidden bg-card-2/60">
         {isPlayer ? (
-          <PlayerPhoto playerId={suggestion.id} alt="" width={40} height={40} className="h-10 w-10 object-cover object-top" />
+          <PlayerPhoto playerId={suggestion.id} alt="" width={36} height={36} className="h-9 w-9 object-cover object-top" />
         ) : (
-          <SafeImage src={image} label={suggestion.name ?? ""} alt="" width={26} height={26} className="h-[26px] w-[26px] object-contain" />
+          <SafeImage src={image} label={suggestion.name ?? ""} alt="" width={24} height={24} className="h-6 w-6 object-contain" />
         )}
       </span>
-      <div className="min-w-0 flex-1">
-        <p className="truncate text-sm font-semibold text-ink">{suggestion.name}</p>
-        <p className="truncate text-[11px] text-dim">
+      <span className="min-w-0 flex-1">
+        <span className="block truncate text-[12.5px] font-semibold text-ink">{suggestion.name}</span>
+        <span className="tl-k tl-k-dim block truncate">
           {isPlayer
             ? [suggestion.position, suggestion.teamName].filter(Boolean).join(" · ")
             : isLeague
               ? "Competition"
               : suggestion.leagueName ?? "Team"}
-        </p>
-      </div>
-      <ChevronRightIcon size={15} className="text-dim" />
+        </span>
+      </span>
+      <ChevronRightIcon size={14} className="shrink-0 text-dim" />
     </Link>
   );
 }
@@ -251,13 +240,13 @@ function MatchResult({ suggestion }: { suggestion: SearchSuggestion }) {
   return (
     <Link
       href={`/match/${suggestion.id}`}
-      className="flex items-center gap-3 px-3.5 py-3 transition-colors hover:bg-white/[0.025]"
+      className="flex items-center gap-3 px-3.5 py-2.5 transition-colors hover:bg-hover"
     >
-      <div className="w-[70px] shrink-0 text-[11px] leading-tight text-dim">
+      <span className="tl-k tl-k-dim w-[74px] shrink-0 leading-tight">
         {live ? (
-          <span className="font-bold text-live">LIVE</span>
+          <span className="font-semibold text-live">Live</span>
         ) : started ? (
-          <span className="font-semibold text-muted">Full time</span>
+          <span className="text-muted">Full time</span>
         ) : suggestion.matchDate ? (
           <>
             <span className="block text-muted"><LocalTime value={suggestion.matchDate} kind="short" /></span>
@@ -267,7 +256,7 @@ function MatchResult({ suggestion }: { suggestion: SearchSuggestion }) {
           "Fixture"
         )}
         <span className="mt-0.5 block truncate">{suggestion.leagueName}</span>
-      </div>
+      </span>
       <div className="flex flex-1 flex-col gap-1">
         <div className="flex items-center gap-2">
           <Image
@@ -275,13 +264,13 @@ function MatchResult({ suggestion }: { suggestion: SearchSuggestion }) {
             alt=""
             width={16}
             height={16}
-            className="h-4 w-4 object-contain"
+            className="h-4 w-4 shrink-0 object-contain"
           />
-          <span className="min-w-0 flex-1 truncate text-xs font-semibold text-ink">
+          <span className="min-w-0 flex-1 truncate text-[11.5px] font-semibold text-ink">
             {suggestion.homeTeamName}
           </span>
           {started && (
-            <span className="text-xs font-bold text-ink num">
+            <span className="text-[12.5px] font-semibold text-ink num">
               {suggestion.status?.scoreStr?.split(" - ")[0] ?? suggestion.homeTeamScore ?? ""}
             </span>
           )}
@@ -292,24 +281,20 @@ function MatchResult({ suggestion }: { suggestion: SearchSuggestion }) {
             alt=""
             width={16}
             height={16}
-            className="h-4 w-4 object-contain"
+            className="h-4 w-4 shrink-0 object-contain"
           />
-          <span className="min-w-0 flex-1 truncate text-xs font-semibold text-ink">
+          <span className="min-w-0 flex-1 truncate text-[11.5px] font-semibold text-ink">
             {suggestion.awayTeamName}
           </span>
           {started && (
-            <span className="text-xs font-bold text-ink num">
+            <span className="text-[12.5px] font-semibold text-ink num">
               {suggestion.status?.scoreStr?.split(" - ")[1] ?? suggestion.awayTeamScore ?? ""}
             </span>
           )}
         </div>
       </div>
-      {finished && (
-        <span className="rounded bg-white/[0.05] px-1.5 py-0.5 text-[11px] font-bold text-dim">
-          FT
-        </span>
-      )}
-      <ChevronRightIcon size={15} className="text-dim" />
+      {finished && <Chip tone="plain">FT</Chip>}
+      <ChevronRightIcon size={14} className="shrink-0 text-dim" />
     </Link>
   );
 }
@@ -317,8 +302,8 @@ function MatchResult({ suggestion }: { suggestion: SearchSuggestion }) {
 function SearchSkeleton() {
   return (
     <div className="shell py-6 md:py-9">
-      <div className="mx-auto max-w-4xl space-y-6">
-        <div className="h-12 animate-pulse rounded-xl border border-line bg-card" />
+      <div className="mx-auto max-w-4xl space-y-5">
+        <div className="skeleton h-[76px]" />
         <SkeletonRows rows={6} />
       </div>
     </div>

@@ -16,7 +16,8 @@ import type {
   TeamResponse,
 } from "@/lib/types";
 import { ChevronRightIcon, TrophyIcon } from "../icons";
-import { Crest, FormPill, RatingChip } from "../ui";
+import { Crest, EmptyState, FormPill, RatingChip } from "../ui";
+import { Chip, K, Phos } from "../tl";
 
 export function NextMatchCard({
   fixture,
@@ -28,8 +29,8 @@ export function NextMatchCard({
   if (!fixture) {
     return (
       <div className="card p-4">
-        <p className="eyebrow">Next match</p>
-        <p className="mt-2 text-sm text-muted">No upcoming fixture scheduled.</p>
+        <K>Next match</K>
+        <p className="mt-2 text-[12.5px] text-muted">No upcoming fixture scheduled.</p>
       </div>
     );
   }
@@ -40,38 +41,35 @@ export function NextMatchCard({
   return (
     <Link
       href={`/match/${fixture.id}`}
-      className="card card-hover group relative flex h-full flex-col overflow-hidden p-4"
+      className="card group flex h-full flex-col overflow-hidden p-4"
     >
-      <div className="pointer-events-none absolute -right-8 -top-10 h-32 w-32 rounded-full bg-accent/8 blur-2xl" />
       <div className="flex items-center justify-between gap-3">
-        <p className="eyebrow">Next match</p>
-        <span className="rounded-md bg-white/[0.05] px-2 py-0.5 text-[11px] font-bold text-dim">
-          {fixture.tournament?.name ?? "Fixture"}
-        </span>
+        <K>Next match</K>
+        <Chip>{fixture.tournament?.name ?? "Fixture"}</Chip>
       </div>
       <div className="my-auto flex items-center justify-between gap-3 py-5">
         <div className="flex min-w-0 flex-1 flex-col items-center gap-1.5 text-center">
           <Crest id={fixture.home.id} name={fixture.home.name} size={42} />
-          <span className="w-full truncate text-xs font-semibold text-ink">
+          <span className="w-full truncate text-[11.5px] font-semibold text-ink">
             {fixture.home.name}
           </span>
         </div>
         <div className="shrink-0 text-center">
-          <p className="font-display text-lg font-extrabold text-ink">
+          <p className="tl-num text-[19px] text-ink">
             {fixture.status.started ? fixture.status.scoreStr ?? "vs" : <LocalTime value={fixture.status.utcTime} />}
           </p>
-          <p className="mt-0.5 text-[11px] font-semibold text-dim">
+          <p className="mt-0.5 text-[10.5px] font-semibold text-dim">
             <LocalTime value={fixture.status.utcTime} kind="short" />
           </p>
         </div>
         <div className="flex min-w-0 flex-1 flex-col items-center gap-1.5 text-center">
           <Crest id={fixture.away.id} name={fixture.away.name} size={42} />
-          <span className="w-full truncate text-xs font-semibold text-ink">
+          <span className="w-full truncate text-[11.5px] font-semibold text-ink">
             {fixture.away.name}
           </span>
         </div>
       </div>
-      <div className="mt-auto flex items-center justify-center gap-1 border-t border-line/50 pt-2.5 text-[11px] font-semibold text-dim transition-colors group-hover:text-accent">
+      <div className="mt-auto flex items-center justify-center gap-1 border-t border-line pt-2.5 text-[10.5px] font-semibold uppercase tracking-[0.08em] text-dim transition-colors group-hover:text-accent">
         Match centre
         <ChevronRightIcon size={12} />
       </div>
@@ -92,19 +90,19 @@ export function TeamFormCard({
   if (!form?.length) {
     return (
       <div className="card p-4">
-        <p className="eyebrow mb-2">Recent form</p>
-        <p className="text-sm text-muted">No matches played yet.</p>
+        <K className="mb-2">Recent form</K>
+        <p className="text-[12.5px] text-muted">No matches played yet.</p>
       </div>
     );
   }
 
   return (
     <div className="card p-3.5">
-      <div className="mb-3 flex items-center justify-between">
-        <p className="eyebrow">Recent form</p>
+      <div className="mb-3 flex items-center justify-between gap-3 border-b border-dashed border-line-strong pb-2">
+        <K>Recent form</K>
         <Link
           href={href ?? "#"}
-          className="text-[11px] font-semibold text-dim transition-colors hover:text-accent"
+          className="text-[10.5px] font-semibold uppercase tracking-[0.08em] text-dim transition-colors hover:text-accent"
         >
           All results
         </Link>
@@ -123,15 +121,15 @@ export function TeamFormCard({
                   ? `/match/${item.linkToMatch.split("#").pop()}`
                   : "#"
               }
-              className="press group flex items-center gap-2 rounded-lg bg-white/[0.025] px-2 py-2 ring-1 ring-inset ring-white/[0.04] transition-colors hover:bg-white/[0.05]"
+              className="press group flex items-center gap-2 border border-line bg-card p-2 transition-colors hover:bg-hover"
               title={`${item.home?.name ?? ""} ${item.score ?? ""} ${item.away?.name ?? ""}`}
             >
               <FormPill result={item.result} size={22} />
               <div className="min-w-0 flex-1">
-                <p className="truncate text-xs font-semibold text-ink">
+                <p className="truncate text-[11.5px] font-semibold text-ink">
                   {opponent?.shortName ?? opponent?.name ?? "Match"}
                 </p>
-                <p className="mt-0.5 truncate text-[11px] text-dim">
+                <p className="mt-0.5 truncate text-[10.5px] text-dim">
                   <span className="num">{item.score ?? "—"}</span>
                   {item.tournamentName ? ` · ${item.tournamentName}` : ""}
                 </p>
@@ -167,10 +165,10 @@ export function MatchResultCard({
   const score = scoreFromStatus(fixture.status);
 
   return (
-    <Link href={`/match/${fixture.id}`} className="press card card-hover flex h-full flex-col p-4">
-      <div className="flex items-center justify-between">
-        <p className="eyebrow">{label}</p>
-        <span className="text-[11px] font-semibold text-dim">
+    <Link href={`/match/${fixture.id}`} className="press card flex h-full flex-col p-4">
+      <div className="flex items-center justify-between gap-3">
+        <K>{label}</K>
+        <span className="text-[10.5px] font-semibold uppercase tracking-[0.08em] text-dim">
           {fixture.tournament?.name ?? ""}
         </span>
       </div>
@@ -178,19 +176,19 @@ export function MatchResultCard({
         <div className="flex flex-1 items-center gap-2">
           <Crest id={fixture.home.id} name={fixture.home.name} size={32} />
           <span
-            className={`min-w-0 truncate text-xs ${
+            className={`min-w-0 truncate text-[11.5px] ${
               homeIsTeam ? "font-bold text-ink" : "font-medium text-muted"
             }`}
           >
             {fixture.home.shortName ?? fixture.home.name}
           </span>
         </div>
-        <span className="shrink-0 font-display text-[26px] font-black leading-none text-ink num">
+        <span className="shrink-0 tl-num text-[24px] leading-none text-ink">
           {score ? `${score[0]}–${score[1]}` : <LocalTime value={fixture.status.utcTime} />}
         </span>
         <div className="flex flex-1 items-center justify-end gap-2 text-right">
           <span
-            className={`min-w-0 truncate text-xs ${
+            className={`min-w-0 truncate text-[11.5px] ${
               !homeIsTeam ? "font-bold text-ink" : "font-medium text-muted"
             }`}
           >
@@ -199,7 +197,7 @@ export function MatchResultCard({
           <Crest id={fixture.away.id} name={fixture.away.name} size={32} />
         </div>
       </div>
-      <p className="mt-auto text-center text-[11px] font-semibold text-dim">
+      <p className="mt-auto text-center text-[10.5px] font-semibold text-dim">
         <LocalTime value={fixture.status.utcTime} kind="short" />
       </p>
     </Link>
@@ -212,9 +210,9 @@ export function SquadPlayer({ member }: { member: SquadMember }) {
   return (
     <Link
       href={`/player/${member.id}`}
-      className="press group flex items-center gap-3 rounded-xl border border-line/70 bg-card/60 p-2.5 transition-colors hover:border-accent/25 hover:bg-white/[0.03]"
+      className="press group flex items-center gap-3 border border-line bg-card p-2.5 transition-colors hover:bg-hover"
     >
-      <span className="relative flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-full bg-white/[0.05] ring-1 ring-inset ring-white/10">
+      <span className="relative flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden border border-line bg-card-2">
         <PlayerPhoto
           playerId={member.id}
           alt=""
@@ -223,17 +221,17 @@ export function SquadPlayer({ member }: { member: SquadMember }) {
           className="h-full w-full object-cover object-top"
         />
         {member.shirtNumber !== undefined && (
-          <span className="absolute bottom-0 right-0 flex h-4 min-w-4 items-center justify-center rounded-full bg-base/90 px-1 text-[11px] font-bold text-muted ring-1 ring-white/10">
+          <span className="tl-num absolute bottom-0 right-0 flex h-4 min-w-4 items-center justify-center border border-line bg-base px-1 text-[10px] leading-none text-ink">
             {member.shirtNumber}
           </span>
         )}
       </span>
       <div className="min-w-0 flex-1">
-        <p className="truncate text-[13px] font-bold text-ink group-hover:text-accent">
+        <p className="truncate text-[12.5px] font-semibold text-ink group-hover:text-accent">
           {member.name}
-          {member.isCaptain && <span className="ml-1 text-[11px] font-bold text-accent">C</span>}
+          {member.isCaptain && <span className="ml-1 text-[10.5px] font-bold text-accent">C</span>}
         </p>
-        <p className="truncate text-[11px] text-dim">
+        <p className="truncate text-[10.5px] text-dim">
           {position}
           {member.age ? ` · ${member.age}y` : ""}
           {member.injury ? " · injured" : ""}
@@ -241,7 +239,7 @@ export function SquadPlayer({ member }: { member: SquadMember }) {
       </div>
       <div className="flex shrink-0 flex-col items-end gap-1">
         {member.rating ? <RatingChip rating={member.rating} /> : null}
-        <span className="text-[11px] font-semibold text-dim num">
+        <span className="text-[10.5px] font-semibold text-dim num">
           {formatMarketValue(member.transferValue)}
         </span>
       </div>
@@ -251,7 +249,7 @@ export function SquadPlayer({ member }: { member: SquadMember }) {
 
 export function SquadGrid({ groups }: { groups?: SquadGroup[] }) {
   if (!groups?.length) {
-    return <div className="card px-4 py-8 text-center text-sm text-dim">Squad not available.</div>;
+    return <EmptyState title="Squad not available." />;
   }
 
   const order = ["coach", "keepers", "defenders", "midfielders", "attackers"];
@@ -269,7 +267,7 @@ export function SquadGrid({ groups }: { groups?: SquadGroup[] }) {
           if (!coach) return null;
           return (
             <section key={group.title}>
-              <p className="eyebrow mb-2">Head coach</p>
+              <K className="mb-2">Head coach</K>
               <div className="max-w-sm">
                 <SquadPlayer member={coach} />
               </div>
@@ -278,9 +276,9 @@ export function SquadGrid({ groups }: { groups?: SquadGroup[] }) {
         }
         return (
           <section key={group.title}>
-            <div className="mb-2 flex items-baseline justify-between">
-              <p className="eyebrow capitalize">{group.title}</p>
-              <span className="text-[11px] font-semibold text-dim">
+            <div className="mb-2 flex items-baseline justify-between gap-3">
+              <K className="capitalize">{group.title}</K>
+              <span className="text-[10.5px] font-semibold text-dim">
                 {group.members.length} players
               </span>
             </div>
@@ -312,47 +310,40 @@ export function TeamStatGrid({
   highlightTeamId?: number;
 }) {
   if (!groups?.length) {
-    return <div className="card px-4 py-8 text-center text-sm text-dim">No team stats available.</div>;
+    return <EmptyState title="No team stats available." />;
   }
 
   return (
-    <div className="grid gap-2 sm:grid-cols-2 xl:grid-cols-3">
-      {groups.map((group) => {
-        const entry =
-          group.participant ??
-          group.topThree?.find(
-            (item) =>
-              highlightTeamId !== undefined &&
-              String(item.teamId) === String(highlightTeamId),
-          );
-        const highlighted =
-          highlightTeamId !== undefined &&
-          entry?.teamId !== undefined &&
-          String(entry.teamId) === String(highlightTeamId);
-        return (
-          <div
-            key={group.header}
-            className={`card p-3.5 ${highlighted ? "border-accent/20 bg-accent/[0.03]" : ""}`}
-          >
-            <div className="flex items-start justify-between gap-2">
-              <p className="text-[11px] font-semibold text-dim">
-                {group.header}
-              </p>
-              {entry?.rank ? (
-                <span className="rounded bg-white/[0.05] px-1.5 py-0.5 text-[11px] font-bold text-dim num">
-                  #{entry.rank}
-                </span>
-              ) : null}
+    <div>
+      <Phos className="mb-2" />
+      <div className="tl-kpis">
+        {groups.map((group) => {
+          const entry =
+            group.participant ??
+            group.topThree?.find(
+              (item) =>
+                highlightTeamId !== undefined &&
+                String(item.teamId) === String(highlightTeamId),
+            );
+          const highlighted =
+            highlightTeamId !== undefined &&
+            entry?.teamId !== undefined &&
+            String(entry.teamId) === String(highlightTeamId);
+          return (
+            <div
+              key={group.header}
+              className={`tl-kpi ${highlighted ? "border-l-2 border-l-accent bg-card-2/60" : ""}`}
+            >
+              <div className="flex items-start justify-between gap-2">
+                <K dim>{group.header}</K>
+                {entry?.rank ? <Chip>#{entry.rank}</Chip> : null}
+              </div>
+              <p className="tl-kpi-v tl-num">{statDisplay(entry)}</p>
+              <p className="tl-kpi-src truncate">{entry?.teamName ?? entry?.name ?? "—"}</p>
             </div>
-            <p className="mt-2 font-display text-2xl font-extrabold tracking-tight text-ink num">
-              {statDisplay(entry)}
-            </p>
-            <p className="mt-0.5 truncate text-[11px] text-dim">
-              {entry?.teamName ?? entry?.name ?? "—"}
-            </p>
-          </div>
-        );
-      })}
+          );
+        })}
+      </div>
     </div>
   );
 }
@@ -364,7 +355,7 @@ export function TrophyGrid({
 }) {
   const wins = (trophies ?? []).filter((trophy) => (trophy.won ?? 0) > 0);
   if (wins.length === 0) {
-    return <div className="card px-4 py-8 text-center text-sm text-dim">No trophies recorded.</div>;
+    return <EmptyState title="No trophies recorded." />;
   }
 
   return (
@@ -378,10 +369,10 @@ export function TrophyGrid({
           <div key={trophy.name} className="card p-3.5">
             <div className="flex items-start justify-between gap-2">
               <TrophyIcon size={16} className="mt-0.5 shrink-0 text-accent" />
-              <span className="font-display text-xl font-extrabold text-ink num">{trophy.won}</span>
+              <span className="tl-num text-[20px] leading-none text-ink">{trophy.won}</span>
             </div>
-            <p className="mt-2 text-xs font-bold text-ink">{trophy.name}</p>
-            <p className="mt-1 text-[11px] text-dim">
+            <p className="mt-2 text-[11.5px] font-semibold text-ink">{trophy.name}</p>
+            <p className="tl-kpi-src mt-1 truncate">
               {trophy.runnerup ? `${trophy.runnerup} runner-up · ` : ""}
               {seasons.length ? seasons.join(", ") : "—"}
             </p>
@@ -402,7 +393,7 @@ export function SquadPreview({ groups }: { groups?: SquadGroup[] }) {
     .slice(0, 6);
 
   if (members.length === 0) {
-    return <div className="card px-4 py-8 text-center text-sm text-dim">Squad not available.</div>;
+    return <EmptyState title="Squad not available." />;
   }
 
   return (

@@ -1,0 +1,96 @@
+/* Signal layer — ground.
+   The dot-grid field, the two colour washes, and the typographic defaults. */
+
+body {
+  background-image:
+    radial-gradient(color-mix(in srgb, var(--color-ink) 9%, transparent) 1px, transparent 1.2px),
+    radial-gradient(120% 60% at 100% 0%, color-mix(in srgb, var(--tl-led) 12%, transparent), transparent 60%),
+    radial-gradient(90% 50% at 0% 100%, color-mix(in srgb, var(--tl-teal) 12%, transparent), transparent 60%);
+  background-size: 14px 14px, 100% 100%, 100% 100%;
+  background-repeat: repeat, no-repeat, no-repeat;
+  background-attachment: scroll, fixed, fixed;
+}
+
+/* Night: the grid becomes a phosphor lattice and the field gains scanlines. */
+[data-theme="dark"] body {
+  background-image:
+    radial-gradient(rgba(140, 255, 170, 0.055) 1px, transparent 1.2px),
+    repeating-linear-gradient(0deg, rgba(0, 0, 0, 0.28) 0 1px, transparent 1px 3px),
+    radial-gradient(120% 60% at 100% 0%, rgba(43, 217, 74, 0.09), transparent 60%),
+    radial-gradient(90% 50% at 0% 100%, rgba(38, 182, 154, 0.09), transparent 60%);
+  background-size: 14px 14px, 100% 100%, 100% 100%, 100% 100%;
+  background-repeat: repeat, repeat, no-repeat, no-repeat;
+}
+
+body {
+  /* Mono has no optical sizes to compensate for; keep the measure generous. */
+  letter-spacing: 0;
+}
+
+.t-signal a {
+  text-decoration: none;
+}
+
+/* ---------- scroll feel ----------
+   The document is an instrument: a thin ruled gutter, a phosphor thumb, and
+   no rubber-band beyond the page. */
+html {
+  scrollbar-color: var(--color-line-strong) transparent;
+  scrollbar-width: thin;
+  overscroll-behavior-y: none;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  html {
+    scroll-behavior: smooth;
+  }
+}
+
+::-webkit-scrollbar {
+  width: 11px;
+  height: 11px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--color-base);
+  border-left: 1px solid var(--color-line);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--color-line-strong);
+  border: 3px solid var(--color-base);
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--tl-led);
+}
+
+::-webkit-scrollbar-corner {
+  background: var(--color-base);
+}
+
+h1,
+h2,
+h3,
+h4 {
+  letter-spacing: 0;
+  text-wrap: balance;
+}
+
+/* Numerals that should read as a lamp display rather than typeset digits. */
+.tl-num {
+  font-family: var(--font-doto), var(--font-face-mono), ui-monospace, monospace;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.01em;
+  line-height: 0.95;
+}
+
+.tl-vh {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}

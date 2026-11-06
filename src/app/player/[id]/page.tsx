@@ -28,6 +28,7 @@ import {
 } from "@/components/player/player-insights";
 import { TabBar } from "@/components/tab-bar";
 import { Crest, RatingChip, SectionHeading, SkeletonBlock, SkeletonRows } from "@/components/ui";
+import { Leader, Panel } from "@/components/tl";
 import { getPlayer } from "@/lib/fotmob";
 import { formatShortDate, inkFor } from "@/lib/format";
 import type { PlayerInfoItem, PlayerResponse } from "@/lib/types";
@@ -121,19 +122,22 @@ async function PlayerContent({
   const otherPositions = player.positionDescription?.nonPrimaryPositions ?? [];
   const team = player.primaryTeam;
   const basePath = `/player/${id}`;
-  const kit = team?.teamColors?.color ?? team?.teamColors?.lightMode ?? "#14301f";
-  const kitInk = inkFor(kit);
+  const kit = team?.teamColors?.color ?? team?.teamColors?.lightMode;
+  const kitInk = kit ? inkFor(kit) : "var(--color-base)";
   const allMatches = player.initialMatchesPage?.matches ?? player.recentMatches ?? [];
   const deepGroups = player.firstSeasonStats?.statsSection?.items ?? [];
   const seasonRating = player.mainLeague?.stats?.find((stat) => stat.localizedTitleId === "rating")?.value;
   const formMatches = player.recentMatches?.length ? player.recentMatches : allMatches;
 
   return (
-    <div className="shell py-6 md:py-8">
-      <section className="kit-hero" style={{ "--kit": kit, "--kit-ink": kitInk } as React.CSSProperties}>
+    <div className="tl-view shell py-6 md:py-8">
+      <section
+        className="kit-hero"
+        style={{ "--kit": kit ?? "var(--color-ink)", "--kit-ink": kitInk } as React.CSSProperties}
+      >
         <div className="kit-hero-slab">
           <div className="relative z-[1] min-w-0 flex-1 self-center py-5 pl-4 sm:py-8 sm:pl-7">
-            <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-[13px] font-semibold">
+            <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-[12.5px] font-semibold">
               {team && (
                 <Link href={`/team/${team.teamId}`} className="flex items-center gap-1.5 hover:underline">
                   <Crest id={team.teamId} name={team.teamName} size={22} />
@@ -149,7 +153,7 @@ async function PlayerContent({
             <h1 className="kit-hero-name">
               {player.name}
             </h1>
-            <p className="mt-3 flex flex-wrap items-baseline gap-x-4 gap-y-1 text-sm font-semibold">
+            <p className="mt-3 flex flex-wrap items-baseline gap-x-4 gap-y-1 text-[12.5px] font-semibold">
               {shirt && shirt !== "—" && <span className="kit-hero-number">{shirt}</span>}
               <span>{position}</span>
               {age && age !== "—" && <span className="opacity-80">{age} years</span>}
@@ -179,7 +183,7 @@ async function PlayerContent({
           )}
           <div>
             <dt>Market value</dt>
-            <dd><span className="font-display text-[28px] font-black leading-none">{marketValue !== "—" ? marketValue : "—"}</span></dd>
+            <dd><span className="tl-num text-[24px] text-ink">{marketValue !== "—" ? marketValue : "—"}</span></dd>
           </div>
           {foot && foot !== "—" && (
             <div>
@@ -263,7 +267,7 @@ async function PlayerContent({
               } · percentiles vs other ${(position ?? "player").toLowerCase()}s`}
               icon={<ChartIcon size={17} />}
             />
-            <div className="flex rounded-lg border border-line bg-card-2/60 p-0.5">
+            <div className="flex border border-line bg-card-2/60 p-0.5">
               {[
                 { value: "total", label: "Total" },
                 { value: "per90", label: "Per 90" },
@@ -272,10 +276,10 @@ async function PlayerContent({
                   key={option.value}
                   href={`${basePath}?tab=stats&metric=${option.value}`}
                   scroll={false}
-                  className={`press rounded-md px-3.5 py-1.5 text-xs font-bold transition-colors ${
+                  className={`press px-3.5 py-1.5 text-[11.5px] font-semibold uppercase tracking-[0.08em] transition-colors ${
                     metric === option.value
                       ? "bg-accent text-on-accent"
-                      : "text-muted hover:text-ink"
+                      : "text-muted hover:bg-hover hover:text-ink"
                   }`}
                 >
                   {option.label}
@@ -350,26 +354,24 @@ function SeasonSummary({
   if (!rows.length) return null;
 
   return (
-    <div className="card p-4">
-      <p className="eyebrow mb-1">At a glance</p>
-      <div className="divide-y divide-line/40">
-        {rows.map((row) => (
-          <div key={row.label} className="flex items-center justify-between gap-3 py-2">
-            <span className="text-[11px] text-dim">{row.label}</span>
-            <span className="text-xs font-semibold capitalize text-muted">{row.value}</span>
-          </div>
-        ))}
-      </div>
-    </div>
+    <Panel label="At a glance">
+      {rows.map((row) => (
+        <Leader
+          key={row.label}
+          k={row.label}
+          v={<span className="capitalize">{row.value}</span>}
+        />
+      ))}
+    </Panel>
   );
 }
 
 function PlayerSkeleton() {
   return (
-    <div className="shell py-6 md:py-8">
-      <SkeletonBlock className="h-56 rounded-2xl" />
-      <SkeletonBlock className="mt-3 h-16 rounded-2xl" />
-      <SkeletonBlock className="mt-4 h-11 rounded-xl" />
+    <div className="tl-view shell py-6 md:py-8">
+      <SkeletonBlock className="h-56" />
+      <SkeletonBlock className="mt-3 h-16" />
+      <SkeletonBlock className="mt-4 h-11" />
       <div className="mt-6 grid gap-7 lg:grid-cols-[minmax(0,1fr)_320px]">
         <div className="space-y-4">
           <div className="grid gap-2 sm:grid-cols-3">

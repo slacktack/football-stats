@@ -23,6 +23,7 @@ import {
 } from "@/components/match/match-panels";
 import { TabBar } from "@/components/tab-bar";
 import { EmptyState, SectionHeading, SkeletonBlock } from "@/components/ui";
+import { Panel } from "@/components/tl";
 import { getLeague, getMatch } from "@/lib/fotmob";
 import { isLive } from "@/lib/format";
 import { normalizeMatchPlayers, youtubeId } from "@/lib/match-players";
@@ -108,8 +109,8 @@ async function MatchContent({
   const finished = general.finished ?? status.finished ?? false;
   const facts = match.content.matchFacts;
   const colors = general.teamColors;
-  const homeColor = colors?.lightMode?.home ?? "#39ff6b";
-  const awayColor = colors?.lightMode?.away ?? "#a78bfa";
+  const homeColor = colors?.lightMode?.home ?? "var(--tl-led)";
+  const awayColor = colors?.lightMode?.away ?? "var(--tl-alert)";
   const venue = facts?.infoBox?.Stadium;
   const tableSource =
     match.content.table?.parentLeagueId ?? general.parentLeagueId ?? general.leagueId;
@@ -124,8 +125,8 @@ async function MatchContent({
     tab === "table" ? await getLeague(tableSource).catch(() => null) : null;
 
   return (
-    <div className="shell py-5 md:py-7">
-      <nav className="mb-3 flex flex-wrap items-center gap-1 text-[11px] text-dim" aria-label="Breadcrumb">
+    <div className="tl-view shell py-5 md:py-7">
+      <nav className="tl-k tl-k-dim mb-3 flex flex-wrap items-center gap-1.5" aria-label="Breadcrumb">
         <Link href="/" className="transition-colors hover:text-ink">
           Football
         </Link>
@@ -139,7 +140,7 @@ async function MatchContent({
         {general.matchRound && (
           <>
             <ChevronRightIcon size={10} />
-            <span className="text-muted">Round {general.matchRound}</span>
+            <span>Round {general.matchRound}</span>
           </>
         )}
       </nav>
@@ -224,22 +225,16 @@ async function MatchContent({
                 awayTeam={{ name: away.name }}
               />
               {match.content.weather?.description && (
-                <div className="card flex items-center justify-between p-4">
-                  <div>
-                    <p className="eyebrow">Weather</p>
-                    <p className="mt-0.5 text-xs font-semibold text-muted">
+                <Panel label="Weather" aside={`wind ${match.content.weather.windSpeed ?? 0} km/h`}>
+                  <div className="flex items-end justify-between gap-3">
+                    <p className="text-[12px] font-semibold text-muted">
                       {match.content.weather.description}
                     </p>
-                  </div>
-                  <div className="text-right">
-                    <p className="font-display text-xl font-extrabold text-ink num">
+                    <p className="tl-num text-[30px] text-ink">
                       {match.content.weather.temperature}°
                     </p>
-                    <p className="text-[11px] text-dim">
-                      Wind {match.content.weather.windSpeed ?? 0} km/h
-                    </p>
                   </div>
-                </div>
+                </Panel>
               )}
             </aside>
           </div>
@@ -259,6 +254,7 @@ async function MatchContent({
             colors={colors}
             homeTeam={{ id: home.id, name: home.name }}
             awayTeam={{ id: away.id, name: away.name }}
+            events={facts?.events?.events ?? []}
           />
         )}
 
@@ -351,20 +347,19 @@ function FormCard({
 }) {
   if (!forms?.length) return null;
   return (
-    <div className="card p-4">
-      <p className="eyebrow mb-2">Recent form</p>
+    <Panel label="Recent form" aside="last five">
       {[
         { name: home.name, form: forms[0] },
         { name: away.name, form: forms[1] },
       ].map((row) => (
         <div key={row.name} className="flex items-center justify-between gap-2 py-1.5">
-          <span className="min-w-0 flex-1 truncate text-xs font-semibold text-muted">
+          <span className="min-w-0 flex-1 truncate text-[12px] font-semibold text-muted">
             {row.name}
           </span>
           <FormStrip form={row.form} />
         </div>
       ))}
-    </div>
+    </Panel>
   );
 }
 
@@ -372,11 +367,11 @@ function MatchSkeleton() {
   return (
     <div className="shell space-y-4 py-6">
       <SkeletonBlock className="h-4 w-48" />
-      <SkeletonBlock className="h-56 rounded-2xl" />
-      <SkeletonBlock className="h-10 w-full rounded-xl" />
+      <SkeletonBlock className="h-56" />
+      <SkeletonBlock className="h-10 w-full" />
       <div className="grid gap-4 xl:grid-cols-[minmax(0,1fr)_310px]">
-        <SkeletonBlock className="h-80 rounded-2xl" />
-        <SkeletonBlock className="h-56 rounded-2xl" />
+        <SkeletonBlock className="h-80" />
+        <SkeletonBlock className="h-56" />
       </div>
     </div>
   );

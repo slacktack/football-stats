@@ -7,10 +7,13 @@ import { ActivityIcon, ChevronRightIcon, TrophyIcon } from "@/components/icons";
 import { LiveRefresher } from "@/components/live-refresher";
 import { LeagueMatchGroup } from "@/components/match-row";
 import { LiveRail, type LiveRailMatch } from "@/components/live-rail";
+import { PixelField } from "@/components/pixel-field";
 import { Crest, EmptyState, SkeletonBlock, SkeletonRows } from "@/components/ui";
+import { AsciiBar, K, Led, Leds, Panel, Ruler, Spark, Wave } from "@/components/tl";
 import { leagueLogo } from "@/lib/assets";
+import { hueClass } from "@/lib/hue";
 import { getAllLeagues, getMatchesByDate, hasLiveMatches } from "@/lib/fotmob";
-import { isLive, scorePair } from "@/lib/format";
+import { isLive, pad, scorePair } from "@/lib/format";
 import {
   addDays,
   buildDateStrip,
@@ -24,10 +27,10 @@ import type { MatchStatus } from "@/lib/types";
 type SearchParams = Promise<Record<string, string | string[] | undefined>>;
 
 const FILTERS = [
-  { value: "all", label: "All" },
-  { value: "live", label: "Live" },
-  { value: "finished", label: "Results" },
-  { value: "upcoming", label: "Upcoming" },
+  { value: "all", label: "All", hue: "ink" },
+  { value: "live", label: "Live", hue: "led" },
+  { value: "finished", label: "Results", hue: "teal" },
+  { value: "upcoming", label: "Upcoming", hue: "amber" },
 ] as const;
 
 function matchesFilter(status: MatchStatus, filter: string) {
@@ -105,18 +108,44 @@ async function HomeContent({ searchParams }: { searchParams: SearchParams }) {
     .sort((a, b) => (rank.get(a.leagueId) ?? 999) - (rank.get(b.leagueId) ?? 999));
 
   return (
-    <div className="shell py-5 md:py-7">
-      <header className="flex items-end justify-between gap-3">
-        <div className="min-w-0">
-          <h1 className="font-display text-[26px] font-black leading-none tracking-[-0.03em] text-ink sm:text-[34px]">
-            {dateHeading}
-          </h1>
-          <p className="mt-1.5 truncate text-[13px] text-muted num">
-            {dateHeading === "Today" ? `${formatLongDate(date)}, ` : ""}
-            {totalMatches} {totalMatches === 1 ? "match" : "matches"}
-          </p>
+    <div className="shell tl-view py-5 md:py-7">
+      <header className="relative overflow-hidden border-b border-line pb-4">
+        <PixelField className="tl-field-right" step={24} />
+        <div className="relative flex flex-wrap items-end justify-between gap-x-4 gap-y-3">
+          <div className="min-w-0">
+            <p className="flex items-center gap-2">
+              <Led tone={liveCount > 0 ? undefined : "teal"} />
+              <K dim>
+                Feed / {dateParam}
+                {filter !== "all" ? ` / ${filter}` : ""}
+              </K>
+            </p>
+            <h1 className="mt-2.5">
+              <Wave
+                text={dateHeading}
+                className="tl-num block text-[30px] font-bold leading-none text-ink sm:text-[44px]"
+              />
+            </h1>
+            <p className="mt-2.5 flex flex-wrap items-center gap-x-3 gap-y-1.5 text-[11.5px] text-muted">
+              <span className="num">
+                <b className="tl-num font-bold text-ink">{totalMatches}</b>{" "}
+                {totalMatches === 1 ? "match" : "matches"}
+              </span>
+              <span className="h-3 w-px bg-line" aria-hidden="true" />
+              <span className="num">
+                <b className="tl-num font-bold text-ink">{groups.length}</b> competitions
+              </span>
+              {liveCount > 0 && (
+                <span className="flex items-center gap-1.5">
+                  <Leds n={3} />
+                  <span className="num font-semibold text-ink">{liveCount} in play</span>
+                </span>
+              )}
+            </p>
+          </div>
+          <LiveRefresher active={live} />
         </div>
-        <LiveRefresher active={live} />
+        <Ruler fill n={150} className="relative mt-4" />
       </header>
 
       <div className="mt-4">
@@ -131,10 +160,10 @@ async function HomeContent({ searchParams }: { searchParams: SearchParams }) {
 
       {filter === "all" && <LiveRail matches={liveMatches.slice(0, 12)} total={liveCount} />}
 
-      <div className="mt-6 grid items-start gap-6 lg:grid-cols-[minmax(0,1fr)_312px]">
+      <div className="mt-6 grid grid-cols-1 items-start gap-6 lg:grid-cols-[minmax(0,1fr)_312px]">
         <div className="min-w-0">
-          <div className="mb-4 flex items-center gap-2">
-            <div className="no-scrollbar flex min-w-0 flex-1 items-center gap-0.5 overflow-x-auto rounded-xl border border-line/80 bg-card p-1 shadow-[0_10px_30px_-24px_rgba(0,0,0,0.7)]">
+          <div className="mb-4 flex items-center gap-3">
+            <div className="no-scrollbar flex min-w-0 flex-1 items-center gap-1.5 overflow-x-auto">
               {FILTERS.map((item) => {
                 const active = filter === item.value;
                 const href = `/?date=${dateParam}${item.value === "all" ? "" : `&filter=${item.value}`}`;
@@ -143,17 +172,14 @@ async function HomeContent({ searchParams }: { searchParams: SearchParams }) {
                     key={item.value}
                     href={href}
                     scroll={false}
-                    className={`press flex shrink-0 items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-xs font-bold transition-all sm:px-3 sm:text-xs ${
-                      active
-                        ? "bg-ink text-canvas shadow-sm"
-                        : "text-muted hover:bg-white/[0.045] hover:text-ink"
+                    aria-current={active ? "page" : undefined}
+                    className={`tl-chip press tl-hue-${item.hue} shrink-0 ${
+                      active ? "tl-chip-inv" : "text-muted hover:border-[var(--tl-hue)] hover:text-[var(--tl-hue-ink)]"
                     }`}
                   >
                     {item.label}
                     <span
-                      className={`rounded px-1 text-[11px] num ${
-                        active ? "bg-canvas/15 text-canvas/70" : "text-dim"
-                      }`}
+                      className={`tl-num text-[12px] ${active ? "opacity-70" : "text-[var(--tl-hue)]"}`}
                     >
                       {counts[item.value] ?? 0}
                     </span>
@@ -161,9 +187,9 @@ async function HomeContent({ searchParams }: { searchParams: SearchParams }) {
                 );
               })}
             </div>
-            <span className="hidden shrink-0 text-[11px] font-medium text-dim sm:block">
-              Grouped by competition
-            </span>
+            <K dim className="hidden shrink-0 sm:block">
+              By competition
+            </K>
           </div>
 
           {groups.length > 0 ? (
@@ -189,43 +215,42 @@ async function HomeContent({ searchParams }: { searchParams: SearchParams }) {
                   ? "Check the full fixture list or come back when the next round kicks off."
                   : "Try another date using the calendar above."
               }
-              icon={filter === "live" ? <ActivityIcon size={22} /> : <TrophyIcon size={22} />}
+              icon={filter === "live" ? <ActivityIcon size={20} /> : <TrophyIcon size={20} />}
               action={
-                <Link
-                  href={filter === "live" ? `/?date=${dateParam}` : "/"}
-                  className="rounded-lg bg-accent px-4 py-2 text-xs font-bold text-on-accent transition-opacity hover:opacity-90"
-                >
+                <Link href={filter === "live" ? `/?date=${dateParam}` : "/"} className="tl-btn">
                   {filter === "live" ? "Show all matches" : "Back to today"}
                 </Link>
               }
             />
           )}
 
-          <p className="mt-4 flex items-center gap-1.5 text-[11px] text-dim">
-            <span className="inline-block h-1 w-1 rounded-full bg-dim" />
-            Squads, lineups and live data update automatically during play.
+          <p className="mt-4 flex items-center gap-2">
+            <Led tone="teal" />
+            <span className="text-[11px] text-dim">
+              Squads, lineups and live telemetry refresh automatically during play.
+            </span>
           </p>
         </div>
 
         <aside className="space-y-4 lg:sticky lg:top-24">
-          <div className="card overflow-hidden">
-            <div className="flex items-center justify-between border-b border-line/60 px-4 py-3">
-              <h2 className="text-[13px] font-bold text-ink">Top competitions</h2>
-              <Link
-                href="/leagues"
-                className="flex items-center gap-0.5 text-xs font-semibold text-dim transition-colors hover:text-accent"
-              >
-                All
-                <ChevronRightIcon size={12} />
+          <Panel
+            label="Top competitions"
+            aside={
+              <Link href="/leagues" className="flex items-center gap-0.5 hover:text-accent">
+                Index
+                <ChevronRightIcon size={11} />
               </Link>
-            </div>
-            <div className="divide-y divide-line/40">
-              {popular.map((league) => (
+            }
+          >
+            <div>
+              {popular.map((league, index) => (
                 <Link
                   key={`${league.ccode}-${league.id}`}
                   href={`/league/${league.id}`}
-                  className="press group flex items-center gap-2.5 px-4 py-2.5 transition-colors hover:bg-white/[0.025]"
+                  className={`tl-tr tl-tr-hue group press ${hueClass(league.id)}`}
+                  style={{ gridTemplateColumns: "20px 24px minmax(0,1fr) auto" }}
                 >
+                  <span className="tl-k tl-num num text-[var(--tl-hue-ink)]">{pad(index + 1)}</span>
                   <Image
                     src={leagueLogo(league.id)}
                     alt=""
@@ -233,20 +258,14 @@ async function HomeContent({ searchParams }: { searchParams: SearchParams }) {
                     height={22}
                     className="h-5 w-5 object-contain"
                   />
-                  <span className="min-w-0 flex-1 truncate text-xs font-semibold text-muted transition-colors group-hover:text-ink">
+                  <span className="min-w-0 truncate text-[12px] font-semibold text-muted transition-colors group-hover:text-ink">
                     {league.name}
                   </span>
-                  <span className="rounded border border-line/80 px-1.5 py-0.5 text-[11px] font-bold text-dim">
-                    {league.ccode}
-                  </span>
-                  <ChevronRightIcon
-                    size={12}
-                    className="text-dim opacity-0 transition-all group-hover:translate-x-0.5 group-hover:opacity-100"
-                  />
+                  <span className="tl-tag tl-hue-chip">{league.ccode}</span>
                 </Link>
               ))}
             </div>
-          </div>
+          </Panel>
 
           <DayInNumbers leagues={data.leagues} />
         </aside>
@@ -258,10 +277,10 @@ async function HomeContent({ searchParams }: { searchParams: SearchParams }) {
 function HomeSkeleton() {
   return (
     <div className="shell py-6 md:py-8">
-      <SkeletonBlock className="h-10 w-40" />
+      <SkeletonBlock className="h-11 w-56" />
       <div className="mt-4 flex gap-1.5 overflow-hidden">
         {Array.from({ length: 9 }).map((_, index) => (
-          <SkeletonBlock key={index} className="h-[68px] min-w-[58px] flex-1 rounded-xl" />
+          <SkeletonBlock key={index} className="h-[62px] min-w-[56px] flex-1" />
         ))}
       </div>
       <div className="mt-7 grid gap-6 lg:grid-cols-[minmax(0,1fr)_312px]">
@@ -271,7 +290,7 @@ function HomeSkeleton() {
         </div>
         <div className="hidden space-y-4 lg:block">
           <SkeletonBlock className="h-80" />
-          <SkeletonBlock className="h-40" />
+          <SkeletonBlock className="h-44" />
         </div>
       </div>
     </div>
@@ -308,56 +327,80 @@ function DayInNumbers({ leagues }: { leagues: { name: string; matches: DayMatch[
     (a, b) => Math.abs(b.home - b.away) - Math.abs(a.home - a.away),
   )[0];
 
+  const highlights = [
+    { label: "Most goals", item: thriller },
+    { label: "Biggest margin", item: rout },
+  ].filter((row) => row.item && row.item.home + row.item.away > 0);
+
+  // Goals landing through the day, ordered by kickoff — the trace reads as a
+  // matchday building, not a random walk.
+  const trace = [...played]
+    .sort((a, b) => a.match.status.utcTime.localeCompare(b.match.status.utcTime))
+    .map((item) => item.home + item.away);
+
   return (
-    <div className="card overflow-hidden">
-      <div className="border-b border-line/60 px-4 py-3">
-        <h2 className="text-[13px] font-bold text-ink">Day in numbers</h2>
+    <Panel label="Day in numbers" aside={`${played.length} played`}>
+      <div className="tl-kpis">
+        <div className="tl-kpi">
+          <span className="tl-kpi-v tl-num">{goals}</span>
+          <span className="tl-kpi-src">Goals</span>
+          <AsciiBar value={goals} total={played.length * 5} blocks={10} className="mt-1 text-[10px]" />
+        </div>
+        <div className="tl-kpi">
+          <span className="tl-kpi-v tl-num">{(goals / played.length).toFixed(1)}</span>
+          <span className="tl-kpi-src">Per game</span>
+          <AsciiBar value={goals / played.length} total={5} blocks={10} className="mt-1 text-[10px]" />
+        </div>
+        <div className="tl-kpi">
+          <span className="tl-kpi-v tl-num">{draws}</span>
+          <span className="tl-kpi-src">Draws</span>
+          <AsciiBar value={draws} total={played.length} blocks={10} tone="sky" className="mt-1 text-[10px]" />
+        </div>
+        <div className="tl-kpi">
+          <span className="tl-kpi-v tl-num">{goalless}</span>
+          <span className="tl-kpi-src">0–0</span>
+          <AsciiBar value={goalless} total={played.length} blocks={10} tone="mint" className="mt-1 text-[10px]" />
+        </div>
       </div>
-      <div className="grid grid-cols-3 divide-x divide-line/50 border-b border-line/50 text-center">
-        {[
-          { label: "Goals", value: goals },
-          { label: "Per game", value: (goals / played.length).toFixed(1) },
-          { label: "Draws", value: draws },
-        ].map((item) => (
-          <div key={item.label} className="px-2 py-3">
-            <p className="font-display text-[22px] font-black leading-none text-ink num">{item.value}</p>
-            <p className="mt-1 text-[11px] font-semibold text-dim">
-              {item.label}
-            </p>
+
+      {trace.length > 1 && (
+        <div className="mt-3">
+          <div className="flex items-baseline justify-between gap-2">
+            <K dim>Goals / match by kickoff</K>
+            <span className="tl-k tl-k-dim num">{trace.length}</span>
           </div>
-        ))}
-      </div>
-      <div className="divide-y divide-line/40">
-        {[
-          { label: "Most goals", item: thriller },
-          { label: "Biggest margin", item: rout },
-        ]
-          .filter((row) => row.item && row.item.home + row.item.away > 0)
-          .map(({ label, item }) => (
-            <Link
-              key={label}
-              href={`/match/${item.match.id}`}
-              className="press group block px-4 py-3 transition-colors hover:bg-white/[0.025]"
-            >
-              <p className="eyebrow">{label}</p>
-              <div className="mt-1.5 flex items-center gap-2">
-                <Crest id={item.match.home.id} name={item.match.home.name} size={18} />
-                <span className="min-w-0 flex-1 truncate text-[13px] font-semibold text-ink group-hover:text-accent">
+          <Spark values={trace} className="mt-2" />
+        </div>
+      )}
+
+      {highlights.length > 0 && (
+        <div className="mt-4 space-y-3">
+          {highlights.map(({ label, item }) => (
+            <div key={label}>
+              <K dim>{label}</K>
+              <Link
+                href={`/match/${item.match.id}`}
+                className="tl-leader press group mt-1 hover:bg-hover"
+              >
+                <Crest id={item.match.home.id} name={item.match.home.name} size={16} />
+                <span className="min-w-0 truncate text-ink transition-colors group-hover:text-accent">
                   {item.match.home.name} – {item.match.away.name}
                 </span>
-                <span className="font-display text-[15px] font-black text-ink num">
+                <i aria-hidden="true" />
+                <b className="tl-num text-[13px] text-ink">
                   {item.home}–{item.away}
-                </span>
-              </div>
-              <p className="mt-0.5 truncate text-[11px] text-dim">{item.league}</p>
-            </Link>
+                </b>
+              </Link>
+              <p className="truncate pl-6 text-[10.5px] text-dim">{item.league}</p>
+            </div>
           ))}
-        {goalless > 0 && (
-          <p className="px-4 py-2.5 text-[11px] text-dim">
-            {goalless} goalless {goalless === 1 ? "game" : "games"} so far
-          </p>
-        )}
-      </div>
-    </div>
+        </div>
+      )}
+
+      <p className="mt-4 border-t border-line pt-3 text-[10.5px] leading-relaxed text-dim">
+        Aggregated from every fixture on this date. Scores are the source feed&rsquo;s final
+        register.
+      </p>
+    </Panel>
   );
 }

@@ -19,7 +19,7 @@ export default async function LeaguesPage() {
   ).size;
 
   return (
-    <div className="shell py-6 md:py-8">
+    <div className="tl-view shell py-6 md:py-8">
       <PageIntro
         eyebrow="Competitions"
         title="Every league on earth"

@@ -15,7 +15,64 @@ import type {
   TimelineEvent,
 } from "@/lib/types";
 import { CardIcon, GoalIcon, SubIcon } from "../icons";
-import { Crest, FormPill, RatingChip } from "../ui";
+import { Crest, DataRow, EmptyState, FormPill, RatingChip } from "../ui";
+import { Leds, LogRow, Panel, StatRow as BlockMeterRow } from "../tl";
+
+/* Signal log kind: which colour block the glyph box wears. */
+function eventKind(event: TimelineEvent): "goal" | "card" | "sub" | "miss" | undefined {
+  if (event.type === "Goal") return "goal";
+  if (event.type === "Substitution") return "sub";
+  if (event.type === "PenaltyMissed") return "miss";
+  if (event.type === "Card") return event.card === "Red" ? "miss" : "card";
+  return undefined;
+}
+
+/** Per-player goals and assists for this match, read off the event log.
+    The feed carries neither on the lineup payload, so the timeline is the
+    only place the two can be counted. */
+function goalTally(events: TimelineEvent[]) {
+  const tally = new Map<number, { goals: number; assists: number }>();
+  const bump = (id: number | null | undefined, key: "goals" | "assists") => {
+    if (!id) return;
+    const row = tally.get(id) ?? { goals: 0, assists: 0 };
+    row[key] += 1;
+    tally.set(id, row);
+  };
+  for (const event of events) {
+    if (event.type !== "Goal" || event.isPenaltyShootoutEvent) continue;
+    if (!event.ownGoal) bump(event.playerId ?? event.player?.id, "goals");
+    bump(event.assistPlayerId, "assists");
+  }
+  return tally;
+}
+
+function TallyGlyph({
+  id,
+  tally,
+  inline = false,
+}: {
+  id: number;
+  tally: Map<number, { goals: number; assists: number }>;
+  inline?: boolean;
+}) {
+  const row = tally.get(id);
+  if (!row) return null;
+  return (
+    <span className={inline ? "flex shrink-0 gap-px" : "absolute -bottom-2 -left-1 z-10 flex gap-px"}>
+      {row.goals ? (
+        <b className="tl-glyph tl-glyph-goal" title={`${row.goals} goal${row.goals > 1 ? "s" : ""}`}>
+          <GoalIcon size={8} />
+          <span className="tl-num">{row.goals}</span>
+        </b>
+      ) : null}
+      {row.assists ? (
+        <b className="tl-glyph tl-glyph-assist" title={`${row.assists} assist${row.assists > 1 ? "s" : ""}`}>
+          A<span className="tl-num">{row.assists}</span>
+        </b>
+      ) : null}
+    </span>
+  );
+}
 
 export function Timeline({
   facts,
@@ -37,116 +94,74 @@ export function Timeline({
   const meaningful = visible.filter((event) => event.type !== "Half" && event.type !== "AddedTime");
   if (!meaningful.length) {
     return (
-      <div className="card flex flex-col items-center gap-2 px-4 py-10 text-center">
-        {live ? (
-          <>
-            <span className="flex items-center gap-2 text-[11px] font-bold text-live">
-              <span className="live-dot h-1.5 w-1.5 rounded-full bg-live" />
-              Live {minute ?? ""}
-            </span>
-            <p className="text-sm font-semibold text-ink">Waiting for the first big moment</p>
-            <p className="max-w-xs text-xs text-dim">
-              No goals, cards or substitutions yet. This page refreshes automatically.
-            </p>
-          </>
-        ) : (
-          <p className="text-sm text-dim">No match events recorded.</p>
-        )}
-      </div>
+      <EmptyState
+        icon={live ? <Leds n={5} /> : undefined}
+        title={live ? "Waiting for the first big moment" : "No match events recorded"}
+        description={
+          live
+            ? `Live ${minute ?? ""} · no goals, cards or substitutions yet. This page refreshes automatically.`
+            : undefined
+        }
+      />
     );
   }
 
   return (
-    <div className="card overflow-hidden">
-      <div className="flex items-center justify-between border-b border-line/60 px-4 py-3">
-        <h2 className="font-display text-sm font-bold text-ink">Match timeline</h2>
-        <span className="text-[11px] text-dim">Goals, cards & changes</span>
-      </div>
-      <ol className="relative divide-y divide-line/30">
+    <Panel label="Match timeline" aside={`${meaningful.length} logged · goals, cards & changes`} leds>
+      <ol className="min-w-0">
         {visible.map((event, index) => {
           if (event.type === "Half") {
             return (
-              <li
-                key={`${event.reactKey ?? index}`}
-                className="flex items-center justify-center gap-2 bg-white/[0.018] px-4 py-1.5 text-[11px] font-bold text-dim"
-              >
-                {event.halfStrShort ?? (event.time >= 90 ? "FT" : "HT")}
+              <li key={`${event.reactKey ?? index}`} className="flex items-center gap-3 py-2">
+                <span className="h-px flex-1 bg-line" aria-hidden="true" />
+                <span className="tl-k">
+                  {event.halfStrShort ?? (event.time >= 90 ? "FT" : "HT")}
+                </span>
+                <span className="h-px flex-1 bg-line" aria-hidden="true" />
               </li>
             );
           }
           if (event.type === "AddedTime") {
             return (
-              <li
-                key={`${event.reactKey ?? index}`}
-                className="flex items-center justify-center gap-1.5 px-4 py-1 text-[11px] font-semibold text-dim"
-              >
-                + {event.minutesAddedInput ?? 1} min
+              <li key={`${event.reactKey ?? index}`} className="flex items-center gap-2 py-1.5">
+                <span className="tl-num text-[12px] text-sky">+{event.minutesAddedInput ?? 1}</span>
+                <span className="tl-k tl-k-dim">min added</span>
               </li>
             );
           }
           const isHome = event.isHome ?? false;
-          const body = (
-            <div className={`flex min-w-0 items-start gap-2 ${isHome ? "flex-row-reverse text-right" : ""}`}>
-              <EventIcon type={event.type} card={event.card} />
-              <div className="min-w-0">
-                <EventText event={event} isHome={isHome} homeTeam={homeTeam} awayTeam={awayTeam} />
-              </div>
-            </div>
-          );
+          const team = isHome ? homeTeam : awayTeam;
           return (
-            <li
+            <LogRow
               key={`${event.reactKey ?? index}`}
-              className={`grid grid-cols-[minmax(0,1fr)_52px_minmax(0,1fr)] items-start gap-2 px-3 py-2.5 sm:px-4 ${
-                event.type === "Goal" ? "bg-accent/[0.045]" : ""
-              }`}
+              minute={event.timeStr ?? event.time}
+              glyph={<EventIcon type={event.type} />}
+              kind={eventKind(event)}
             >
-              <div className="min-w-0">{isHome && body}</div>
-              <div className="flex flex-col items-center gap-1">
-                <span className="font-display text-[13px] font-extrabold text-muted num">
-                  {event.timeStr ?? event.time}&apos;
-                </span>
+              <span className="flex min-w-0 flex-wrap items-center gap-x-2 gap-y-1">
+                <Crest id={team.id} name={team.name} size={16} />
+                <EventText event={event} isHome={isHome} homeTeam={homeTeam} awayTeam={awayTeam} />
                 {event.newScore && (
-                  <span className="rounded-md bg-accent px-1.5 py-0.5 text-[11px] font-black text-on-accent num">
+                  <span className="tl-num text-[12px] text-muted">
                     {event.newScore[0]}–{event.newScore[1]}
                   </span>
                 )}
-              </div>
-              <div className="min-w-0">{!isHome && body}</div>
-            </li>
+              </span>
+            </LogRow>
           );
         })}
       </ol>
-    </div>
+    </Panel>
   );
 }
 
-function EventIcon({ type, card }: { type: string; card?: string }) {
-  if (type === "Goal") {
-    return (
-      <span className="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-accent/15 text-accent">
-        <GoalIcon size={14} />
-      </span>
-    );
-  }
-  if (type === "Card") {
-    return (
-      <span
-        className={`mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full ${
-          card === "Red" ? "bg-red-500/15 text-red-400" : "bg-yellow-400/15 text-yellow-300"
-        }`}
-      >
-        <CardIcon size={13} />
-      </span>
-    );
-  }
-  if (type === "Substitution") {
-    return (
-      <span className="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-sky-400/12 text-sky-400">
-        <SubIcon size={14} />
-      </span>
-    );
-  }
-  return <span className="mt-0.5 h-6 w-6 shrink-0 rounded-full bg-white/[0.05]" />;
+/** Glyph for the 22px log box. The box itself is .tl-log-glyph (CSS). */
+function EventIcon({ type }: { type: string }) {
+  if (type === "Goal") return <GoalIcon size={12} />;
+  if (type === "Card") return <CardIcon size={12} />;
+  if (type === "Substitution") return <SubIcon size={12} />;
+  if (type === "PenaltyMissed") return <span aria-hidden="true">✕</span>;
+  return <span className="h-1 w-1 bg-dim" aria-hidden="true" />;
 }
 
 function EventText({
@@ -163,37 +178,39 @@ function EventText({
   const team = isHome ? homeTeam : awayTeam;
   if (event.type === "Goal") {
     return (
-      <div>
-        <p className="text-[13px] font-bold text-ink">
+      <span className="min-w-0">
+        <span className="block truncate text-[12px] font-semibold text-ink">
           {event.player?.name ?? event.nameStr}
           {event.ownGoal ? " (OG)" : ""}
-        </p>
-        {event.assistStr && <p className="mt-0.5 text-[11px] text-dim">{event.assistStr}</p>}
-      </div>
+        </span>
+        {event.assistStr && (
+          <span className="mt-0.5 block truncate text-[11px] text-dim">{event.assistStr}</span>
+        )}
+      </span>
     );
   }
   if (event.type === "Substitution") {
     const [on, off] = event.swap ?? [];
     return (
-      <div className="space-y-0.5">
-        <p className="truncate text-xs font-semibold text-ink">
-          <span className="text-accent">↑</span> {on?.name ?? "Player in"}
-        </p>
-        <p className="truncate text-[11px] text-dim">
-          <span className="text-orange-300">↓</span> {off?.name ?? "Player out"}
-        </p>
-      </div>
+      <span className="min-w-0">
+        <span className="block truncate text-[12px] font-semibold text-ink">
+          <span className="text-live">↑</span> {on?.name ?? "Player in"}
+        </span>
+        <span className="block truncate text-[11px] text-dim">
+          <span className="text-violet">↓</span> {off?.name ?? "Player out"}
+        </span>
+      </span>
     );
   }
   return (
-    <div>
-      <p className="text-xs font-semibold text-ink">
+    <span className="min-w-0">
+      <span className="block truncate text-[12px] font-semibold text-ink">
         {event.player?.name ?? event.nameStr ?? event.type}
-      </p>
-      <p className="mt-0.5 text-[11px] text-dim">
+      </span>
+      <span className="mt-0.5 block truncate text-[11px] text-dim">
         {event.card ? `${event.card} card` : team.name}
-      </p>
-    </div>
+      </span>
+    </span>
   );
 }
 
@@ -222,22 +239,8 @@ export function MomentumChart({
   );
 
   return (
-    <div className="card p-4">
-      <div className="flex flex-wrap items-center justify-between gap-2">
-        <div>
-          <p className="eyebrow">Momentum</p>
-          <p className="mt-0.5 text-xs text-dim">Who was on top, minute by minute</p>
-        </div>
-        <div className="flex items-center gap-3 text-xs text-muted">
-          <span className="flex items-center gap-1.5">
-            <span className="h-2 w-3 rounded-sm bg-accent" /> {homeName} <b className="text-ink num">{homeShare}%</b>
-          </span>
-          <span className="flex items-center gap-1.5">
-            <span className="h-2 w-3 rounded-sm bg-violet" /> {awayName} <b className="text-ink num">{100 - homeShare}%</b>
-          </span>
-        </div>
-      </div>
-      <div className="relative mt-3 overflow-hidden rounded-xl border border-line/50 bg-white/[0.015]">
+    <Panel label="Momentum" aside="who was on top, minute by minute">
+      <div className="tl-frame relative mt-1 overflow-hidden bg-card-2/60">
         <svg viewBox={`0 0 ${W} ${H}`} preserveAspectRatio="none" className="block h-32 w-full" role="img" aria-label="Momentum chart">
           <defs>
             <clipPath id="mom-top"><rect x="0" y="0" width={W} height={mid} /></clipPath>
@@ -248,13 +251,21 @@ export function MomentumChart({
           <path d={area} clipPath="url(#mom-bottom)" fill="var(--color-violet)" fillOpacity="0.55" />
           <line x1="0" x2={W} y1={mid} y2={mid} stroke="currentColor" className="text-dim" strokeOpacity="0.5" vectorEffect="non-scaling-stroke" />
         </svg>
-        <div className="pointer-events-none absolute inset-x-2 bottom-1 flex justify-between text-[11px] font-semibold text-dim">
+        <div className="tl-k tl-k-dim pointer-events-none absolute inset-x-2 bottom-1 flex justify-between">
           <span>0&apos;</span>
           <span>HT</span>
           <span>{end}&apos;</span>
         </div>
       </div>
-    </div>
+      <div className="mt-2 flex flex-wrap items-center gap-x-4 gap-y-1">
+        <span className="tl-k flex items-center gap-1.5 text-muted">
+          <span className="h-2 w-3 bg-accent" aria-hidden="true" /> {homeName} <b className="tl-num text-ink">{homeShare}%</b>
+        </span>
+        <span className="tl-k flex items-center gap-1.5 text-muted">
+          <span className="h-2 w-3 bg-violet" aria-hidden="true" /> {awayName} <b className="tl-num text-ink">{100 - homeShare}%</b>
+        </span>
+      </div>
+    </Panel>
   );
 }
 
@@ -276,28 +287,23 @@ export function MatchShotMap({
   const xg = shots.reduce((sum, shot) => sum + (shot.expectedGoals ?? 0), 0);
 
   return (
-    <div className="card p-4">
-      <div className="flex flex-wrap items-center justify-between gap-2">
-        <div>
-          <p className="eyebrow">Shot map</p>
-          <p className="mt-0.5 text-[11px] text-dim">
-            {shots.length} shots · {goals} goals · {xg.toFixed(2)} xG
-          </p>
-        </div>
-        <div className="flex items-center gap-3 text-[11px] text-dim">
-          <span className="flex items-center gap-1">
-            <span className="h-2 w-2 rounded-full bg-accent" /> {homeName}
-          </span>
-          <span className="flex items-center gap-1">
-            <span className="h-2 w-2 rounded-full bg-violet" /> {awayName}
-          </span>
-        </div>
+    <Panel
+      label="Shot map"
+      aside={`${shots.length} shots · ${goals} goals · ${xg.toFixed(2)} xg`}
+    >
+      <div className="mb-2 flex flex-wrap items-center gap-x-4 gap-y-1">
+        <span className="tl-k flex items-center gap-1.5 text-muted">
+          <span className="h-2 w-2 bg-accent" aria-hidden="true" /> {homeName}
+        </span>
+        <span className="tl-k flex items-center gap-1.5 text-muted">
+          <span className="h-2 w-2 bg-violet" aria-hidden="true" /> {awayName}
+        </span>
       </div>
-      <div className="mt-3 overflow-hidden rounded-xl border border-line/60 bg-[#07130c]">
+      <div className="tl-frame overflow-hidden">
         <svg viewBox="0 0 105 68" className="block w-full" role="img" aria-label="Match shot map">
-          <rect width="105" height="68" fill="#07130c" />
-          <g stroke="rgba(255,255,255,0.13)" strokeWidth="0.35" fill="none">
-            <rect x="0.5" y="0.5" width="104" height="67" rx="1" />
+          <rect width="105" height="68" fill="var(--tl-pitch-field)" />
+          <g stroke="var(--tl-hair-strong)" strokeWidth="0.35" fill="none">
+            <rect x="0.5" y="0.5" width="104" height="67" />
             <line x1="52.5" y1="0.5" x2="52.5" y2="67.5" />
             <circle cx="52.5" cy="34" r="9.15" />
             <rect x="0.5" y="13.84" width="16" height="40.32" />
@@ -309,15 +315,17 @@ export function MatchShotMap({
             const isHome = shot.teamId === homeId;
             const cx = isHome ? shot.x : 105 - shot.x;
             const isGoal = shot.eventType === "Goal";
+            const size = isGoal ? 4.6 : 3;
             return (
-              <circle
+              <rect
                 key={shot.id}
-                cx={Math.min(104, Math.max(1, cx))}
-                cy={Math.min(67, Math.max(1, shot.y))}
-                r={isGoal ? 2.3 : 1.5}
-                fill={isHome ? "#39ff6b" : "#a78bfa"}
+                x={Math.min(104, Math.max(1, cx)) - size / 2}
+                y={Math.min(67, Math.max(1, shot.y)) - size / 2}
+                width={size}
+                height={size}
+                fill={isHome ? "var(--tl-led)" : "var(--tl-alert)"}
                 fillOpacity={isGoal ? 1 : shot.isOnTarget ? 0.85 : 0.35}
-                stroke={isGoal ? "#07130c" : "none"}
+                stroke={isGoal ? "var(--tl-pitch-field)" : "none"}
                 strokeWidth="0.4"
               >
                 <title>
@@ -325,12 +333,12 @@ export function MatchShotMap({
                     shot.eventType ?? ""
                   }`}
                 </title>
-              </circle>
+              </rect>
             );
           })}
         </svg>
       </div>
-    </div>
+    </Panel>
   );
 }
 
@@ -349,78 +357,47 @@ export function MatchStatsPanel({
   );
   if (!visible.length) {
     return (
-      <div className="card px-4 py-8 text-center text-sm text-dim">
-        Match stats are not available yet.
-      </div>
+      <EmptyState
+        title="Match stats"
+        description="Match stats are not available yet."
+      />
     );
   }
 
   return (
     <div className="space-y-3">
       {visible.map((group) => (
-        <div key={group.key ?? group.title} className="card overflow-hidden">
-          <div className="border-b border-line/50 px-4 py-2.5">
-            <h3 className="text-xs font-bold text-muted">
-              {group.title}
-            </h3>
-          </div>
-          <div className="divide-y divide-line/30 px-4">
+        <Panel key={group.key ?? group.title} label={group.title} aside={`${homeName} v ${awayName}`}>
+          <div className="divide-y divide-line/30">
             {(group.stats ?? [])
               .filter((row) => row.type !== "title")
               .map((row) => (
-                <StatRow key={row.key} row={row} homeName={homeName} awayName={awayName} />
+                <StatRow key={row.key} row={row} />
               ))}
           </div>
-        </div>
+        </Panel>
       ))}
     </div>
   );
 }
 
-function StatRow({
-  row,
-  homeName,
-  awayName,
-}: {
-  row: MatchStatValue;
-  homeName: string;
-  awayName: string;
-}) {
+function StatRow({ row }: { row: MatchStatValue }) {
   const home = row.stats?.[0] ?? "—";
   const away = row.stats?.[1] ?? "—";
   const homeNumber = parseStatNumber(home);
   const awayNumber = parseStatNumber(away);
-  const total = homeNumber + awayNumber;
-  const homeWidth = total > 0 ? (homeNumber / total) * 100 : 50;
-
   const lead = row.highlighted ?? (homeNumber > awayNumber ? "home" : awayNumber > homeNumber ? "away" : "equal");
-  const valueClass = (side: "home" | "away") =>
-    lead === side
-      ? side === "home"
-        ? "bg-accent text-on-accent"
-        : "bg-violet text-[#120a24]"
-      : "text-ink";
+  const label =
+    lead === "home" ? `◀ ${row.title}` : lead === "away" ? `${row.title} ▶` : row.title;
 
   return (
-    <div className="py-3">
-      <div className="grid grid-cols-[1fr_auto_1fr] items-center gap-2">
-        <span className="justify-self-start" title={homeName}>
-          <span className={`rounded-md px-1.5 py-0.5 text-[13px] font-extrabold num ${valueClass("home")}`}>{home}</span>
-        </span>
-        <span className="text-center text-xs font-semibold text-muted">{row.title}</span>
-        <span className="justify-self-end" title={awayName}>
-          <span className={`rounded-md px-1.5 py-0.5 text-[13px] font-extrabold num ${valueClass("away")}`}>{away}</span>
-        </span>
-      </div>
-      <div className="mt-2 grid grid-cols-2 gap-1">
-        <div className="flex h-1.5 justify-end overflow-hidden rounded-full bg-white/[0.05]">
-          <span className="bar-grow-r h-full rounded-full bg-accent" style={{ width: `${homeWidth}%`, opacity: lead === "home" ? 1 : 0.45 }} />
-        </div>
-        <div className="flex h-1.5 overflow-hidden rounded-full bg-white/[0.05]">
-          <span className="bar-grow h-full rounded-full bg-violet" style={{ width: `${100 - homeWidth}%`, opacity: lead === "away" ? 1 : 0.45 }} />
-        </div>
-      </div>
-    </div>
+    <BlockMeterRow
+      label={label}
+      home={homeNumber}
+      away={awayNumber}
+      homeText={String(home)}
+      awayText={String(away)}
+    />
   );
 }
 
@@ -429,59 +406,63 @@ export function Lineups({
   colors,
   homeTeam,
   awayTeam,
+  events = [],
 }: {
   lineup?: MatchLineup;
   colors?: MatchTeamColors;
   homeTeam: { id: number | string; name: string };
   awayTeam: { id: number | string; name: string };
+  events?: TimelineEvent[];
 }) {
   const home = lineup?.homeTeam;
   const away = lineup?.awayTeam;
   if (!home?.starters?.length || !away?.starters?.length) {
     return (
-      <div className="card px-4 py-8 text-center text-sm text-dim">
-        Lineups are not available yet.
-      </div>
+      <EmptyState
+        title="Lineups"
+        description="Lineups are not available yet."
+      />
     );
   }
 
-  const homeColor = colors?.lightMode?.home ?? "#39ff6b";
-  const awayColor = colors?.lightMode?.away ?? "#a78bfa";
-  const homeFont = colors?.fontLightMode?.home ?? "#07130c";
-  const awayFont = colors?.fontLightMode?.away ?? "#07130c";
+  const tally = goalTally(events);
+  const homeColor = colors?.lightMode?.home ?? "var(--tl-led)";
+  const awayColor = colors?.lightMode?.away ?? "var(--tl-alert)";
+  const homeFont = colors?.fontLightMode?.home ?? "var(--color-on-accent)";
+  const awayFont = colors?.fontLightMode?.away ?? "var(--color-on-accent)";
 
   return (
-    <div className="mx-auto max-w-[980px] space-y-5">
+    <div className="mx-auto max-w-[980px] space-y-4">
       <div className="card overflow-hidden">
         <div className="grid grid-cols-2 divide-x divide-line/50 border-b border-line/60">
           {[
             { team: home, name: homeTeam.name, color: homeColor },
             { team: away, name: awayTeam.name, color: awayColor },
           ].map((side) => (
-            <div key={side.name} className="flex items-center gap-2.5 px-3 py-3">
-              <Crest id={side.team.id} name={side.name} size={26} />
+            <div key={side.name} className="flex min-w-0 items-center gap-2 px-2.5 py-2.5">
+              <Crest id={side.team.id} name={side.name} size={24} />
               <div className="min-w-0">
-                <p className="truncate text-xs font-bold text-ink">{side.name}</p>
-                <p className="text-[11px] text-dim">
+                <p className="truncate text-[12px] font-semibold text-ink">{side.name}</p>
+                <p className="tl-k tl-k-dim truncate">
                   {side.team.formation} · avg {side.team.averageStarterAge?.toFixed(1) ?? "—"} yrs
                 </p>
               </div>
-              <span className="ml-auto flex items-center gap-2">
-                <span className="hidden text-[10px] font-bold text-dim sm:inline">Team</span>
+              <span className="ml-auto flex shrink-0 items-center gap-2">
+                <span className="tl-k tl-k-dim hidden sm:inline">Team</span>
                 {side.team.rating ? (
                   <RatingChip rating={side.team.rating} size="lg" />
                 ) : (
-                  <span className="h-2.5 w-2.5 rounded-full" style={{ backgroundColor: side.color }} />
+                  <span className="h-2.5 w-2.5" style={{ backgroundColor: side.color }} aria-hidden="true" />
                 )}
               </span>
             </div>
           ))}
         </div>
-        <div className="pitch-surface relative aspect-[68/118] w-full overflow-hidden sm:aspect-[105/68]">
+        <div className="tl-frame pitch-surface relative aspect-[68/118] w-full overflow-hidden sm:aspect-[105/68]">
           <div className="absolute inset-0 hidden opacity-70 sm:block">
             <svg viewBox="0 0 105 68" className="h-full w-full" aria-hidden="true">
-              <g stroke="rgba(255,255,255,0.55)" strokeWidth="0.35" fill="none">
-                <rect x="1" y="1" width="103" height="66" rx="1" />
+              <g stroke="var(--tl-hair)" strokeWidth="0.35" fill="none">
+                <rect x="1" y="1" width="103" height="66" />
                 <line x1="52.5" y1="1" x2="52.5" y2="67" />
                 <circle cx="52.5" cy="34" r="9.15" />
                 <rect x="1" y="13.84" width="16" height="40.32" />
@@ -493,8 +474,8 @@ export function Lineups({
           </div>
           <div className="absolute inset-0 opacity-70 sm:hidden">
             <svg viewBox="0 0 68 118" preserveAspectRatio="none" className="h-full w-full" aria-hidden="true">
-              <g stroke="rgba(255,255,255,0.55)" strokeWidth="0.35" fill="none">
-                <rect x="1" y="1" width="66" height="116" rx="1" />
+              <g stroke="var(--tl-hair)" strokeWidth="0.35" fill="none">
+                <rect x="1" y="1" width="66" height="116" />
                 <line x1="1" y1="59" x2="67" y2="59" />
                 <circle cx="34" cy="59" r="9.15" />
                 <rect x="13.84" y="1" width="40.32" height="16" />
@@ -529,8 +510,8 @@ export function Lineups({
                 >
                   <span className="relative inline-flex">
                     <span
-                      className="relative flex h-7 w-7 items-center justify-center overflow-hidden rounded-full bg-card-2 shadow-[0_8px_18px_-8px_rgba(0,0,0,0.95)] transition-transform duration-200 group-hover:scale-110 sm:h-10 sm:w-10"
-                      style={{ boxShadow: `0 0 0 2px ${color}, 0 8px 18px -8px rgba(0,0,0,0.95)` }}
+                      className="relative flex h-7 w-7 items-center justify-center overflow-hidden bg-card-2 transition-transform duration-200 group-hover:scale-110 sm:h-10 sm:w-10"
+                      style={{ boxShadow: `inset 0 0 0 2px ${color}` }}
                     >
                       <PlayerPhoto
                         playerId={player.id}
@@ -541,7 +522,7 @@ export function Lineups({
                       />
                     </span>
                     <span
-                      className="absolute -bottom-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full text-[10px] font-black shadow-sm sm:h-[18px] sm:w-[18px] sm:text-[11px]"
+                      className="absolute -bottom-1 -right-1 flex h-4 w-4 items-center justify-center text-[10px] font-bold sm:h-[18px] sm:w-[18px] sm:text-[11px]"
                       style={{ backgroundColor: color, color: font }}
                     >
                       {player.shirtNumber ?? player.positionId}
@@ -550,16 +531,20 @@ export function Lineups({
                       <RatingChip
                         rating={player.performance.rating}
                         size="sm"
-                        className="absolute -right-4 -top-2 shadow-[0_4px_10px_-2px_rgba(0,0,0,0.7)] sm:-right-5"
+                        className="absolute -right-4 -top-2 sm:-right-5"
                       />
                     ) : null}
                     {player.performance?.substitutionEvents?.length ? (
-                      <span className="absolute -left-3 -top-1.5 flex h-4 w-4 items-center justify-center rounded-full bg-black/80 text-sky-300" title="Substituted">
+                      <span
+                        className="tl-frame absolute -left-3 -top-1.5 flex h-4 w-4 items-center justify-center bg-card-2 text-mint"
+                        title="Substituted"
+                      >
                         <SubIcon size={10} />
                       </span>
                     ) : null}
+                    <TallyGlyph id={player.id} tally={tally} />
                   </span>
-                  <span className="max-w-[76px] truncate text-[11px] font-semibold text-white [text-shadow:0_1px_3px_rgba(0,0,0,0.8)] sm:max-w-[100px] sm:text-[13px]">
+                  <span className="max-w-[76px] truncate bg-card-2/60 px-0.5 text-[11px] font-semibold text-ink sm:max-w-[100px] sm:text-[12px]">
                     {player.name.split(" ").slice(-1)[0]}
                   </span>
                 </Link>
@@ -569,8 +554,8 @@ export function Lineups({
         </div>
       </div>
       <div className="grid gap-3 md:grid-cols-2">
-        <Bench team={home} name={homeTeam.name} />
-        <Bench team={away} name={awayTeam.name} />
+        <Bench team={home} name={homeTeam.name} tally={tally} />
+        <Bench team={away} name={awayTeam.name} tally={tally} />
       </div>
       <div className="grid gap-3 md:grid-cols-2">
         <Absentees team={home} name={homeTeam.name} />
@@ -580,23 +565,26 @@ export function Lineups({
   );
 }
 
-function Bench({ team, name }: { team?: LineupTeam; name: string }) {
+function Bench({
+  team,
+  name,
+  tally,
+}: {
+  team?: LineupTeam;
+  name: string;
+  tally?: Map<number, { goals: number; assists: number }>;
+}) {
   if (!team?.subs?.length) return null;
   return (
-    <div className="card overflow-hidden">
-      <div className="border-b border-line/50 px-3.5 py-2.5">
-        <h3 className="text-[11px] font-bold text-muted">
-          {name} · substitutes
-        </h3>
-      </div>
+    <Panel label={`${name} · substitutes`}>
       <div className="divide-y divide-line/30">
         {team.subs.map((player) => (
           <Link
             key={player.id}
             href={`/player/${player.id}`}
-            className="flex items-center gap-2.5 px-3 py-2 transition-colors hover:bg-white/[0.025]"
+            className="flex items-center gap-2.5 px-1 py-2 transition-colors hover:bg-hover"
           >
-            <span className="relative h-7 w-7 shrink-0 overflow-hidden rounded-full bg-white/[0.05] ring-1 ring-inset ring-white/10">
+            <span className="tl-frame relative h-7 w-7 shrink-0 overflow-hidden bg-card-2">
               <PlayerPhoto
                 playerId={player.id}
                 alt=""
@@ -605,46 +593,40 @@ function Bench({ team, name }: { team?: LineupTeam; name: string }) {
                 className="h-full w-full object-cover object-top"
               />
             </span>
-            <span className="w-5 shrink-0 text-center text-[11px] font-bold text-dim num">{player.shirtNumber ?? ""}</span>
-            <span className="min-w-0 flex-1 truncate text-[13px] font-semibold text-ink">
+            <span className="tl-num w-5 shrink-0 text-center text-[11px] text-dim">{player.shirtNumber ?? ""}</span>
+            <span className="min-w-0 flex-1 truncate text-[12px] font-semibold text-ink">
               {player.name}
             </span>
+            {tally?.get(player.id) ? <TallyGlyph id={player.id} tally={tally} inline /> : null}
             {player.performance?.substitutionEvents?.[0] && (
-              <span className="flex items-center gap-1 text-[11px] font-semibold text-sky-300 num">
+              <span className="tl-k flex items-center gap-1 text-mint">
                 <SubIcon size={11} />
-                {player.performance.substitutionEvents[0].time}&apos;
+                <span className="tl-num text-[11.5px]">{player.performance.substitutionEvents[0].time}&apos;</span>
               </span>
             )}
             <RatingChip rating={player.performance?.rating} />
           </Link>
         ))}
       </div>
-    </div>
+    </Panel>
   );
 }
 
 function Absentees({ team, name }: { team?: LineupTeam; name: string }) {
   if (!team?.coach?.name && !team?.unavailable?.length) return null;
   return (
-    <div className="card p-3.5">
-      <p className="eyebrow mb-2">{name}</p>
-      {team.coach?.name && (
-        <p className="mb-2 flex items-center justify-between text-xs">
-          <span className="text-dim">Coach</span>
-          <span className="font-semibold text-ink">{team.coach.name}</span>
-        </p>
-      )}
+    <Panel label={name} aside={team.coach?.name ? `coach ${team.coach.name}` : undefined}>
       {team.unavailable?.length ? (
-        <div className="divide-y divide-line/30 border-t border-line/40">
+        <div className="divide-y divide-line/30">
           {team.unavailable.map((player) => (
-            <div key={player.id ?? player.name} className="flex items-center justify-between gap-3 py-1.5 text-xs">
+            <div key={player.id ?? player.name} className="flex items-center justify-between gap-3 py-1.5 text-[12px]">
               <span className="truncate font-semibold text-muted">{player.name}</span>
-              <span className="shrink-0 text-[11px] text-dim">{unavailableReason(player)}</span>
+              <span className="tl-k tl-k-dim shrink-0">{unavailableReason(player)}</span>
             </div>
           ))}
         </div>
       ) : null}
-    </div>
+    </Panel>
   );
 }
 
@@ -666,9 +648,10 @@ export function H2HList({
   const matches = h2h?.matches ?? [];
   if (!matches.length) {
     return (
-      <div className="card px-4 py-8 text-center text-sm text-dim">
-        No previous meetings found.
-      </div>
+      <EmptyState
+        title="Head to head"
+        description="No previous meetings found."
+      />
     );
   }
   const summary = h2h?.summary ?? [0, 0, 0];
@@ -682,45 +665,45 @@ export function H2HList({
           { label: "Wins", value: summary[2] ?? 0, team: awayTeam.name },
         ].map((item) => (
           <div key={`${item.label}-${item.team}`} className="px-2 py-3">
-            <p className="font-display text-2xl font-extrabold text-ink num">{item.value}</p>
-            <p className="truncate text-[11px] text-dim">{item.team}</p>
-            <p className="text-[11px] text-dim">{item.label}</p>
+            <p className="tl-num text-[26px] text-ink">{item.value}</p>
+            <p className="tl-k mt-1 truncate text-muted">{item.team}</p>
+            <p className="tl-k tl-k-dim">{item.label}</p>
           </div>
         ))}
       </div>
-      <div className="card overflow-hidden">
+      <Panel label="Previous meetings" aside={`${matches.length} fixtures`}>
         <div className="divide-y divide-line/40">
           {matches.map((match, index) => (
             <Link
               key={`${match.matchUrl ?? index}`}
               href={`/match/${match.matchUrl?.split("#").pop() ?? ""}`}
-              className="group flex items-center gap-3 px-3 py-2.5 transition-colors hover:bg-white/[0.025]"
+              className="group flex items-center gap-2 px-1 py-2.5 transition-colors hover:bg-hover"
             >
-              <span className="w-14 shrink-0 text-[11px] text-dim">
+              <span className="w-14 shrink-0 text-[11px] text-dim num">
                 {match.time?.utcTime ? <LocalTime value={match.time.utcTime} kind="short" /> : "—"}
               </span>
               <div className="flex flex-1 items-center justify-end gap-1.5">
-                <span className="truncate text-xs font-semibold text-muted group-hover:text-ink">
+                <span className="truncate text-[12px] font-semibold text-muted group-hover:text-ink">
                   {match.home.name}
                 </span>
                 <Crest id={match.home.id} name={match.home.name} size={16} />
               </div>
-              <span className="w-12 shrink-0 rounded bg-white/[0.05] px-1 py-0.5 text-center text-[11px] font-bold text-ink num">
+              <span className="w-12 shrink-0 border border-line bg-card-2/60 px-1 py-0.5 text-center text-[11px] font-semibold text-ink num">
                 {match.status?.scoreStr ?? "vs"}
               </span>
               <div className="flex flex-1 items-center gap-1.5">
                 <Crest id={match.away.id} name={match.away.name} size={16} />
-                <span className="truncate text-xs font-semibold text-muted group-hover:text-ink">
+                <span className="truncate text-[12px] font-semibold text-muted group-hover:text-ink">
                   {match.away.name}
                 </span>
               </div>
-              <span className="hidden w-24 shrink-0 truncate text-right text-[11px] text-dim sm:block">
+              <span className="tl-k tl-k-dim hidden w-24 shrink-0 truncate text-right sm:block">
                 {match.league?.name}
               </span>
             </Link>
           ))}
         </div>
-      </div>
+      </Panel>
     </div>
   );
 }
@@ -728,13 +711,13 @@ export function H2HList({
 export function FormStrip({ form }: { form?: TeamFormEntry[] }) {
   if (!form?.length) return null;
   return (
-    <div className="flex gap-1.5">
+    <div className="flex gap-1">
       {form.slice(0, 5).map((item, index) => (
         <Link
           key={`${item.date?.utcTime ?? index}`}
           href={item.linkToMatch ? `/match/${item.linkToMatch.split("#").pop()}` : "#"}
           title={`${item.home?.name ?? ""} ${item.score ?? ""} ${item.away?.name ?? ""}`}
-          className="transition-transform hover:scale-110"
+          className="press"
         >
           <FormPill result={item.result} size={19} />
         </Link>
@@ -754,20 +737,20 @@ export function PlayerOfTheMatch({
     `${player.name?.firstName ?? ""} ${player.name?.lastName ?? ""}`.trim();
 
   return (
-    <Link href={`/player/${player.id}`} className="card card-hover flex items-center gap-3 p-3.5">
-      <span className="relative h-14 w-14 shrink-0 overflow-hidden rounded-full bg-white/[0.05] ring-1 ring-inset ring-white/10">
+    <Link href={`/player/${player.id}`} className="card flex items-center gap-3 p-3 transition-colors hover:bg-hover">
+      <span className="tl-frame relative h-12 w-12 shrink-0 overflow-hidden bg-card-2">
         <Image
           src={`https://images.fotmob.com/image_resources/playerimages/${player.id}.png`}
           alt={name}
-          width={56}
-          height={56}
+          width={48}
+          height={48}
           className="h-full w-full object-cover object-top"
         />
       </span>
       <div className="min-w-0 flex-1">
-        <p className="eyebrow">Player of the match</p>
-        <p className="truncate text-sm font-bold text-ink">{name}</p>
-        <p className="truncate text-[11px] text-dim">
+        <p className="tl-k tl-k-dim">Player of the match</p>
+        <p className="truncate text-[13px] font-semibold text-ink">{name}</p>
+        <p className="tl-k tl-k-dim truncate">
           {player.teamName}
           {player.minutesPlayed ? ` · ${player.minutesPlayed} mins` : ""}
         </p>
@@ -818,20 +801,11 @@ export function MatchInfoCard({
   }
 
   return (
-    <div className="card p-4">
-      <p className="eyebrow mb-1">Match info</p>
-      <div className="divide-y divide-line/40">
-        {rows.map((row) => (
-          <div key={row.label} className="flex items-start justify-between gap-3 py-2">
-            <span className="text-[11px] text-dim">{row.label}</span>
-            <span className="text-right text-xs font-semibold text-muted">{row.value}</span>
-          </div>
-        ))}
-      </div>
-      <p className="mt-2 text-[11px] text-dim">
-        {homeTeam.name} vs {awayTeam.name}
-      </p>
-    </div>
+    <Panel label="Match info" aside={`${homeTeam.name} v ${awayTeam.name}`}>
+      {rows.map((row) => (
+        <DataRow key={row.label} label={row.label} value={row.value} />
+      ))}
+    </Panel>
   );
 }
 
@@ -856,26 +830,28 @@ export function InsightsCard({
   const list = (Array.isArray(insights) ? (insights as Insight[]) : []).filter((i) => i.text);
   if (!list.length) return null;
   return (
-    <div className="card p-4">
-      <p className="eyebrow mb-2">Talking points</p>
+    <Panel label="Talking points" aside={`${Math.min(list.length, 6)} of ${list.length}`}>
       <ul className="stagger space-y-2">
         {list.slice(0, 6).map((item, index) => {
           const team = String(item.teamId) === String(home.id) ? home : away;
           return (
-            <li key={index} className="flex items-start gap-2.5 rounded-xl bg-white/[0.025] p-2.5">
+            <li key={index} className="flex items-start gap-2.5 border border-line bg-card-2/60 p-2.5">
               {item.playerId ? (
-                <Link href={`/player/${item.playerId}`} className="h-8 w-8 shrink-0 overflow-hidden rounded-full bg-white/[0.05]">
+                <Link
+                  href={`/player/${item.playerId}`}
+                  className="tl-frame h-8 w-8 shrink-0 overflow-hidden bg-card-2"
+                >
                   <PlayerPhoto playerId={item.playerId} alt="" width={32} height={32} className="h-full w-full object-cover object-top" />
                 </Link>
               ) : (
                 <Crest id={team.id} name={team.name} size={32} />
               )}
-              <p className="text-[13px] leading-snug text-muted">{item.text}</p>
+              <p className="text-[12px] leading-snug text-muted">{item.text}</p>
             </li>
           );
         })}
       </ul>
-    </div>
+    </Panel>
   );
 }
 
@@ -894,36 +870,34 @@ export function AttackingZones({
   const away = zones?.away?.total;
   if (!home || !away) return null;
   return (
-    <div className="card p-4">
-      <p className="eyebrow">Attack sides</p>
-      <p className="mt-0.5 text-xs text-dim">Where each team sent its attacks</p>
-      <div className="mt-3 grid grid-cols-2 gap-3">
+    <Panel label="Attack sides" aside="share of attacks by channel">
+      <div className="grid grid-cols-2 gap-3">
         {[
-          { name: homeName, z: home, tone: "bg-accent", text: "text-on-accent" },
-          { name: awayName, z: away, tone: "bg-violet", text: "text-[#120a24]" },
-        ].map(({ name, z, tone, text }) => {
+          { name: homeName, z: home, tone: "bg-accent" },
+          { name: awayName, z: away, tone: "bg-violet" },
+        ].map(({ name, z, tone }) => {
           const max = Math.max(z.left ?? 0, z.center ?? 0, z.right ?? 0);
           return (
             <div key={name}>
-              <p className="mb-1.5 truncate text-xs font-semibold text-muted">{name}</p>
-              <div className="pitch-surface relative grid h-36 grid-rows-3 gap-1 overflow-hidden rounded-xl p-1.5">
+              <p className="tl-k mb-1.5 truncate text-muted">{name}</p>
+              <div className="tl-frame pitch-surface relative grid h-36 grid-rows-3 gap-1 overflow-hidden p-1.5">
                 {(["left", "center", "right"] as const).map((key) => {
                   const value = z[key] ?? 0;
                   const lead = value === max;
                   return (
-                    <div key={key} className="relative flex items-center justify-center overflow-hidden rounded-lg bg-white/[0.04]">
+                    <div key={key} className="tl-frame relative flex items-center justify-center overflow-hidden bg-card-2/60">
                       <span
                         className={`bar-grow absolute inset-y-0 left-0 ${tone}`}
                         style={{ width: `${value}%`, opacity: lead ? 0.9 : 0.35 }}
                       />
-                      <span className={`relative font-display text-sm font-extrabold num ${lead ? text : "text-white"}`}>
+                      <span className={`tl-num relative px-1 text-[15px] ${lead ? "text-ink" : "text-dim"}`}>
                         {value}%
                       </span>
                     </div>
                   );
                 })}
               </div>
-              <div className="mt-1 flex justify-between text-[10px] text-dim">
+              <div className="tl-k tl-k-dim mt-1 flex justify-between">
                 <span>Left ↑</span>
                 <span>Right ↓</span>
               </div>
@@ -931,7 +905,7 @@ export function AttackingZones({
           );
         })}
       </div>
-    </div>
+    </Panel>
   );
 }
 
@@ -959,12 +933,11 @@ export function TopRatedCard({
   ];
   if (!groups.some((g) => g.players.length)) return null;
   return (
-    <div className="card p-4">
-      <p className="eyebrow mb-2">Top rated</p>
+    <Panel label="Top rated" aside="highest first">
       <div className="space-y-3">
         {groups.map(({ team, players }) => (
           <div key={team.name}>
-            <p className="mb-1 flex items-center gap-1.5 text-[11px] font-bold text-dim">
+            <p className="tl-k tl-k-dim mb-1 flex items-center gap-1.5">
               <Crest id={team.id} name={team.name} size={14} />
               {team.name}
             </p>
@@ -973,16 +946,16 @@ export function TopRatedCard({
                 <Link
                   key={player.playerId}
                   href={`/player/${player.playerId}`}
-                  className="press flex items-center gap-2.5 rounded-lg py-1.5 transition-colors hover:bg-white/[0.03]"
+                  className="press flex items-center gap-2.5 py-1.5 transition-colors hover:bg-hover"
                 >
-                  <span className="h-8 w-8 shrink-0 overflow-hidden rounded-full bg-white/[0.05] ring-1 ring-inset ring-white/10">
+                  <span className="tl-frame h-8 w-8 shrink-0 overflow-hidden bg-card-2">
                     <PlayerPhoto playerId={player.playerId} alt="" width={32} height={32} className="h-full w-full object-cover object-top" />
                   </span>
                   <span className="min-w-0 flex-1">
-                    <span className="block truncate text-[13px] font-semibold text-ink">
+                    <span className="block truncate text-[12px] font-semibold text-ink">
                       {player.name.fullName ?? `${player.name.firstName ?? ""} ${player.name.lastName ?? ""}`}
                     </span>
-                    <span className="text-[11px] text-dim">{player.positionLabel?.label ?? ""}</span>
+                    <span className="tl-k tl-k-dim block">{player.positionLabel?.label ?? ""}</span>
                   </span>
                   <RatingChip rating={player.playerRating ?? player.playerRatingRounded} star={player.manOfTheMatch} />
                 </Link>
@@ -991,6 +964,6 @@ export function TopRatedCard({
           </div>
         ))}
       </div>
-    </div>
+    </Panel>
   );
 }

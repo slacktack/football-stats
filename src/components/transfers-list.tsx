@@ -6,17 +6,17 @@ import { Crest } from "./ui";
 
 function TransferRow({ transfer }: { transfer: Transfer }) {
   return (
-    <div className="flex items-center gap-3 px-3 py-2.5 sm:px-4">
+    <div className="flex items-center gap-3 px-3 py-2.5 transition-colors hover:bg-hover sm:px-4">
       <div className="flex min-w-0 flex-1 items-center gap-2.5">
         <Crest id={transfer.fromClubId} name={transfer.fromClub} size={26} />
         <div className="min-w-0 flex-1">
           <Link
             href={`/player/${transfer.playerId}`}
-            className="block truncate text-[13px] font-semibold text-ink transition-colors hover:text-accent"
+            className="block truncate text-[11.5px] font-semibold text-ink transition-colors hover:text-accent"
           >
             {transfer.name}
           </Link>
-          <span className="mt-0.5 flex items-center gap-1.5 text-[11px] text-dim">
+          <span className="tl-k tl-k-dim mt-0.5 flex items-center gap-1.5">
             <span className="truncate">{transfer.fromClubFullName ?? transfer.fromClub}</span>
             <ArrowRightIcon size={10} className="shrink-0" />
             <span className="truncate">{transfer.toClubFullName ?? transfer.toClub}</span>
@@ -25,8 +25,8 @@ function TransferRow({ transfer }: { transfer: Transfer }) {
         <Crest id={transfer.toClubId} name={transfer.toClub} size={26} />
       </div>
       <div className="shrink-0 text-right">
-        <div className="text-xs font-bold text-ink">{formatFee(transfer.fee, transfer.amountEuroEstimated)}</div>
-        <div className="text-[11px] text-dim">
+        <div className="text-[12.5px] font-semibold text-ink num">{formatFee(transfer.fee, transfer.amountEuroEstimated)}</div>
+        <div className="tl-k tl-k-dim mt-0.5 block">
           {transfer.transferDate ? formatMonthDay(transfer.transferDate) : transfer.transferType?.text ?? ""}
         </div>
       </div>
@@ -51,7 +51,7 @@ export function TransfersList({
   });
 
   if (list.length === 0) {
-    return <div className="card px-4 py-10 text-center text-sm text-dim">{emptyLabel}</div>;
+    return <div className="card px-4 py-10 text-center text-[12.5px] text-dim">{emptyLabel}</div>;
   }
 
   if (teamId) {
@@ -60,30 +60,30 @@ export function TransfersList({
     return (
       <div className="grid gap-3 lg:grid-cols-2">
         <section className="card overflow-hidden">
-          <div className="flex items-center justify-between border-b border-line/60 bg-white/[0.014] px-3.5 py-2.5">
-            <h3 className="text-xs font-bold text-ink">Arrivals</h3>
-            <span className="text-[11px] text-dim">{arrivals.length}</span>
-          </div>
-          <div className="divide-y divide-line/40">
+          <header className="flex items-center justify-between border-b border-line px-3.5 py-2 sm:px-4">
+            <h3 className="tl-k">Arrivals</h3>
+            <span className="tl-k tl-k-dim">{arrivals.length}</span>
+          </header>
+          <div className="divide-y divide-line">
             {(limit ? arrivals.slice(0, limit) : arrivals).map((transfer) => (
               <TransferRow key={`in-${transfer.playerId}-${transfer.transferDate ?? ""}`} transfer={transfer} />
             ))}
             {arrivals.length === 0 && (
-              <p className="px-4 py-5 text-xs text-dim">No arrivals recorded.</p>
+              <p className="px-4 py-5 text-[11.5px] text-dim">No arrivals recorded.</p>
             )}
           </div>
         </section>
         <section className="card overflow-hidden">
-          <div className="flex items-center justify-between border-b border-line/60 bg-white/[0.014] px-3.5 py-2.5">
-            <h3 className="text-xs font-bold text-ink">Departures</h3>
-            <span className="text-[11px] text-dim">{departures.length}</span>
-          </div>
-          <div className="divide-y divide-line/40">
+          <header className="flex items-center justify-between border-b border-line px-3.5 py-2 sm:px-4">
+            <h3 className="tl-k">Departures</h3>
+            <span className="tl-k tl-k-dim">{departures.length}</span>
+          </header>
+          <div className="divide-y divide-line">
             {(limit ? departures.slice(0, limit) : departures).map((transfer) => (
               <TransferRow key={`out-${transfer.playerId}-${transfer.transferDate ?? ""}`} transfer={transfer} />
             ))}
             {departures.length === 0 && (
-              <p className="px-4 py-5 text-xs text-dim">No departures recorded.</p>
+              <p className="px-4 py-5 text-[11.5px] text-dim">No departures recorded.</p>
             )}
           </div>
         </section>
@@ -93,7 +93,7 @@ export function TransfersList({
 
   return (
     <div className="card overflow-hidden">
-      <div className="divide-y divide-line/40">
+      <div className="divide-y divide-line">
         {(limit ? list.slice(0, limit) : list).map((transfer) => (
           <TransferRow
             key={`${transfer.playerId}-${transfer.fromClubId}-${transfer.toClubId}-${transfer.transferDate ?? ""}`}
