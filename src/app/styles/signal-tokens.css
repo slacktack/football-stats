@@ -17,7 +17,7 @@
   --tl-alert: #e2462b;
 
   --tl-ease: cubic-bezier(0.22, 1, 0.36, 1);
-  --tl-rail: 248px;
+  --tl-rail: 272px;
   --tl-rail-sm: 68px;
 
   --tl-panel: color-mix(in srgb, var(--color-card) 78%, transparent);

@@ -7,8 +7,9 @@ import { Chip, Scrub } from "./tl";
 
 export function SiteHeader() {
   return (
-    <header className="sticky top-0 z-50 border-b border-line bg-base pt-[env(safe-area-inset-top)]">
+    <header className="tl-header sticky top-0 z-50 border-b border-line bg-base pt-[env(safe-area-inset-top)]">
       <Scrub />
+      <span className="tl-header-line" aria-hidden="true" />
       <div className="shell flex h-[52px] items-center gap-2 sm:gap-3">
         <div className="flex min-w-0 flex-1 items-center gap-3">
           <Brand compact />
@@ -18,8 +19,8 @@ export function SiteHeader() {
 
         <div className="ml-auto flex shrink-0 items-center gap-2">
           <Link href="/?filter=live" className="hidden sm:block">
-            <Chip tone="live">
-              <i className="tl-led steady" aria-hidden="true" />
+            <Chip tone="live" className="tl-live-chip">
+              <i className="tl-led" aria-hidden="true" />
               Live now
             </Chip>
           </Link>

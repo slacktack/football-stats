@@ -74,15 +74,50 @@ function formatStat(stat: RawStat["stat"]): string {
 }
 
 function positionMap(lineup?: MatchLineup) {
-  const map = new Map<number, { starter: boolean; position?: string }>();
+  const map = new Map<
+    number,
+    { starter: boolean; position?: string; events?: { time: number; type: string }[] }
+  >();
   for (const team of [lineup?.homeTeam, lineup?.awayTeam]) {
-    for (const p of team?.starters ?? []) map.set(p.id, { starter: true, position: positionLabel(p.usualPlayingPositionId, p.positionId) });
-    for (const p of team?.subs ?? []) map.set(p.id, { starter: false, position: positionLabel(p.usualPlayingPositionId, p.positionId) });
+    for (const p of team?.starters ?? [])
+      map.set(p.id, {
+        starter: true,
+        position: positionLabel(p.usualPlayingPositionId, p.positionId),
+        events: p.performance?.substitutionEvents,
+      });
+    for (const p of team?.subs ?? [])
+      map.set(p.id, {
+        starter: false,
+        position: positionLabel(p.usualPlayingPositionId, p.positionId),
+        events: p.performance?.substitutionEvents,
+      });
   }
   return map;
 }
 
-function positionLabel(usual?: number, positionId?: number) {
+/* The feed carries no minutes stat, so the clock is reconstructed from the
+   substitution log: starters count from kickoff, bench from their sub-in. */
+function minutesFromLineup(
+  pos: { starter: boolean; events?: { time: number; type: string }[] } | undefined,
+  elapsed: number,
+): number {
+  if (!pos) return 0;
+  const at = (type: string) =>
+    (pos.events ?? []).filter((e) => e.type === type).map((e) => e.time);
+  const ins = at("subIn");
+  const outs = at("subOut");
+  if (pos.starter) {
+    const end = outs.length ? Math.max(...outs) : elapsed;
+    const start = ins.length ? Math.max(...ins) : 0;
+    return Math.max(0, end - start);
+  }
+  if (!ins.length) return 0;
+  const start = Math.max(...ins);
+  const end = outs.length ? Math.max(...outs) : elapsed;
+  return Math.max(0, end - start);
+}
+
+export function positionLabel(usual?: number, positionId?: number) {
   if (positionId === 11 || usual === 0) return "GK";
   if (usual === 1) return "DEF";
   if (usual === 2) return "MID";
@@ -94,6 +129,7 @@ export function normalizeMatchPlayers(
   raw: Record<string, unknown> | undefined,
   homeId: number,
   lineup?: MatchLineup,
+  elapsed = 0,
 ): MatchPlayerRow[] {
   if (!raw) return [];
   const positions = positionMap(lineup);
@@ -121,7 +157,9 @@ export function normalizeMatchPlayers(
 
     const get = (key: string) => num(flat.get(key)?.value);
     const passes = flat.get("accurate_passes");
-    const minutes = get("minutes_played");
+    const minutes = flat.get("minutes_played")
+      ? get("minutes_played")
+      : minutesFromLineup(positions.get(player.id), elapsed);
     const rating = num(flat.get("rating")?.value) || null;
     if (!minutes && !rating) continue;
 

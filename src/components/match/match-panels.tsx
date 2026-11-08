@@ -17,6 +17,8 @@ import type {
 import { CardIcon, GoalIcon, SubIcon } from "../icons";
 import { Crest, DataRow, EmptyState, FormPill, RatingChip } from "../ui";
 import { Leds, LogRow, Panel, StatRow as BlockMeterRow } from "../tl";
+import { LineupPitch, TallyGlyph, type PitchPlayer } from "./lineup-pitch";
+import { positionLabel, type MatchPlayerRow } from "@/lib/match-players";
 
 /* Signal log kind: which colour block the glyph box wears. */
 function eventKind(event: TimelineEvent): "goal" | "card" | "sub" | "miss" | undefined {
@@ -44,34 +46,6 @@ function goalTally(events: TimelineEvent[]) {
     bump(event.assistPlayerId, "assists");
   }
   return tally;
-}
-
-function TallyGlyph({
-  id,
-  tally,
-  inline = false,
-}: {
-  id: number;
-  tally: Map<number, { goals: number; assists: number }>;
-  inline?: boolean;
-}) {
-  const row = tally.get(id);
-  if (!row) return null;
-  return (
-    <span className={inline ? "flex shrink-0 gap-px" : "absolute -bottom-2 -left-1 z-10 flex gap-px"}>
-      {row.goals ? (
-        <b className="tl-glyph tl-glyph-goal" title={`${row.goals} goal${row.goals > 1 ? "s" : ""}`}>
-          <GoalIcon size={8} />
-          <span className="tl-num">{row.goals}</span>
-        </b>
-      ) : null}
-      {row.assists ? (
-        <b className="tl-glyph tl-glyph-assist" title={`${row.assists} assist${row.assists > 1 ? "s" : ""}`}>
-          A<span className="tl-num">{row.assists}</span>
-        </b>
-      ) : null}
-    </span>
-  );
 }
 
 export function Timeline({
@@ -407,12 +381,14 @@ export function Lineups({
   homeTeam,
   awayTeam,
   events = [],
+  players = [],
 }: {
   lineup?: MatchLineup;
   colors?: MatchTeamColors;
   homeTeam: { id: number | string; name: string };
   awayTeam: { id: number | string; name: string };
   events?: TimelineEvent[];
+  players?: MatchPlayerRow[];
 }) {
   const home = lineup?.homeTeam;
   const away = lineup?.awayTeam;
@@ -430,6 +406,22 @@ export function Lineups({
   const awayColor = colors?.lightMode?.away ?? "var(--tl-alert)";
   const homeFont = colors?.fontLightMode?.home ?? "var(--color-on-accent)";
   const awayFont = colors?.fontLightMode?.away ?? "var(--color-on-accent)";
+
+  const toPitchPlayers = (team: LineupTeam, side: "home" | "away"): PitchPlayer[] =>
+    (team.starters ?? []).map((p) => ({
+      id: p.id,
+      name: p.name,
+      side,
+      shirt: p.shirtNumber,
+      posId: p.positionId,
+      rating: p.performance?.rating ?? null,
+      x: p.horizontalLayout?.x ?? 0.5,
+      y: p.horizontalLayout?.y ?? 0.5,
+      subbed: Boolean(p.performance?.substitutionEvents?.length),
+      age: p.age ?? null,
+      country: p.countryName,
+      position: positionLabel(p.usualPlayingPositionId, p.positionId),
+    }));
 
   return (
     <div className="mx-auto max-w-[980px] space-y-4">
@@ -458,100 +450,15 @@ export function Lineups({
             </div>
           ))}
         </div>
-        <div className="tl-frame pitch-surface relative aspect-[68/118] w-full overflow-hidden sm:aspect-[105/68]">
-          <div className="absolute inset-0 hidden opacity-70 sm:block">
-            <svg viewBox="0 0 105 68" className="h-full w-full" aria-hidden="true">
-              <g stroke="var(--tl-hair)" strokeWidth="0.35" fill="none">
-                <rect x="1" y="1" width="103" height="66" />
-                <line x1="52.5" y1="1" x2="52.5" y2="67" />
-                <circle cx="52.5" cy="34" r="9.15" />
-                <rect x="1" y="13.84" width="16" height="40.32" />
-                <rect x="1" y="24.84" width="7" height="18.32" />
-                <rect x="88" y="13.84" width="16" height="40.32" />
-                <rect x="97" y="24.84" width="7" height="18.32" />
-              </g>
-            </svg>
-          </div>
-          <div className="absolute inset-0 opacity-70 sm:hidden">
-            <svg viewBox="0 0 68 118" preserveAspectRatio="none" className="h-full w-full" aria-hidden="true">
-              <g stroke="var(--tl-hair)" strokeWidth="0.35" fill="none">
-                <rect x="1" y="1" width="66" height="116" />
-                <line x1="1" y1="59" x2="67" y2="59" />
-                <circle cx="34" cy="59" r="9.15" />
-                <rect x="13.84" y="1" width="40.32" height="16" />
-                <rect x="24.84" y="1" width="18.32" height="7" />
-                <rect x="13.84" y="101" width="40.32" height="16" />
-                <rect x="24.84" y="110" width="18.32" height="7" />
-              </g>
-            </svg>
-          </div>
-          {[
-            { team: home, side: "home" as const, color: homeColor, font: homeFont },
-            { team: away, side: "away" as const, color: awayColor, font: awayFont },
-          ].flatMap(({ team, side, color, font }) =>
-            (team.starters ?? []).map((player) => {
-              const layout = player.horizontalLayout;
-              const along = 0.03 + (layout?.x ?? 0.5) * 0.46;
-              const across = layout?.y ?? 0.5;
-              const home = side === "home";
-              const pos = {
-                "--dl": `${(home ? along : 1 - along) * 100}%`,
-                "--dt": `${(home ? across : 1 - across) * 100}%`,
-                "--ml": `${(home ? across : 1 - across) * 100}%`,
-                "--mt": `${(home ? 1 - along : along) * 100}%`,
-              } as React.CSSProperties;
-              return (
-                <Link
-                  key={`${side}-${player.id}`}
-                  href={`/player/${player.id}`}
-                  className="lineup-marker group absolute z-10 flex -translate-x-1/2 -translate-y-1/2 flex-col items-center gap-1"
-                  style={pos}
-                  title={`${player.name}${player.performance?.rating ? ` · ${player.performance.rating}` : ""}`}
-                >
-                  <span className="relative inline-flex">
-                    <span
-                      className="relative flex h-7 w-7 items-center justify-center overflow-hidden bg-card-2 transition-transform duration-200 group-hover:scale-110 sm:h-10 sm:w-10"
-                      style={{ boxShadow: `inset 0 0 0 2px ${color}` }}
-                    >
-                      <PlayerPhoto
-                        playerId={player.id}
-                        alt=""
-                        width={40}
-                        height={40}
-                        className="h-full w-full object-cover object-top"
-                      />
-                    </span>
-                    <span
-                      className="absolute -bottom-1 -right-1 flex h-4 w-4 items-center justify-center text-[10px] font-bold sm:h-[18px] sm:w-[18px] sm:text-[11px]"
-                      style={{ backgroundColor: color, color: font }}
-                    >
-                      {player.shirtNumber ?? player.positionId}
-                    </span>
-                    {player.performance?.rating ? (
-                      <RatingChip
-                        rating={player.performance.rating}
-                        size="sm"
-                        className="absolute -right-4 -top-2 sm:-right-5"
-                      />
-                    ) : null}
-                    {player.performance?.substitutionEvents?.length ? (
-                      <span
-                        className="tl-frame absolute -left-3 -top-1.5 flex h-4 w-4 items-center justify-center bg-card-2 text-mint"
-                        title="Substituted"
-                      >
-                        <SubIcon size={10} />
-                      </span>
-                    ) : null}
-                    <TallyGlyph id={player.id} tally={tally} />
-                  </span>
-                  <span className="max-w-[76px] truncate bg-card-2/60 px-0.5 text-[11px] font-semibold text-ink sm:max-w-[100px] sm:text-[12px]">
-                    {player.name.split(" ").slice(-1)[0]}
-                  </span>
-                </Link>
-              );
-            }),
-          )}
-        </div>
+        <LineupPitch
+          players={[...toPitchPlayers(home, "home"), ...toPitchPlayers(away, "away")]}
+          tally={tally}
+          stats={players}
+          homeColor={homeColor}
+          awayColor={awayColor}
+          homeFont={homeFont}
+          awayFont={awayFont}
+        />
       </div>
       <div className="grid gap-3 md:grid-cols-2">
         <Bench team={home} name={homeTeam.name} tally={tally} />

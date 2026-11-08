@@ -695,6 +695,16 @@
     animation: tl-blink 1s steps(2, jump-none) infinite;
   }
 
+  /* Player sheet: an opaque instrument panel — never translucent, or the
+     pitch ghosts through the numbers. */
+  .tl-sheet {
+    background: var(--tl-panel-solid);
+    box-shadow:
+      0 0 0 1px color-mix(in srgb, var(--tl-led) 30%, transparent),
+      0 0 64px color-mix(in srgb, var(--tl-led) 14%, transparent),
+      0 24px 80px rgba(0, 0, 0, 0.45);
+  }
+
   /* ---------- log feed (timeline, events) ---------- */
 
   .tl-log-row {

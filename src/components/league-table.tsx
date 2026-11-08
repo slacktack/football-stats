@@ -103,8 +103,9 @@ export function LeagueTable({
 
   return (
     <div className={`card overflow-hidden ${className}`}>
+      <div className="tl-tbl-band" aria-hidden="true" />
       <div className="overflow-x-auto thin-scrollbar">
-        <table className="w-full border-collapse text-left">
+        <table className="tl-tbl w-full min-w-[560px] border-collapse text-left">
           <thead>
             <tr>
               <SortHeader
@@ -113,7 +114,7 @@ export function LeagueTable({
                 col="idx"
                 sort={sort}
                 onSort={toggle}
-                className="w-9 py-2.5 pl-3 pr-1 text-right"
+                className="w-10 py-2.5 pl-4 pr-2 text-right"
               />
               <SortHeader
                 label="Team"
@@ -123,54 +124,62 @@ export function LeagueTable({
                 onSort={toggle}
                 className="py-2.5 pr-2 text-left"
               />
-              <SortHeader label="P" title="Played" col="played" sort={sort} onSort={toggle} className="w-8 py-2.5 text-right" />
-              <SortHeader label="W" title="Won" col="wins" sort={sort} onSort={toggle} className="hidden w-8 py-2.5 text-right sm:table-cell" />
-              <SortHeader label="D" title="Drawn" col="draws" sort={sort} onSort={toggle} className="hidden w-8 py-2.5 text-right sm:table-cell" />
-              <SortHeader label="L" title="Lost" col="losses" sort={sort} onSort={toggle} className="hidden w-8 py-2.5 text-right sm:table-cell" />
-              <SortHeader label="GD" title="Goal difference" col="goalConDiff" sort={sort} onSort={toggle} className="w-10 py-2.5 text-right" />
-              <SortHeader label="Pts" title="Points" col="pts" sort={sort} onSort={toggle} className="w-10 py-2.5 text-right" />
-              {form && <th scope="col" className="tl-th hidden w-[132px] py-2.5 pl-2 pr-3 text-left font-medium lg:table-cell">Form</th>}
+              <SortHeader label="P" title="Played" col="played" sort={sort} onSort={toggle} className="w-10 py-2.5 text-right" />
+              <SortHeader label="W" title="Won" col="wins" sort={sort} onSort={toggle} className="hidden w-10 py-2.5 text-right sm:table-cell" />
+              <SortHeader label="D" title="Drawn" col="draws" sort={sort} onSort={toggle} className="hidden w-10 py-2.5 text-right sm:table-cell" />
+              <SortHeader label="L" title="Lost" col="losses" sort={sort} onSort={toggle} className="hidden w-10 py-2.5 text-right sm:table-cell" />
+              <SortHeader label="GD" title="Goal difference" col="goalConDiff" sort={sort} onSort={toggle} className="w-14 py-2.5 text-right" />
+              <SortHeader label="Pts" title="Points" col="pts" sort={sort} onSort={toggle} className="w-16 py-2.5 text-right" />
+              {form && <th scope="col" className="tl-th hidden w-[140px] py-2.5 pl-2 pr-4 text-left font-medium lg:table-cell">Form</th>}
             </tr>
           </thead>
           <tbody>
-            {rows.map((row) => {
+            {rows.map((row, index) => {
               const isHighlighted = highlightSet.has(String(row.id));
               return (
                 <tr
                   key={row.id}
-                  className={`group border-b border-line last:border-0 ${
-                    isHighlighted ? "bg-accent/10" : "hover:bg-hover"
+                  style={{ "--d": index } as React.CSSProperties}
+                  className={`tl-tbl-row group border-b border-line last:border-0 ${
+                    isHighlighted ? "bg-accent/10" : "hover:bg-accent/[0.06]"
                   }`}
                 >
-                  <td className="relative py-2.5 pl-3 pr-1 text-right">
+                  <td className="relative py-2.5 pl-4 pr-2 text-right">
                     <span
-                      className="absolute inset-y-0 left-0 w-[3px]"
-                      style={{ background: LAMPS[lampFor(row.qualColor)] }}
+                      className={`tl-lamp-rule absolute inset-y-[5px] left-0 w-[3px] transition-all duration-200 group-hover:w-[5px] group-hover:inset-y-0 ${
+                        isHighlighted ? "inset-y-0" : ""
+                      }`}
+                      style={{
+                        background: LAMPS[lampFor(row.qualColor)],
+                        boxShadow: `0 0 10px color-mix(in srgb, ${LAMPS[lampFor(row.qualColor)]} 55%, transparent)`,
+                      }}
                     />
-                    <span className={`tl-num text-[13px] ${isHighlighted ? "text-accent" : "text-dim"}`}>{row.idx}</span>
+                    <span className={`tl-num text-[14px] transition-colors ${isHighlighted ? "text-accent" : "text-dim group-hover:text-ink"}`}>
+                      {row.idx}
+                    </span>
                   </td>
                   <td className="py-2.5 pr-2">
                     <Link
                       href={`/team/${row.id}`}
-                      className="flex items-center gap-2.5 text-[11.5px] font-semibold text-ink transition-colors hover:text-accent"
+                      className="flex items-center gap-3 text-[12.5px] font-semibold text-ink transition-colors hover:text-accent"
                     >
-                      <Crest id={row.id} name={row.name} size={26} />
+                      <Crest id={row.id} name={row.name} size={28} />
                       <span className="truncate">{row.shortName || row.name}</span>
                     </Link>
                   </td>
-                  <td className="py-2.5 text-right text-[11.5px] text-muted num">{row.played}</td>
-                  <td className="hidden py-2.5 text-right text-[11.5px] text-muted num sm:table-cell">{row.wins}</td>
-                  <td className="hidden py-2.5 text-right text-[11.5px] text-muted num sm:table-cell">{row.draws}</td>
-                  <td className="hidden py-2.5 text-right text-[11.5px] text-muted num sm:table-cell">{row.losses}</td>
-                  <td className="py-2.5 text-right text-[11.5px] text-muted num">
+                  <td className="px-2 py-2.5 text-right text-[12.5px] text-muted num">{row.played}</td>
+                  <td className="hidden px-2 py-2.5 text-right text-[12.5px] text-muted num sm:table-cell">{row.wins}</td>
+                  <td className="hidden px-2 py-2.5 text-right text-[12.5px] text-muted num sm:table-cell">{row.draws}</td>
+                  <td className="hidden px-2 py-2.5 text-right text-[12.5px] text-muted num sm:table-cell">{row.losses}</td>
+                  <td className={`px-2 py-2.5 text-right text-[12.5px] num ${row.goalConDiff > 0 ? "text-[var(--tl-mint-ink)]" : row.goalConDiff < 0 ? "text-[var(--tl-alert)]" : "text-muted"}`}>
                     {row.goalConDiff > 0 ? `+${row.goalConDiff}` : row.goalConDiff}
                   </td>
-                  <td className="py-2.5 text-right tl-num text-[14px] text-ink num">{row.pts}</td>
+                  <td className="tl-pts px-2 py-2.5 text-right tl-num text-[16px] text-ink num">{row.pts}</td>
                   {form && (
-                    <td className="hidden py-2 pl-2 pr-3 lg:table-cell">
+                    <td className="hidden py-2 pl-2 pr-4 lg:table-cell">
                       <div className="flex gap-1">
                         {(form[row.id] ?? []).slice(0, 5).map((result, resultIndex) => (
-                          <FormPill key={`${row.id}-${resultIndex}`} result={result} size={19} />
+                          <FormPill key={`${row.id}-${resultIndex}`} result={result} size={21} />
                         ))}
                       </div>
                     </td>
@@ -254,11 +263,12 @@ export function XgTable({ rows, highlight = [] }: { rows?: XgRow[]; highlight?: 
 
   return (
     <div className="card overflow-hidden">
+      <div className="tl-tbl-band" aria-hidden="true" />
       <div className="overflow-x-auto thin-scrollbar">
-        <table className="w-full border-collapse text-left">
+        <table className="tl-tbl w-full min-w-[560px] border-collapse text-left">
           <thead>
             <tr>
-              <SortHeader label="#" title="xG position" col="idx" sort={sort} onSort={toggle} className="w-9 py-2.5 pl-3 pr-1 text-right" />
+              <SortHeader label="#" title="xG position" col="idx" sort={sort} onSort={toggle} className="w-10 py-2.5 pl-4 pr-2 text-right" />
               <SortHeader label="Team" title="Club" col="name" sort={sort} onSort={toggle} className="py-2.5 pr-2 text-left" />
               <SortHeader label="xG" title="Expected goals for" col="xg" sort={sort} onSort={toggle} className="w-24 py-2.5 text-right" />
               <SortHeader label="xGA" title="Expected goals against" col="xgConceded" sort={sort} onSort={toggle} className="w-12 py-2.5 text-right" />
@@ -268,14 +278,15 @@ export function XgTable({ rows, highlight = [] }: { rows?: XgRow[]; highlight?: 
             </tr>
           </thead>
           <tbody>
-            {sorted.map((row) => {
+            {sorted.map((row, index) => {
               const diff = (row.pts ?? 0) - (row.xPoints ?? 0);
               const isHighlighted = highlightSet.has(String(row.id));
               return (
                 <tr
                   key={row.id}
-                  className={`border-b border-line last:border-0 ${
-                    isHighlighted ? "bg-accent/10" : "hover:bg-hover"
+                  style={{ "--d": index } as React.CSSProperties}
+                  className={`tl-tbl-row border-b border-line last:border-0 ${
+                    isHighlighted ? "bg-accent/10" : "hover:bg-accent/[0.06]"
                   }`}
                 >
                   <td className="py-2.5 pl-3 pr-1 text-right tl-num text-[13px] text-dim num">

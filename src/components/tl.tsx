@@ -1,6 +1,5 @@
 import Link from "next/link";
 import type { ReactNode, CSSProperties } from "react";
-import { pad } from "@/lib/format";
 
 /* Touchline / Signal primitives.
    Server-safe by design: every effect here is CSS, not JS. Anything that
@@ -318,22 +317,5 @@ export function Wave({ text, className = "", onInk = false }: { text: ReactNode;
         </span>
       ))}
     </span>
-  );
-}
-
-/** Boot readout. Pure CSS: it lifts off after its log finishes, no timer,
-    and is removed entirely under prefers-reduced-motion. */
-export function Boot({ lines, headline }: { lines: string[]; headline?: string }) {
-  return (
-    <div className="tl-boot" aria-hidden="true">
-      <div className="tl-boot-log">
-        <b>{headline ?? "TOUCHLINE"}</b>
-        {lines.map((line, index) => (
-          <span key={line} style={{ "--d": index } as CSSProperties}>
-            <em>{pad(index + 1)}</em> {line}
-          </span>
-        ))}
-      </div>
-    </div>
   );
 }

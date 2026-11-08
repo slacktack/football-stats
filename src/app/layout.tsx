@@ -5,7 +5,7 @@ import { SiteFooter } from "@/components/site-footer";
 import { MobileBar } from "@/components/top-nav";
 import { Rail } from "@/components/rail";
 import { SiteHeader } from "@/components/site-header";
-import { Boot, ScanBar } from "@/components/tl";
+import { ScanBar } from "@/components/tl";
 import { SfxController } from "@/components/sfx";
 import "./globals.css";
 
@@ -88,7 +88,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
         >
           Skip to content
         </a>
-        <Suspense fallback={<div className="hidden h-dvh w-[248px] lg:block" />}>
+        <Suspense fallback={<div className="hidden h-dvh w-[272px] lg:block" />}>
           <Rail />
         </Suspense>
         <div className="tl-stage flex min-h-dvh flex-col">
@@ -105,15 +105,6 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
         </Suspense>
         <SfxController />
         <ScanBar />
-        <Boot
-          headline="TOUCHLINE"
-          lines={[
-            "link established // fotmob feed",
-            "calendar synced // 24 competitions",
-            "telemetry armed // live polling on",
-            "console ready",
-          ]}
-        />
       </body>
     </html>
   );

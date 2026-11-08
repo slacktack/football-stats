@@ -138,83 +138,6 @@
     }
   }
 
-  /* ---------- boot readout ---------- */
-
-  .tl-boot {
-    position: fixed;
-    z-index: 90;
-    top: 0;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    display: grid;
-    place-items: center;
-    background: #0d0f0d;
-    color: #e9e5e1;
-    pointer-events: none;
-    animation: tl-boot-out 0.7s cubic-bezier(0.77, 0, 0.18, 1) 1.35s both;
-  }
-
-  @media (min-width: 1024px) {
-    .tl-boot {
-      left: var(--tl-rail);
-    }
-  }
-
-  .tl-boot-log {
-    position: relative;
-    display: grid;
-    gap: 8px;
-    min-width: min(420px, 86vw);
-    font-size: 13px;
-  }
-
-  .tl-boot-log b {
-    display: block;
-    font-family: var(--font-doto), var(--font-face-mono);
-    font-size: 54px;
-    font-weight: 700;
-    color: var(--tl-led);
-    text-shadow: 0 0 24px rgba(43, 217, 74, 0.6);
-    letter-spacing: 0.02em;
-    margin-bottom: 10px;
-  }
-
-  .tl-boot-log span {
-    opacity: 0;
-    animation: tl-line 0.25s steps(3) both;
-    animation-delay: calc(var(--d) * 0.18s + 0.12s);
-  }
-
-  .tl-boot-log em {
-    font-style: normal;
-    color: rgba(233, 229, 225, 0.45);
-  }
-
-  .tl-boot-log i {
-    font-style: normal;
-    color: rgba(233, 229, 225, 0.3);
-  }
-
-  .tl-boot-log strong {
-    color: var(--tl-led);
-    font-weight: 500;
-  }
-
-  @keyframes tl-line {
-    to {
-      opacity: 1;
-    }
-  }
-
-  @keyframes tl-boot-out {
-    to {
-      opacity: 0;
-      transform: translateY(-14px);
-      visibility: hidden;
-    }
-  }
-
   /* ---------- dot-matrix text wave ---------- */
 
   .tl-wave .tl-word {
@@ -561,6 +484,85 @@
     }
   }
 
+  /* ---------- header ---------- */
+
+  .tl-header-line {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    height: 2px;
+    pointer-events: none;
+    background: linear-gradient(
+      90deg,
+      transparent,
+      var(--tl-led) 25%,
+      var(--tl-teal) 50%,
+      var(--tl-led) 75%,
+      transparent
+    );
+    background-size: 200% 100%;
+    animation: tl-band-run 8s linear infinite;
+    opacity: 0.4;
+    transition: opacity 0.3s var(--tl-ease);
+  }
+
+  .tl-header:hover .tl-header-line {
+    opacity: 0.9;
+  }
+
+  .tl-live-chip {
+    transition:
+      box-shadow 0.25s var(--tl-ease),
+      transform 0.25s var(--tl-ease);
+  }
+
+  .tl-live-chip:hover {
+    box-shadow: 0 0 18px color-mix(in srgb, var(--tl-led) 55%, transparent);
+    transform: translateY(-1px);
+  }
+
+  .tl-header .tl-brand:hover b {
+    text-shadow: 0 0 16px color-mix(in srgb, var(--tl-led) 55%, transparent);
+  }
+
+  /* ---------- standings register ---------- */
+
+  .tl-tbl-band {
+    height: 4px;
+    background: linear-gradient(90deg, var(--tl-led), var(--tl-teal), var(--tl-led));
+    background-size: 200% 100%;
+    animation: tl-band-run 6s linear infinite;
+    opacity: 0.85;
+  }
+
+  @keyframes tl-band-run {
+    to {
+      background-position: 200% 0;
+    }
+  }
+
+  .tl-tbl-row {
+    animation: tl-row-in 0.35s var(--tl-ease) both;
+    animation-delay: calc(var(--d, 0) * 22ms);
+  }
+
+  @keyframes tl-row-in {
+    from {
+      opacity: 0;
+      transform: translateX(-10px);
+    }
+    to {
+      opacity: 1;
+      transform: none;
+    }
+  }
+
+  .tl-pts {
+    font-weight: 700;
+    text-shadow: 0 0 12px color-mix(in srgb, var(--tl-led) 45%, transparent);
+  }
+
   /* ---------- fixture row ---------- */
 
   .tl-row-sweep {
@@ -595,8 +597,7 @@
    Theatrical layers are removed, not slowed: a 0.01ms scan bar still
    repaints the whole viewport forever. */
 @media (prefers-reduced-motion: reduce) {
-  .tl-scanbar,
-  .tl-boot {
+  .tl-scanbar {
     display: none;
   }
 
@@ -606,6 +607,12 @@
   }
 
   .tl-tele-track {
+    animation: none;
+  }
+
+  .tl-tbl-band,
+  .tl-tbl-row,
+  .tl-header-line {
     animation: none;
   }
 

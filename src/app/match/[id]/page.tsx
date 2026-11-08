@@ -115,9 +115,14 @@ async function MatchContent({
   const tableSource =
     match.content.table?.parentLeagueId ?? general.parentLeagueId ?? general.leagueId;
   const videoId = youtubeId(facts?.highlights?.url);
+  const elapsed = finished
+    ? 90
+    : live
+      ? Number(String(status.liveTime?.short ?? "").match(/\d+/)?.[0] ?? 0)
+      : 0;
   const players =
-    tab === "players"
-      ? normalizeMatchPlayers(match.content.playerStats, Number(home.id), match.content.lineup)
+    tab === "players" || tab === "lineups"
+      ? normalizeMatchPlayers(match.content.playerStats, Number(home.id), match.content.lineup, elapsed)
       : [];
   const xg = statPair(match.content.stats, "expected_goals");
   const scorers = goalScorers(match.header.events);
@@ -255,6 +260,7 @@ async function MatchContent({
             homeTeam={{ id: home.id, name: home.name }}
             awayTeam={{ id: away.id, name: away.name }}
             events={facts?.events?.events ?? []}
+            players={players}
           />
         )}
 
@@ -269,7 +275,7 @@ async function MatchContent({
         )}
 
         {tab === "table" && (
-          <div className="mx-auto max-w-3xl space-y-3">
+          <div className="mx-auto max-w-4xl space-y-3">
             <SectionHeading
               title="League table"
               subtitle={general.leagueName ?? "Competition standings"}
