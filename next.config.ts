@@ -6,6 +6,8 @@ const nextConfig: NextConfig = {
   poweredByHeader: false,
   devIndicators: false,
   images: {
+    // Vercel's free optimizer quota ran out; crests load straight from FotMob.
+    unoptimized: true,
     remotePatterns: [
       {
         protocol: "https",
