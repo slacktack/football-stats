@@ -237,24 +237,19 @@ export function LeagueMatchGroup({
     <section className={`card overflow-hidden ${hueClass(leagueId)}`}>
       <div className="tl-head tl-head-hue gap-3 py-2.5">
         <Link href={href} className="group flex min-w-0 items-center gap-3">
-          <span className="flex h-11 w-11 shrink-0 items-center justify-center border border-[color:color-mix(in_srgb,var(--tl-hue)_40%,var(--color-line))] bg-[color:color-mix(in_srgb,var(--tl-hue)_10%,transparent)] transition-colors group-hover:border-[var(--tl-hue)]">
-            <Image
-              src={leagueLogo(primaryId ?? leagueId)}
-              alt=""
-              width={36}
-              height={36}
-              className="h-9 w-9 object-contain"
-            />
-          </span>
+          <Image
+            src={leagueLogo(primaryId ?? leagueId)}
+            alt=""
+            width={24}
+            height={24}
+            className="h-6 w-6 shrink-0 object-contain"
+          />
           <span className="min-w-0">
             <span className="flex items-center gap-2">
-              <span className="truncate text-[15px] font-bold text-ink transition-colors group-hover:text-[var(--tl-hue-ink)]">
+              <span className="truncate text-[13px] font-bold uppercase tracking-[0.04em] text-ink transition-colors group-hover:text-[var(--tl-hue-ink)]">
                 <Wave text={name} />
               </span>
               <span className="tl-tag tl-hue-chip hidden sm:inline">{ccode}</span>
-            </span>
-            <span className="tl-k tl-hue-t mt-0.5 block opacity-80">
-              {matches.length} {matches.length === 1 ? "fixture" : "fixtures"}
             </span>
           </span>
         </Link>
@@ -264,7 +259,7 @@ export function LeagueMatchGroup({
             aria-label={`Open ${name}`}
             className="tl-k ml-auto flex shrink-0 items-center gap-1 border border-transparent px-1.5 py-1 text-dim transition-colors hover:border-[var(--tl-hue)] hover:bg-[color:color-mix(in_srgb,var(--tl-hue)_12%,transparent)] hover:text-[var(--tl-hue-ink)]"
           >
-            <span className="hidden sm:inline">Open league</span>
+            <span className="tl-num text-[13px]">{matches.length}</span>
             <ChevronRightIcon size={11} />
           </Link>
         )}

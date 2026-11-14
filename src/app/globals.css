@@ -4,6 +4,7 @@
 @import "./styles/signal-primitives.css";
 @import "./styles/signal-shell.css";
 @import "./styles/signal-motion.css";
+@import "./styles/signal-refresh.css";
 
 @theme inline {
   --font-sans: var(--font-face-mono);

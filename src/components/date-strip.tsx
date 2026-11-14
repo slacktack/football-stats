@@ -68,13 +68,13 @@ export function DateStrip({
               aria-current={active ? "date" : undefined}
               className={`tl-hue-${hue} group relative flex h-[62px] min-w-[56px] flex-1 flex-col items-center justify-center gap-0.5 border px-2 transition-colors ${
                 active
-                  ? "border-ink bg-ink text-canvas"
+                  ? "tl-sig border-transparent text-[#0b0b0b]"
                   : "border-line bg-card text-muted hover:border-[var(--tl-hue)] hover:text-ink"
               }`}
             >
               <span
                 className="absolute inset-x-0 top-0 h-[3px] origin-left scale-x-0 bg-[var(--tl-hue)] transition-transform duration-300 group-hover:scale-x-100"
-                style={{ transform: active ? "scaleX(1)" : undefined }}
+                style={{ transform: active ? "scaleX(0)" : undefined }}
                 aria-hidden="true"
               />
               <span

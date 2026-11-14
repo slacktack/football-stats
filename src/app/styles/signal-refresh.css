@@ -1,0 +1,106 @@
+/* Signal refresh: gradient accents, plain panel heads, underline tabs, paper scorebug.
+   Unlayered so it wins over the layered primitives and utilities. */
+:root {
+  --sig-grad: linear-gradient(90deg, #2bd94a, #26b69a 60%, #9be15d);
+  --sig-dots: radial-gradient(rgba(17, 17, 17, 0.09) 1px, transparent 1.2px);
+}
+[data-theme="dark"] {
+  --sig-dots: radial-gradient(rgba(233, 229, 225, 0.12) 1px, transparent 1.2px);
+}
+
+.tl-sig { background: var(--sig-grad); }
+
+/* Hero band: signal dot grid; paper theme drops the black plate. */
+.tl-band {
+  background: var(--sig-dots) 0 0 / 14px 14px, #111111;
+}
+[data-theme="dark"] .tl-band {
+  background: var(--sig-dots) 0 0 / 14px 14px, linear-gradient(180deg, #101612, #090c0a);
+}
+:root:not([data-theme="dark"]) .tl-band {
+  background: var(--sig-dots) 0 0 / 14px 14px, #efebe7;
+  color: #111111;
+  border-bottom-color: #111111;
+  box-shadow: inset 0 4px 0 0 #2bd94a;
+  --color-ink: #111111;
+  --color-muted: rgba(17, 17, 17, 0.62);
+  --color-dim: rgba(17, 17, 17, 0.42);
+  --color-line: rgba(17, 17, 17, 0.16);
+  --color-line-strong: rgba(17, 17, 17, 0.32);
+  --tl-hair: rgba(17, 17, 17, 0.32);
+  --tl-hair-soft: rgba(17, 17, 17, 0.16);
+  --tl-hair-strong: rgba(17, 17, 17, 0.42);
+}
+
+/* Active chip and live score box carry the gradient. */
+.tl-chip-inv,
+a.tl-chip-inv:hover {
+  background: var(--sig-grad);
+  border-color: transparent;
+  color: #0b0b0b;
+}
+.tl-vs.tl-vs-live {
+  background: var(--sig-grad);
+  border: 1px solid transparent;
+  color: #0b0b0b;
+  box-shadow: none;
+}
+.tl-vs.tl-vs-live .tl-vs-v { color: #0b0b0b; }
+.tl-vs::after { display: none; }
+
+/* Panel heads: plain row, hairline under, 7px gradient square. */
+.tl-panel-h,
+.tl-head,
+.tl-head-hue {
+  align-items: center;
+  background: transparent;
+  border-bottom: 1px solid var(--color-line);
+}
+.tl-panel-h::before,
+.tl-head::before {
+  position: static;
+  flex: none;
+  width: 7px;
+  height: 7px;
+  background: var(--sig-grad);
+}
+.tl-head-hue::before { width: 7px; background: var(--tl-hue); }
+.tl-panel-h::after { display: none; }
+.tl-head .tl-k-dim { color: var(--color-dim); }
+.tl-br { display: none; }
+
+/* Section tabs: number + label, 3px gradient underline when active. */
+.tl-tab,
+.tl-tab:hover {
+  border: 0;
+  border-bottom: 1px solid var(--color-line);
+  background: transparent;
+  padding: 12px 10px 11px;
+  overflow: visible;
+}
+.tl-tab-i { display: none; }
+.tl-tab-c { order: -1; opacity: 0.55; }
+.tl-tab-on,
+.tl-tab-on:hover {
+  background: transparent;
+  color: var(--color-ink);
+  background: var(--sig-grad) bottom / 100% 3px no-repeat;
+}
+.tl-tab-on .tl-tab-c { color: #2bd94a; opacity: 1; }
+
+/* Scorebug: paper card + dot grid in the paper theme, no scanlines. */
+:root:not([data-theme="dark"]) .matchhero {
+  background: var(--sig-dots) 0 0 / 14px 14px, #efebe7;
+  color: #111111;
+  border-color: #111111;
+  box-shadow: inset 0 4px 0 0 #2bd94a;
+}
+:root:not([data-theme="dark"]) .matchhero::after { display: none; }
+:root:not([data-theme="dark"]) .matchhero-photo { opacity: 0.08; }
+:root:not([data-theme="dark"]) .matchhero-meta { color: rgba(17, 17, 17, 0.62); }
+:root:not([data-theme="dark"]) .matchhero .logo-watermark { filter: none; }
+:root:not([data-theme="dark"]) .matchhero-crest { border-color: rgba(17, 17, 17, 0.2); }
+:root:not([data-theme="dark"]) .matchhero-score {
+  color: #12a144;
+  text-shadow: none;
+}

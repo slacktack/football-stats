@@ -7,9 +7,9 @@ import { ActivityIcon, ChevronRightIcon, TrophyIcon } from "@/components/icons";
 import { LiveRefresher } from "@/components/live-refresher";
 import { LeagueMatchGroup } from "@/components/match-row";
 import { LiveRail, type LiveRailMatch } from "@/components/live-rail";
-import { PixelField } from "@/components/pixel-field";
+import { DotMatrix } from "@/components/dot-matrix";
 import { Crest, EmptyState, SkeletonBlock, SkeletonRows } from "@/components/ui";
-import { AsciiBar, K, Led, Leds, Panel, Ruler, Spark, Wave } from "@/components/tl";
+import { AsciiBar, K, Led, Leds, Panel, Spark, Wave } from "@/components/tl";
 import { leagueLogo } from "@/lib/assets";
 import { hueClass } from "@/lib/hue";
 import { getAllLeagues, getMatchesByDate, hasLiveMatches } from "@/lib/fotmob";
@@ -110,7 +110,10 @@ async function HomeContent({ searchParams }: { searchParams: SearchParams }) {
   return (
     <div className="shell tl-view py-5 md:py-7">
       <header className="tl-band relative overflow-hidden">
-        <PixelField className="tl-field-right" step={24} />
+        <h2 className="sr-only">Touchline</h2>
+        <div className="relative mb-3 h-[64px] sm:h-[96px]">
+          <DotMatrix text="touchline" />
+        </div>
         <div className="relative flex flex-wrap items-end justify-between gap-x-4 gap-y-3">
           <div className="min-w-0">
             <p className="flex items-center gap-2">
@@ -145,7 +148,6 @@ async function HomeContent({ searchParams }: { searchParams: SearchParams }) {
           </div>
           <LiveRefresher active={live} />
         </div>
-        <Ruler fill n={150} className="relative mt-4" />
       </header>
 
       <div className="mt-4">
