@@ -13,8 +13,8 @@
     flex-direction: column;
     gap: 4px;
     padding: 14px 12px 12px;
-    background: #111;
-    color: #e9e5e1;
+    background: var(--rail-bg);
+    color: var(--rail-ink);
     overflow: hidden;
     transition: width 0.35s var(--tl-ease);
   }
@@ -36,7 +36,7 @@
     width: 1px;
     background: repeating-linear-gradient(
       to bottom,
-      rgba(233, 229, 225, 0.35) 0 1px,
+      color-mix(in srgb, var(--rail-ink) 35%, transparent) 0 1px,
       transparent 1px 6px
     );
     animation: tl-seam 2.4s linear infinite;
@@ -49,7 +49,7 @@
     gap: 8px;
     padding: 2px 2px 14px;
     margin-bottom: 8px;
-    border-bottom: 1px solid rgba(233, 229, 225, 0.14);
+    border-bottom: 1px solid color-mix(in srgb, var(--rail-ink) 14%, transparent);
   }
 
   .tl-brand {
@@ -85,7 +85,7 @@
     flex: none;
     display: grid;
     place-items: center;
-    border: 1px solid rgba(233, 229, 225, 0.3);
+    border: 1px solid color-mix(in srgb, var(--rail-ink) 30%, transparent);
     border-radius: 0;
     background: transparent;
     color: inherit;
@@ -103,7 +103,7 @@
   .tl-collapse:hover {
     background: var(--tl-led);
     border-color: var(--tl-led);
-    color: #111;
+    color: var(--rail-bg);
     box-shadow: 0 0 16px -2px color-mix(in srgb, var(--tl-led) 65%, transparent);
   }
 
@@ -157,13 +157,13 @@
     letter-spacing: 0.08em;
     text-transform: uppercase;
     white-space: nowrap;
-    color: rgba(233, 229, 225, 0.72);
+    color: color-mix(in srgb, var(--rail-ink) 72%, transparent);
     transition: background 0.2s, color 0.2s;
   }
 
   .tl-nav a:hover {
-    color: #e9e5e1;
-    background: rgba(233, 229, 225, 0.07);
+    color: var(--rail-ink);
+    background: color-mix(in srgb, var(--rail-ink) 7%, transparent);
   }
 
   .tl-nav a:hover .tl-nav-i {
@@ -171,8 +171,8 @@
   }
 
   .tl-nav a[aria-current="page"] {
-    color: #111;
-    background: #e9e5e1;
+    color: var(--rail-bg);
+    background: var(--rail-ink);
     box-shadow:
       0 0 0 1px rgba(43, 217, 74, 0.55),
       0 0 22px -4px rgba(43, 217, 74, 0.5);
@@ -287,7 +287,7 @@
     letter-spacing: 0.03em;
     text-transform: uppercase;
     white-space: nowrap;
-    color: rgba(233, 229, 225, 0.62);
+    color: color-mix(in srgb, var(--rail-ink) 62%, transparent);
     transition: background 0.15s, color 0.15s;
   }
 
@@ -303,7 +303,7 @@
 
   .tl-rail-league:hover {
     background: color-mix(in srgb, var(--tl-hue, var(--tl-led)) 9%, transparent);
-    color: var(--tl-hue, #e9e5e1);
+    color: var(--tl-hue, var(--rail-ink));
     text-shadow: 0 0 12px color-mix(in srgb, var(--tl-hue, var(--tl-led)) 50%, transparent);
   }
 
@@ -348,7 +348,7 @@
     gap: 6px;
     margin-top: 8px;
     padding: 12px 6px 4px;
-    border-top: 1px solid rgba(233, 229, 225, 0.14);
+    border-top: 1px solid color-mix(in srgb, var(--rail-ink) 14%, transparent);
     font-size: 10px;
     letter-spacing: 0.06em;
     text-transform: uppercase;
@@ -381,7 +381,7 @@
   }
 
   .tl-status-dim {
-    color: rgba(233, 229, 225, 0.5);
+    color: color-mix(in srgb, var(--rail-ink) 50%, transparent);
   }
 
   .tl-live-k {
@@ -397,9 +397,9 @@
     grid-template-columns: minmax(0, 1fr) auto;
     gap: 3px 8px;
     padding: 7px 8px 7px 10px;
-    border-bottom: 1px solid rgba(233, 229, 225, 0.12);
+    border-bottom: 1px solid color-mix(in srgb, var(--rail-ink) 12%, transparent);
     font-size: 11px;
-    color: rgba(233, 229, 225, 0.75);
+    color: color-mix(in srgb, var(--rail-ink) 75%, transparent);
     transition: background 0.15s, color 0.15s, padding-left 0.22s var(--tl-ease);
   }
 
@@ -414,8 +414,8 @@
   }
 
   .tl-rail-match:hover {
-    background: rgba(233, 229, 225, 0.07);
-    color: #e9e5e1;
+    background: color-mix(in srgb, var(--rail-ink) 7%, transparent);
+    color: var(--rail-ink);
     padding-left: 14px;
   }
 
@@ -427,7 +427,7 @@
 
   /* The competition tag above each fixture row wears the league hue. */
   .tl-rm-league {
-    color: color-mix(in srgb, var(--tl-hue, #e9e5e1) 78%, transparent);
+    color: color-mix(in srgb, var(--tl-hue, var(--rail-ink)) 78%, transparent);
     font-size: 10px;
     letter-spacing: 0.06em;
     text-transform: uppercase;
@@ -474,9 +474,9 @@
     display: grid;
     grid-auto-flow: column;
     grid-auto-columns: 1fr;
-    background: #111;
+    background: var(--rail-bg);
     padding-bottom: env(safe-area-inset-bottom);
-    outline: 1px solid rgba(233, 229, 225, 0.16);
+    outline: 1px solid color-mix(in srgb, var(--rail-ink) 16%, transparent);
     outline-offset: -1px;
   }
 
@@ -488,7 +488,7 @@
     gap: 3px;
     min-height: 54px;
     padding: 9px 0 8px;
-    color: rgba(233, 229, 225, 0.58);
+    color: color-mix(in srgb, var(--rail-ink) 58%, transparent);
     font-size: 9.5px;
     letter-spacing: 0.1em;
     text-transform: uppercase;
@@ -496,8 +496,8 @@
   }
 
   .tl-mbar-i:active {
-    background: rgba(233, 229, 225, 0.08);
-    color: #e9e5e1;
+    background: color-mix(in srgb, var(--rail-ink) 8%, transparent);
+    color: var(--rail-ink);
   }
 
   .tl-mbar-i[aria-current="page"] {

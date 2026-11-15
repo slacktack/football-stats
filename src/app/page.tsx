@@ -111,8 +111,8 @@ async function HomeContent({ searchParams }: { searchParams: SearchParams }) {
     <div className="shell tl-view py-5 md:py-7">
       <header className="tl-band relative overflow-hidden">
         <h2 className="sr-only">Touchline</h2>
-        <div className="relative mb-3 h-[64px] sm:h-[96px]">
-          <DotMatrix text="touchline" />
+        <div className="relative mb-3 h-[78px] w-full min-w-0 overflow-hidden sm:h-[132px]">
+          <DotMatrix text="touchline" gap={6} />
         </div>
         <div className="relative flex flex-wrap items-end justify-between gap-x-4 gap-y-3">
           <div className="min-w-0">

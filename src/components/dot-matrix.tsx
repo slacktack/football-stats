@@ -34,12 +34,13 @@ export function DotMatrix({ text = "touchline", className = "", gap = 9 }: { tex
       const off = document.createElement("canvas");
       off.width = cols; off.height = rows;
       const o = off.getContext("2d")!;
-      const face = getComputedStyle(document.body).fontFamily || "sans-serif";
+      // A heavy grotesk reads far better as dots than the body's mono.
+      const face = `"Helvetica Neue", "Arial Black", Arial, sans-serif`;
       let size = rows * 0.95;
-      o.font = `700 ${size}px ${face}`;
+      o.font = `800 ${size}px ${face}`;
       const tw = o.measureText(text).width;
       if (tw > cols * 0.94) size *= (cols * 0.94) / tw;
-      o.font = `700 ${size}px ${face}`;
+      o.font = `800 ${size}px ${face}`;
       o.textAlign = "center";
       o.textBaseline = "middle";
       o.fillText(text, cols / 2, rows / 2 + size * 0.04);
@@ -98,5 +99,5 @@ export function DotMatrix({ text = "touchline", className = "", gap = 9 }: { tex
     };
   }, [text, gap]);
 
-  return <canvas ref={ref} aria-hidden="true" className={`block h-full w-full ${className}`} />;
+  return <canvas ref={ref} aria-hidden="true" className={`absolute inset-0 block h-full w-full ${className}`} />;
 }

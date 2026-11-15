@@ -4,7 +4,7 @@ import Link from "next/link";
 import { usePathname, useSearchParams } from "next/navigation";
 import { useEffect, useState, useSyncExternalStore } from "react";
 import { ActivityIcon, HomeIcon, SearchIcon, TrophyIcon } from "./icons";
-import { Mark } from "./tl";
+import { DotMatrix } from "./dot-matrix";
 
 const RAIL_KEY = "touchline-rail";
 const RAIL_EVENT = "touchline-rail-change";
@@ -65,10 +65,8 @@ export function CollapseButton() {
 export function RailBrand() {
   return (
     <Link href="/" className="tl-brand" aria-label="Touchline console home">
-      <Mark />
-      <span className="tl-brand-t">
-        <b>TOUCHLINE</b>
-        <small>Scores console</small>
+      <span className="relative block" style={{ height: 44, width: 200 }}>
+        <DotMatrix text="touchline" gap={3.2} />
       </span>
     </Link>
   );

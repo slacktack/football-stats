@@ -104,3 +104,22 @@ a.tl-chip-inv:hover {
   color: #12a144;
   text-shadow: none;
 }
+
+/* Rail follows the theme: bright paper with a green wash by day, console black by night. */
+:root { --rail-bg: #f4f1ec; --rail-ink: #111111; }
+[data-theme="dark"] { --rail-bg: #111111; --rail-ink: #e9e5e1; }
+:root:not([data-theme="dark"]) .tl-rail,
+:root:not([data-theme="dark"]) .tl-mbar {
+  background:
+    radial-gradient(rgba(17, 17, 17, 0.08) 1px, transparent 1.2px) 0 0 / 14px 14px,
+    radial-gradient(120% 60% at 0% 0%, rgba(43, 217, 74, 0.22), transparent 60%),
+    radial-gradient(90% 50% at 100% 100%, rgba(38, 182, 154, 0.18), transparent 60%),
+    var(--rail-bg);
+}
+:root:not([data-theme="dark"]) .tl-nav a[aria-current="page"] {
+  background: linear-gradient(90deg, #2bd94a, #26b69a 60%, #9be15d);
+  color: #0b0b0b;
+  box-shadow: 0 6px 18px -8px rgba(18, 161, 68, 0.6);
+}
+:root:not([data-theme="dark"]) .tl-nav a:hover { background: rgba(43, 217, 74, 0.12); }
+:root:not([data-theme="dark"]) .tl-rail-match:hover { background: rgba(43, 217, 74, 0.1); }
