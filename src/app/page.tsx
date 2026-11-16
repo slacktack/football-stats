@@ -108,7 +108,7 @@ async function HomeContent({ searchParams }: { searchParams: SearchParams }) {
     .sort((a, b) => (rank.get(a.leagueId) ?? 999) - (rank.get(b.leagueId) ?? 999));
 
   return (
-    <div className="shell tl-view py-5 md:py-7">
+    <div className="shell tl-view pb-5 md:pb-7">
       <header className="tl-band relative overflow-hidden">
         <h2 className="sr-only">Touchline</h2>
         <div className="relative mb-3 h-[78px] w-full min-w-0 overflow-hidden sm:h-[132px]">

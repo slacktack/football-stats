@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { DotMatrix } from "./dot-matrix";
+import { HeaderBrand } from "./header-brand";
 import { SearchDialog } from "./search-dialog";
 import { ThemeToggle } from "./theme-toggle";
 import { SfxToggle } from "./sfx";
@@ -11,9 +11,7 @@ export function SiteHeader() {
       <span className="tl-header-line" aria-hidden="true" />
       <div className="shell flex h-[52px] items-center gap-2 sm:gap-3">
         <div className="flex min-w-0 flex-1 items-center gap-3">
-          <Link href="/" aria-label="Touchline home" className="relative block h-[38px] w-[170px] shrink-0 sm:w-[200px]">
-            <DotMatrix text="touchline" gap={3} />
-          </Link>
+          <HeaderBrand />
         </div>
 
         <div className="ml-auto flex shrink-0 items-center gap-2">

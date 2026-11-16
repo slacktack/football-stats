@@ -72,6 +72,7 @@ export function DotMatrix({ text = "touchline", className = "", gap = 9 }: { tex
       ctx.globalAlpha = 1;
       if (!reduce) raf = requestAnimationFrame(draw);
     };
+    const paint = () => { cancelAnimationFrame(raf); draw(performance.now()); };
 
     const onMove = (e: PointerEvent) => {
       const r = canvas.getBoundingClientRect();
@@ -79,16 +80,18 @@ export function DotMatrix({ text = "touchline", className = "", gap = 9 }: { tex
       if (reduce) draw(0);
     };
     const onLeave = () => { mouse.x = mouse.y = -9999; };
-    const ro = new ResizeObserver(() => { build(); if (reduce) draw(0); });
+    // Paint immediately on every rebuild so a throttled rAF (battery saver, background tab) never leaves it blank.
+    const ro = new ResizeObserver(() => { build(); paint(); });
     const mo = new MutationObserver(() => { colors = css(); if (reduce) draw(0); });
 
     ro.observe(canvas);
     mo.observe(document.documentElement, { attributes: true, attributeFilter: ["data-theme"] });
     canvas.addEventListener("pointermove", onMove);
     canvas.addEventListener("pointerleave", onLeave);
-    document.fonts?.ready.then(() => { build(); if (reduce) draw(0); });
+    document.fonts?.ready.then(() => { build(); paint(); });
     build();
-    raf = requestAnimationFrame(draw);
+    paint();
+    if (!reduce) raf = requestAnimationFrame(draw);
 
     return () => {
       cancelAnimationFrame(raf);
